@@ -28,7 +28,7 @@ require '../wemsDatabase.php';
          					    $json .= "{\"CTID\": \"$row[CTID]\",\"FULLNAME\": \"$row[FULLNAME]\"},";
          
          					}
-         					$json .= "{\"CTID\": \"99999999\",\"FULLNAME\": \"All Conponents\"},";
+         					//$json .= "{\"CTID\": \"99999999\",\"FULLNAME\": \"All Conponents\"},";
          								 
          				$json .= "]";
      }

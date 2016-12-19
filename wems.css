@@ -1,0 +1,9 @@
+@CHARSET "ISO-8859-1";
+
+#map{
+  //For center align
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  height: 50%;
+}
