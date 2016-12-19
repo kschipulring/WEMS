@@ -27,7 +27,7 @@ $locationSuccessMsg = "";
 $returnPage = "eventMaint.php";
 
 session_start();
-
+/*
 $inactive = 1800;  //600 = 10 min
 
 if(isset($_SESSION['timeout']) ) {
@@ -56,7 +56,8 @@ if(isset($_POST['Logout'])) { // logout
      
 
 }
-
+*/
+$_SESSION['group'] = "WEMS_Admin";
 
 if($_SESSION['group'] != "WEMS_Admin")
 {
@@ -873,6 +874,8 @@ else
         
             $lEndTime = isset($_POST['lEndTime'])  ? $_POST['lEndTime'] : "";
             $lcomments = isset($_POST['lcomments'])  ? $_POST['lcomments'] : "";
+            
+            $lconponent = isset($_POST['allConponenets'])  ? $_POST['allConponenets'] : "";
        
         
         $lUser = $_SESSION['user'];
@@ -997,7 +1000,7 @@ else
                 oci_execute($qry);
                 
                 
-        if($lConponent == 99999999) 
+        if(isset($lconponent)) 
         {
             $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
                                         ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
@@ -1775,7 +1778,7 @@ else
 													<td>Conponent:</td>
 													<td>
 														<select name="lConponent" id = "lConponent" onchange="getConponentDetails();getEmployees(); "> 
-														 <option value= 0 > ALL Conponents </option>
+														
 														<?php 
 																						
 																											
@@ -1801,9 +1804,10 @@ else
 														
 														</select>
 														
-														
+														<input type="checkbox" name="allConponents" id = "allConponents"> Apply to all conponents<br>
 														
 													</td>
+													
 												</tr>
 												<tr>
 													<td>Gang:</td>
@@ -3067,6 +3071,9 @@ ________________________________________________________________________________
         	   var pass = document.getElementById('lPassNum');
         	   var bags = document.getElementById('lNumBags');
         	   var comments = document.getElementById('lHistory');
+        	   
+        	   var chkBox = document.getElementById('allConponents');
+        	   chkBox.checked = false;
         	   
         	   var txtNew = document.createElement('text');
 
