@@ -1,6 +1,11 @@
 <?php
-  
+ob_start();
 //session_start(); echo $_SESSION['group']
+
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/tcpdf/6.2.12" );
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/LIRR/1.0.4.3" ); 
+$library_path = '../lib/';
+set_include_path(get_include_path() . PATH_SEPARATOR . $library_path);
 
 $eventErrMsg = "";
 $gangErrMsg = "";
@@ -69,7 +74,7 @@ else
 {
 
     require '../wemsDatabase.php';
-    
+    require_once('tcpdf/tcpdf.php');
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
     OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
     
@@ -1318,8 +1323,7 @@ else
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                      
- 
+                        
              			</table>
     	
       				</fieldset>
@@ -2557,7 +2561,7 @@ ________________________________________________________________________________
      
      <div style="background-color:#FFF2F2;" id="view4"  > 
       
-     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
+     			<form action="../classes/createPDF.php"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
               
                
       				<fieldset id="reports">
@@ -2565,9 +2569,93 @@ ________________________________________________________________________________
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                      
+                            <tr>
+							     <td>Event:</td>
+								 <td><select name="event" id = "event" > <option value= 0 selected>  </option>
+								<?php 
 
-                      
+                                $qry = oci_parse($c, "SELECT EVENTID, OPENTIME, CLOSETIME from WEMS_EVENT order by eventid")
+                                OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+                                oci_execute($qry);
+                                while($row = oci_fetch_array($qry)){
+                                    $id = $row['EVENTID'];
+                                    $desc = "Open ".$row['OPENTIME']. " Close " .$row['CLOSETIME'];
+									echo "<option value=\"$id\" > $desc </option>";
+                                }
+				               ?> 
+                                </select></td>
+							</tr>
+                            <tr>
+							     <td>Location:</td>
+								 <td><select name="lLoc" id = "lLoc" > <option value= 0 selected>  </option>
+								<?php 
+
+                                $qry = oci_parse($c, "SELECT MARKERID, MARKERNAME from WEMS_LOCATION where LOC_CD = 'S' order by MARKERNAME")
+                                OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+                                oci_execute($qry);
+                                while($row = oci_fetch_array($qry)){
+                                    $id = $row['MARKERID'];
+                                    $desc = $row['MARKERNAME'];
+									echo "<option value=\"$id\" > $desc </option>";
+                                }
+				               ?> 
+                                </select></td>
+							</tr>
+                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="create PDF" /></td></tr> 
+                            
+                            <?php if(isset($task) && $task == 'create PDF') {
+                                
+
+                            }
+                            $tbl = <<<EOD
+[
+	{
+		"table": {
+			"row1": [
+				{
+					"displayName": "Event:",
+					"parameter": "eventName",
+					"labelStyle": "width:113px; text-align:right;background-color: #D0DFEA;",
+					"parameterStyle": "width:200px; text-align:left;"
+				},
+				{
+					"displayName": "No of people in Gang:",
+					"parameter": "numOfGang",
+					"labelStyle": "width:113px; text-align:right;background-color: #D0DFEA;",
+					"parameterStyle": "width:200px; text-align:left;"
+				}
+			],
+			"row2": [
+				{
+					"displayName": "Start Date :",
+					"parameter": "startDate",
+					"labelStyle": "width:113px; text-align:right;font-weight:normal;background-color: #D0DFEA;",
+					"parameterStyle": "width:200px; text-align:left;"
+				},
+				{
+					"displayName": "End Date :",
+					"parameter": "endDate",
+					"labelStyle": "width:113px; text-align:right;font-weight:normal;background-color: #D0DFEA;",
+					"parameterStyle": "width:200px; text-align:left;"
+				}
+			]
+		}
+	}
+]
+EOD;
+                             
+                          $json   = <<<EOD
+{
+	"eventName": "Dec 30 Storm",
+	"numOfGang": "5",
+	"startDate": "12/30/2016",
+	"endDate": "12/31/2016"
+}
+EOD;
+                            echo "<input type='hidden' value ='".$json."' name='jsonData' id='jsonData' />";
+                            echo "<input type='hidden' value ='".$tbl."' name='formData' id='formData' />";
+                            ?>
+                           
         				</table>
         
       				</fieldset>
