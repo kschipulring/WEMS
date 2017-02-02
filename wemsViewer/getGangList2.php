@@ -5,9 +5,9 @@
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
     OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
     
-    $loc = isset($_GET['loc']) ? $_GET['loc'] : -1;
-    $eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
-    $conponent = isset($_GET['conponent']) ? $_GET['conponent'] : -1;
+   // $loc = isset($_GET['loc']) ? $_GET['loc'] : -1;
+    //$eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
+    //$conponent = isset($_GET['conponent']) ? $_GET['conponent'] : -1;
    
     
     $ASSIGNED_SITEFORMEN = "";
@@ -17,8 +17,8 @@
         $qry2 = oci_parse($c, "select ASSIGNED_SITEFOREMEN from WEMS_CLEANABLE_TARGET WHERE MARKERID = :MARKERID and CTID = :CTID")
             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
-        oci_bind_by_name($qry2, "MARKERID",  $loc, -1);
-        oci_bind_by_name($qry2, "CTID", $conponent, -1);
+        oci_bind_by_name($qry2, "MARKERID",  $lLoc, -1);
+        oci_bind_by_name($qry2, "CTID", $lConponent, -1);
     
         oci_execute($qry2);
     
@@ -50,11 +50,11 @@
          					    $assign_loc = $row['ASSIGN_LOC'];
          					    $forman = $row['FORMANID'];
          					    
-         					   if(($loc == $assign_loc) or ($assign_loc ==""))
+         					   if(($lLoc == $assign_loc) or ($assign_loc ==""))
          					    {
          					        if($ASSIGNED_SITEFORMEN == $forman)
          					        {
-         					            $json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[NAME]\",\"LOCATION\": \"$conponent\"},";
+         					            $json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[NAME]\",\"LOCATION\": \"$lConponent\"},";
          					        }
          					        else 
          					        {
