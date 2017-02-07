@@ -435,7 +435,7 @@ define([
                                  		  //opt.value = val[i].FORMANID;
                                  		  //var assignLoc = document.createElement('text');
                                    		  //var assignLoc = val[i].LOCATION;
-                                   		  
+                                   		   
                                    		  
                                    		//{\"FOREMAN\": \"$foreman\",\"STATUS\": \"$row[STATUS]\",\"BAGS\": \"$row[CT_BAGS]\",\"FULLNAME\": \"$row[FULLNAME]\",\"PASSNUM\": \"$row[CT_PASSNUM]\"}                                   		        
                                     	  	
@@ -458,6 +458,10 @@ define([
                                    			
                                    			templateString += '<b>PASS NUMBER</b>: ';
                                    			templateString += val[i].PASSNUM;
+                                   			templateString += '<br/><br/>';
+                                   			
+                                   			templateString += '<b>NOTE</b>: ';
+                                   			templateString += val[i].NOTE;
                                    			templateString += '<br/><br/>';
                                    			
                                    			

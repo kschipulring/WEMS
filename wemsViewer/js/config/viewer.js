@@ -202,16 +202,16 @@ define([
                 position: 3,
                 options: 'config/identify'
             },
-            wems: {
-                include: true,
-                id: 'wems',
-                type: 'titlePane',
-                path: 'gis/dijit/wems',
-                title: 'WEMS',
-                open: true,
-                position: 3,
-                options: 'config/wems'
-            },
+           // wems: {
+           //     include: true,
+           //     id: 'wems',
+           //     type: 'titlePane',
+           //     path: 'gis/dijit/wems',
+           //     title: 'WEMS',
+           //     open: true,
+            //    position: 3,
+            //    options: 'config/wems'
+            //},
             basemaps: {
                 include: true,
                 id: 'basemaps',

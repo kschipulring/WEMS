@@ -7,8 +7,8 @@
 
     $MARKERID = isset($_GET['markerid']) ? $_GET['markerid'] : -1;
     //$eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
-    
-    
+    $locNote = "";
+   
     //$MARKERID = 61100300;
        
           
@@ -20,10 +20,27 @@
     oci_bind_by_name($qry, ":MARKERID", $MARKERID, -1);
      
     oci_execute($qry);
+    
+    
+    $qry3 = oci_parse($c, "select LOC_NOTE from WEMS_LOCATION where MARKERID = :MARKERID")
+    OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+     
+    oci_bind_by_name($qry3, ":MARKERID", $MARKERID, -1);
+     
+    oci_execute($qry3);
+    
+    while($row2 = oci_fetch_array($qry3))
+    {
+        $locNote .= $row2['LOC_NOTE'];
+        //$locNote = "TEST";
+    }
+    
+    
      
     $json = "[";
      
-   
+    
+    
     while($row = oci_fetch_array($qry))
     {
     
@@ -32,6 +49,7 @@
         $bags = $row['CT_BAGS'];
         $conponentName = $row['FULLNAME'];
         $passNum = $row['CT_PASSNUM'];
+        
         
         if($foreman != "")
         {
@@ -46,14 +64,17 @@
                                         {
                                             $foreman = $row['NAME'];
                                         }
-        }
+                                        
+                                        
+                                        
+            
+        } 
         
         
         
         
         
-        
-        $json .= "{\"FOREMAN\": \"$foreman\",\"STATUS\": \"$status\",\"BAGS\": \"$bags\",\"FULLNAME\": \"$conponentName \",\"PASSNUM\": \"$passNum\"},";
+        $json .= "{\"FOREMAN\": \"$foreman\",\"STATUS\": \"$status\",\"BAGS\": \"$bags\",\"FULLNAME\": \"$conponentName \",\"PASSNUM\": \"$passNum\",\"NOTE\": \"$locNote\"},";
          
     }
     //$json .= "{\"CTID\": \"99999999\",\"FULLNAME\": \"All Conponents\"},";
@@ -68,6 +89,27 @@
     
     oci_close($c);
     
+    
+    /*
+    $json = "[";
+    $locNote = "";
+    $qry3 = oci_parse($c, "select LOC_NOTE from WEMS_LOCATION where MARKERID = :MARKERID")
+    OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+     
+    oci_bind_by_name($qry3, ":MARKERID", $MARKERID, -1);
+     
+    oci_execute($qry3);
+    
+    while($row2 = oci_fetch_array($qry3))
+    {
+        $locNote .= $row2['LOC_NOTE'];
+         $json .= "{\"NOTE\": \"$locNote\"},";
+    }
+    $json .= "{\"NOTE\": \"$locNote\"},";
+    $json .= "]";
+   echo $json;
+    oci_close($c);
+    */
     ?>
     
         

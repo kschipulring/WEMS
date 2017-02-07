@@ -635,9 +635,9 @@ else
     							
     							oci_execute($closeLocQry);
     							
-    							
-    							
-    	$closeLocQry = oci_parse($c, "Update WEMS_LOCATION set STATUS = 1, LOCATION_PASSNUM = NULL")
+    	*/						
+    						
+    	$closeLocQry = oci_parse($c, "Update WEMS_LOCATION set STATUS = 4, LOCATION_PASSNUM = NULL")
     							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     							
     								
@@ -646,7 +646,7 @@ else
     						$eventID = 0;
     						$eventType = 0;
     						$openTime = "";
-    	*/					
+    						
     						$EventSuccessMsg = "Success";
     						
         }// if(!strlen($errMsg))
