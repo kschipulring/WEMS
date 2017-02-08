@@ -1,5 +1,9 @@
 <?php
-  
+ob_start();
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/tcpdf/6.2.12" );
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/LIRR/1.0.4.3" );
+$library_path = '../lib/';
+set_include_path(get_include_path() . PATH_SEPARATOR . $library_path);  
 //session_start(); //echo $_SESSION['group']
 
 
@@ -2497,7 +2501,8 @@ ________________________________________________________________________________
 							</tr>
                             <tr>
 							     <td>Location:</td>
-								 <td><select name="locationId[]" id = "locationId" multiple size = 2>
+								 <td><select name="locationId[]" id = "locationId" multiple size ="1">
+								 <option selected="selected">Select Location</option>
                                 </select></td>
 							</tr>
                             <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="create PDF" /></td></tr> 
