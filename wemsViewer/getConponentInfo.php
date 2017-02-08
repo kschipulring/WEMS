@@ -12,7 +12,7 @@ require '../wemsDatabase.php';
      {
 
          
-         $qry = oci_parse($c, "SELECT CTID, FULLNAME FROM WEMS_CLEANABLE_TARGET where MARKERID = :MARKERID")
+         $qry = oci_parse($c, "SELECT CTID, FULLNAME FROM WEMS_CLEANABLE_TARGET where MARKERID = :MARKERID and TYPE = 'S'")
          		OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
          
          				oci_bind_by_name($qry, ":MARKERID", $LocId, -1);

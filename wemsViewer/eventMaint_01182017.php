@@ -2,7 +2,6 @@
   
 //session_start(); //echo $_SESSION['group']
 
-
 $eventErrMsg = "";
 $gangErrMsg = "";
 $locationErrMsg = "";
@@ -21,7 +20,6 @@ $gStartTm = "";
 $lLoc = "";
 
 $tabindex = 0;
-
 
 
 $locationSuccessMsg = "";
@@ -72,7 +70,7 @@ else
 {
 
     require '../wemsDatabase.php';
-    require_once('tcpdf/tcpdf.php');
+    
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
     OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
     
@@ -113,7 +111,7 @@ else
     {
        
         //header("Location: http://arcgisupg.lirr.org/gisweb/wemsViewer/WEMS_GIS.html");
-        header("Location: http://webz8dev.lirr.org/~tebert/wems/wemsViewer/WEMS_GIS.php");
+        header("Location: http://webz8dev.lirr.org/~tebert/wems/wemsViewer/index.php");
     }
     
     
@@ -125,67 +123,15 @@ else
     
     //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     
-    if($task == "Re-Open Storm")
-    {
-       
-        $pastEvent = isset($_POST['pastStorms'])  ? $_POST['pastStorms'] : "";
-        
-        include 'openOldEvent.php';
-        
-        
-        $qry = oci_parse($c, "select EVENTID, EXTERNALID, EVENTTYPE, TO_CHAR(OPENTIME, 'MM/DD/YYYY') as OPENTIME, OPENUSER from WEMS_EVENT where EVENTID = :EVENTID")
-        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-        
-        oci_bind_by_name($qry, ":EVENTID",  $pastEvent, -1);
-        oci_execute($qry);
-        
-        while(($row = oci_fetch_array($qry)) !== false)
-        {
-            $eventID = $row['EVENTID'];
-            $externalID = $row['EXTERNALID'];
-            $eventType = $row['EVENTTYPE'];
-            $openTime = $row['OPENTIME'];
-            $activeUser = $row['OPENUSER'];
-        }
-        
-        
-        $qry2 = oci_parse($c, "UPDATE WEMS_ABLE_TARGET SET ASSIGNED_CREWSIZE = NULL, ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = 1, CT_PASSNUM = NULL, CT_BAGS = NULL")
-        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-        
-       
-        oci_execute($qry2);
-        
-        
-        $qry3 = oci_parse($c, "UPDATE WEMS_LOCATION SET STATUS = 1, LOCATION_PASSNUM = NULL")
-        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-        
-        $qry4 = oci_parse($c, "UPDATE WEMS_EVENT SET CLOSETIME = NULL WHERE EVENTID = :EVENTID")
-        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-        
-        oci_bind_by_name($qry4, ":EVENTID",  $eventID, -1);
-         
-        oci_execute($qry4);
-        
-        
-        
-        reOpen($eventID);
-        
-      
-        
-        
-        
-    }
+    
     
     if($task == "Assign Parking Lot")
     {
-       
-         
-         $lPassNum = 0;
-         $lNumBags = 0;
-         
+        //$interlockingErrMsg = "HELP";
     
-        $plLoc = isset($_POST['plLoc'])  ? $_POST['plLoc'] : "";
-        $plConponent = "";
+    
+        $lLoc = isset($_POST['plLoc'])  ? $_POST['plLoc'] : "";
+        $plConponent = isset($_POST['plConponent'])  ? $_POST['plConponent'] : "";
         $lForman = isset($_POST['plForman'])  ? $_POST['plForman'] : "";
         $lStatus = isset($_POST['plStatus'])  ? $_POST['plStatus'] : "";
     
@@ -206,29 +152,100 @@ else
     
     
         $interlockingErrMsg = $plConponent;
-        
-        $lconponentl = "allConponents";
-
-        $plConponent = "";
-       
-        $Loc_Type = 'P';
-         
-         
-        $filesToUpload = "";
-         
-        
-        require_once('assignLocation.php');
-         
-        $Loc_Type = 'P';
-         
-        updateLocationGang($lconponentl, $plConponent, $eventID, $lForman, $lNoteTime, $lStatus, $plLoc,
-            $lPassNum, $lNumBags, $lcomments, $lUser, $Loc_Type);
-         
-        
-        require_once('uploadFile.php');
-        uploadFile($eventID, $lLoc);
-        
-        
+    
+    
+        $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
+         ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
+         WHERE CTID = :CTID ")
+             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+             oci_bind_by_name($qry, ":NOTIFYTIME",  $lNoteTime, -1);
+             oci_bind_by_name($qry, ":CT_STATUS",  $lStatus, -1);
+             oci_bind_by_name($qry, ":ASSIGNED_SITEFOREMEN", $lForman , -1);
+             oci_bind_by_name($qry, ":CTID", $plConponent, -1);
+             oci_bind_by_name($qry, ":CTPASSNUM", $lPassNum, -1);
+             oci_bind_by_name($qry, ":CTBAGS", $lNumBags, -1);
+    
+    
+             oci_execute($qry);
+    
+             //Notes
+    
+             $qry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME)
+         VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE) ")
+             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+    
+             oci_bind_by_name($qry, ":EVENTID",  $eventID, -1);
+             oci_bind_by_name($qry, ":CTID",  $plConponent, -1);
+             oci_bind_by_name($qry, ":CTNOTES", $lcomments , -1);
+             oci_bind_by_name($qry, ":FORMANID", $lForman, -1);
+             oci_bind_by_name($qry, ":CTSTATUS",  $lStatus, -1);
+             oci_bind_by_name($qry, ":CTPASSNUM",  $lPassNum, -1);
+             oci_bind_by_name($qry, ":CTBAGS", $lNumBags , -1);
+             oci_bind_by_name($qry, ":CTSTARTTIME", $lNoteTime, -1);
+             oci_bind_by_name($qry, ":CTNOTEUSER", $lUser, -1);
+    
+    
+             oci_execute($qry);
+    
+    
+    
+    
+             //Once a gang is assigned Add a Note to the WEMS_GANG_NOTES
+    
+    
+    
+             $addGangNoteQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, ENTER_DATETIME, ASSIGN_LOC)
+         VALUES(:EVENTID, :FORMANID, sysdate, :NOTEUSER, 'Gang Assigned', sysdate, :ASSIGN_LOC ) ")
+             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+    
+             oci_bind_by_name( $addGangNoteQry, ":EVENTID",  $eventID, -1);
+             oci_bind_by_name( $addGangNoteQry, ":FORMANID", $lForman, -1);
+             oci_bind_by_name( $addGangNoteQry, ":NOTEUSER", $lUser, -1);
+             oci_bind_by_name( $addGangNoteQry, ":ASSIGN_LOC",  $plConponent, -1);
+    
+             oci_execute($addGangNoteQry);
+    
+    
+             //if the gang was unassigned then remove the location in WEMS_GANG
+             $qry = oci_parse($c, "update WEMS_GANG Set ASSIGN_LOC = null where ASSIGN_LOC = :ASSIGNLOC AND EVENTID = :EVENTID")
+             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+             oci_bind_by_name($qry, ":ASSIGNLOC",  $plConponent, -1);
+             //oci_bind_by_name($qry, ":FORMANID",   $lForman, -1);
+             oci_bind_by_name($qry, ":EVENTID",   $eventID, -1);
+    
+             oci_execute($qry);
+    
+             //Mark the Gang as assigned
+             $qry = oci_parse($c, "update WEMS_GANG SET ASSIGN_LOC = :ASSIGNLOC WHERE FORMANID = :FORMANID and EVENTID = :EVENTID")
+             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+             oci_bind_by_name($qry, ":ASSIGNLOC",  $plConponent, -1);
+             oci_bind_by_name($qry, ":FORMANID",   $lForman, -1);
+             oci_bind_by_name($qry, ":EVENTID",   $eventID, -1);
+    
+             oci_execute($qry);
+    
+             if($lStatus == 4)
+             {
+                 $qry = oci_parse($c, "update WEMS_GANG SET ASSIGN_LOC = NULL WHERE EVENTID = :EVENTID and FORMANID = :FORMANID")
+                 OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+                 oci_bind_by_name($qry, ":FORMANID",   $lForman, -1);
+                 oci_bind_by_name($qry, ":EVENTID",   $eventID, -1);
+    
+                 oci_execute($qry);
+             }
+    
+    
+    
+    
+             $tabindex = 2;
+    
+    
     
     }//if($task == "Assign Parking Lot")
     
@@ -250,12 +267,7 @@ else
     
         
          $lLoc = isset($_POST['iLoc'])  ? $_POST['iLoc'] : "";
-        // $iConponent = isset($_POST['iConponent'])  ? $_POST['iConponent'] : "";
-        
-         $lconponentl = "allConponents";
-         $lConponent = "";
-         $lPassNum = 0;
-         $lNumBags = 0;
+         $iConponent = isset($_POST['iConponent'])  ? $_POST['iConponent'] : "";
          $lForman = isset($_POST['iForman'])  ? $_POST['iForman'] : "";
          $lStatus = isset($_POST['iStatus'])  ? $_POST['iStatus'] : "";
     
@@ -271,30 +283,106 @@ else
          $lEndTime = isset($_POST['iEndTime'])  ? $_POST['iEndTime'] : "";
          $lcomments = isset($_POST['icomments'])  ? $_POST['icomments'] : "";
           
-         $Loc_Type = 'I';
-         
     
-    
-         //$interlockingErrMsg = $iConponent;
-
          $lUser = $_SESSION['user'];
-         
-         
-         $filesToUpload = "";
-         
-
-         require_once('assignLocation.php');
-         
-         $Loc_Type = 'I';
-         
-         updateLocationGang($lconponentl, $lConponent, $eventID, $lForman, $lNoteTime, $lStatus, $lLoc,
-             $lPassNum, $lNumBags, $lcomments, $lUser, $Loc_Type);
-         
+    
+    
+         $interlockingErrMsg = $iConponent;
+    
           
-         require_once('uploadFile.php');
-         uploadFile($eventID,  $lLoc);
-         
-  
+         $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
+         ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
+         WHERE CTID = :CTID ")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+         oci_bind_by_name($qry, ":NOTIFYTIME",  $lNoteTime, -1);
+         oci_bind_by_name($qry, ":CT_STATUS",  $lStatus, -1);
+         oci_bind_by_name($qry, ":ASSIGNED_SITEFOREMEN", $lForman , -1);
+         oci_bind_by_name($qry, ":CTID", $iConponent, -1);
+         oci_bind_by_name($qry, ":CTPASSNUM", $lPassNum, -1);
+         oci_bind_by_name($qry, ":CTBAGS", $lNumBags, -1);
+    
+    
+         oci_execute($qry);
+          
+         //Notes
+          
+         $qry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME)
+         VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE) ")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+          
+    
+         oci_bind_by_name($qry, ":EVENTID",  $eventID, -1);
+         oci_bind_by_name($qry, ":CTID",  $iConponent, -1);
+         oci_bind_by_name($qry, ":CTNOTES", $lcomments , -1);
+         oci_bind_by_name($qry, ":FORMANID", $lForman, -1);
+         oci_bind_by_name($qry, ":CTSTATUS",  $lStatus, -1);
+         oci_bind_by_name($qry, ":CTPASSNUM",  $lPassNum, -1);
+         oci_bind_by_name($qry, ":CTBAGS", $lNumBags , -1);
+         oci_bind_by_name($qry, ":CTSTARTTIME", $lNoteTime, -1);
+         oci_bind_by_name($qry, ":CTNOTEUSER", $lUser, -1);
+    
+          
+         oci_execute($qry);
+          
+          
+          
+          
+         //Once a gang is assigned Add a Note to the WEMS_GANG_NOTES
+    
+          
+          
+         $addGangNoteQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, ENTER_DATETIME, ASSIGN_LOC)
+         VALUES(:EVENTID, :FORMANID, sysdate, :NOTEUSER, 'Gang Assigned', sysdate, :ASSIGN_LOC ) ")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+          
+         oci_bind_by_name( $addGangNoteQry, ":EVENTID",  $eventID, -1);
+         oci_bind_by_name( $addGangNoteQry, ":FORMANID", $lForman, -1);
+         oci_bind_by_name( $addGangNoteQry, ":NOTEUSER", $lUser, -1);
+         oci_bind_by_name( $addGangNoteQry, ":ASSIGN_LOC",  $iConponent, -1);
+    
+         oci_execute($addGangNoteQry);
+          
+    
+         //if the gang was unassigned then remove the location in WEMS_GANG
+          
+         $qry = oci_parse($c, "update WEMS_GANG Set ASSIGN_LOC = null where ASSIGN_LOC = :ASSIGNLOC AND EVENTID = :EVENTID")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+         oci_bind_by_name($qry, ":ASSIGNLOC",  $iConponent, -1);
+         //oci_bind_by_name($qry, ":FORMANID",   $lForman, -1);
+         oci_bind_by_name($qry, ":EVENTID",   $eventID, -1);
+    
+         oci_execute($qry);
+    
+         //Mark the Gang as assigned
+         $qry = oci_parse($c, "update WEMS_GANG SET ASSIGN_LOC = :ASSIGNLOC WHERE FORMANID = :FORMANID and EVENTID = :EVENTID")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+          
+         oci_bind_by_name($qry, ":ASSIGNLOC",  $iConponent, -1);
+         oci_bind_by_name($qry, ":FORMANID",   $lForman, -1);
+         oci_bind_by_name($qry, ":EVENTID",   $eventID, -1);
+          
+         oci_execute($qry);
+          
+         if($lStatus == 4)
+         {
+         $qry = oci_parse($c, "update WEMS_GANG SET ASSIGN_LOC = NULL WHERE EVENTID = :EVENTID and FORMANID = :FORMANID")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+    
+         oci_bind_by_name($qry, ":FORMANID",   $lForman, -1);
+         oci_bind_by_name($qry, ":EVENTID",   $eventID, -1);
+    
+         oci_execute($qry);
+         }
+    
+    
+          
+         $tabindex = 1;
+        
+    
+    
     
     }//if($task == "Assign Location")
     
@@ -310,7 +398,15 @@ else
         $lConponent = isset($_POST['lConponent'])  ? $_POST['lConponent'] : "";
     
         $locationSuccessMsg = "ID: " . $selectedFile . ", CONPONENT: " . $lConponent . ", EVENT: " . $eventID;
-     
+        
+        //echo $selectedFile;
+    
+    
+    
+   
+        //include('config.php');
+    
+        //echo $ID;
         $dlqry = oci_parse($c, "SELECT BLOB_COL, ID FROM WEMS_LOCDOCS WHERE ID = :ID AND EVENTID = :EVENTID AND MARKERID = :MARKERID")
         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
         
@@ -628,26 +724,19 @@ else
     							oci_bind_by_name($closeCTQry, ":EVENTID", $eventID, -1);
     								
     							oci_execute($closeCTQry);
+    							/*
     							
-    	/*						
     	$closeLocQry = oci_parse($c, "Update WEMS_CLEANABLE_TARGET set NOTIFYTIME = NULL, ASSIGNED_CREWSIZE = NULL, ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = NULL, CT_PASSNUM = NULL, CT_BAGS = NULL")
     							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     								
     							
     							oci_execute($closeLocQry);
-    							
-    							
-    							
-    	$closeLocQry = oci_parse($c, "Update WEMS_LOCATION set STATUS = 1, LOCATION_PASSNUM = NULL")
-    							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-    							
-    								
-    							oci_execute($closeLocQry);
+    							*/
     
     						$eventID = 0;
     						$eventType = 0;
     						$openTime = "";
-    	*/					
+    						
     						$EventSuccessMsg = "Success";
     						
         }// if(!strlen($errMsg))
@@ -883,8 +972,7 @@ else
     
     </head>
     
-    <!-- <body onload="getEmployees();getILEmployees();getPLEmployees();"> -->
-    <body>
+    <body onload="getEmployees();getILEmployees();getPLEmployees();">
     <div>
     
    <img src="wemsPhoto.jpg" alt="Mountain View", style="float:right;height:42px;">
@@ -899,7 +987,7 @@ else
     		<li><a href="#view2">Gang Assignments</a></li> 
     		<li><a href="#view3">Location Assignments</a></li> 
     		<li><a href="#view4">Reports</a></li> 
-    		<li><a href="#view5">Visualization</a></li> 
+    		<li><a href="#view5">Visualzation</a></li> 
     	</ul> 
     	</div>
     	<div class="tabcontents"> 
@@ -919,7 +1007,8 @@ else
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                        
+                      
+ 
              			</table>
     	
       				</fieldset>
@@ -947,7 +1036,7 @@ else
       				<fieldset id="event">
         				<legend>Event Maintenance </legend>
 
-        				<table  align = "center" class="table" cellpadding="1" cellspacing="1" border="0" >
+        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" >
         				
         				
         			<?php
@@ -1091,7 +1180,7 @@ else
 									else
 									{
 									    echo"<td colspan = \"2\" align=\"center\"><input class=\"Create Storm\" type=\"submit\" value=\"Create Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
-									    
+									   
 									}
 								?>
              
@@ -1132,39 +1221,7 @@ else
 													?>
 													</textarea></td>
 												</tr>
-												<?php 
-												if($eventID == 0)
-												{
-												    
-												    
-												    echo"<tr><td colspan = \"2\" align=\"center\">__________________________________________</td></tr>";
-												    echo"<tr><td colspan = \"2\" align=\"center\">Past Storms:";
-												    echo"<select name=\"pastStorms\" id = \"pastStorms\" > <option value= 0 selected>";
-												    	
-												    
-												    
-												    $qry = oci_parse($c, "SELECT EXTERNALID, EVENTID from WEMS_EVENT order by EVENTID")
-												    OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-												    
-												    oci_execute($qry);
-												    
-												    while($row = oci_fetch_array($qry)){
-												        $id = $row['EVENTID'];
-												        $desc = $row['EXTERNALID'] . " - " . $id;
-												        	
-												        if($id == $eventType)
-												            echo "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
-												            else
-												                echo "<option value=\"$id\" > $desc </option>";
-												    
-												    }
-												    
-												    echo"</option></select></td></tr>";
-												    
-												    
-													echo"<td colspan = \"2\" align=\"center\"><input class=\"Re-Open Storm\" type=\"submit\" value=\"Re-Open Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
-												}
-												?>
+
         									</table>
         
       				</fieldset>
@@ -1394,11 +1451,9 @@ else
        							
        							}
      	                      */
-								if($eventID > 0)
-								{
-								    include 'getTotalByDepartment.php';
-								    echo "<tr><td colspan=\"2\"> " . $output . "</td></tr>";
-								}
+								
+								include 'getTotalByDepartment.php';
+								echo "<tr><td colspan=\"2\"> " . $output . "</td></tr>";
 							  	
        	                    ?>
      	
@@ -1509,14 +1564,14 @@ else
 												</tr>
 												
 												<tr>
-													<td>Component:</td>
+													<td>Conponent:</td>
 													<td>
 														<select name="lConponent" id = "lConponent" onchange="getConponentDetails();getEmployees(); "> 
 														
 														<?php 
 																						
 																											
-														$qry = oci_parse($c, "SELECT CTID, FULLNAME FROM WEMS_CLEANABLE_TARGET where MARKERID = :MARKERID and TYPE = 'S'")
+														$qry = oci_parse($c, "SELECT CTID, FULLNAME FROM WEMS_CLEANABLE_TARGET where MARKERID = :MARKERID")
 														OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 														 
 														oci_bind_by_name($qry, ":MARKERID", $lLoc, -1);
@@ -1545,112 +1600,9 @@ else
 												</tr>
 												<tr>
 													<td>Gang:</td>
-													<td><select name="lForman" id = "lForman"  > 
-													
-													
-													
-													<?php 
-													/*
-														if($lConponent !=  "")	
-														{
-														   
-														  $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEEID ")
-                                                                OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+													<td><select name="lForman" id = "lForman" > 
+													<option value= 0 selected>  </option>
 
-                                  
-                                                            oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-
-                                                            oci_execute($qry);
-														 
-														  $loc = $row[ASSIGN_LOC];
-                                                            
-														  while($row = oci_fetch_array($qry))
-														  {
-														    if(($lConponent == $loc) || ($lLoc== $loc))
-														    {
-														      echo "<option value= \"$row[CTID]\" selected=\"selected\"> $row[FULLNAME] </option>";
-														    }
-														    else 
-														    {
-														      echo "<option value= \"$row[NAME]\" > $row[NAME] </option>";
-														    }
-														    													
-														  }
-														}//if($lConponent !=  "")
-														
-														*/
-														 //Needs to be moved out into seperate function
-														 
-														if($lConponent !=  "")
-														{
-														    echo "<option value= \"\" >  </option>";
-                                                            $ASSIGNED_SITEFORMEN = "";
-    
-    
-       
-                                                            $qry2 = oci_parse($c, "select ASSIGNED_SITEFOREMEN from WEMS_CLEANABLE_TARGET WHERE MARKERID = :MARKERID and CTID = :CTID")
-                                                            OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-
-                                                            oci_bind_by_name($qry2, "MARKERID",  $lLoc, -1);
-                                                            oci_bind_by_name($qry2, "CTID", $lConponent, -1);
-    
-                                                            oci_execute($qry2);
-    
-                                                            while($row = oci_fetch_array($qry2))
-                                                            {
-                                                                $ASSIGNED_SITEFORMEN = $row['ASSIGNED_SITEFOREMEN'];
-                                                            }
-
-
-	                                                        $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEEID ")
-                                                            OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-
-                                  
-                                                            oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-
-                                                            oci_execute($qry);
-
-                                                            while($row = oci_fetch_array($qry))
-                                                            {
-                                                                $assign_loc = $row['ASSIGN_LOC'];
-                                                                $forman = $row['FORMANID'];
-                                   
-                                                                if(($lLoc == $assign_loc) or ($assign_loc ==""))
-                                                                {
-                                                                    if($ASSIGNED_SITEFORMEN == $forman)
-                                                                    {
-                                                                        echo "<option value= \"$forman\" selected=\"selected\"> $row[NAME] </option>";
-                                                                        
-                                                                        //$json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[NAME]\",\"LOCATION\": \"$lConponent\"},";
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        echo "<option value= \"$forman\" > $row[NAME] </option>";
-                                                                        //$json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[NAME]\",\"LOCATION\": \"\"},";
-                                                                    }
-                                           	
-                                                                }
-                                        
-                                                            }
-														   
-                                                        }
-														
-														
-														
-														
-														
-														
-														
-													?>
-													
-													
-													
-													
-													
-													
-													
-													
-													
 													
                                    					</select>
       
@@ -1706,11 +1658,10 @@ else
 														
 														<?php
 														//echo "<option value= \"0\">1</option>";
-														
 														for ($x = 0; $x <= 40; $x++) {
-														   // if($x == $lNumBags)
-														   //     echo "<option value= \"$x\" selected=\"selected\"> $x </option>";
-														   //     else
+														    if($x == $lNumBags)
+														        echo "<option value= \"$x\" selected=\"selected\"> $x </option>";
+														        else
 														    echo "<option value= \"$x\"> $x </option>";
 														}
 														
@@ -1827,15 +1778,9 @@ else
 													<td><td><textarea rows="10" cols="100" name="lHistory" id="lHistory">
 													<?php
 													$locComments = "";
-													$qry = oci_parse($c, "SELECT TO_CHAR(WEMS_CLEANABLE_TARGET_NOTES.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTNOTES, EMPLOYEE.NAME, WEMS_CLEANABLE_TARGET_NOTES.CTSTATUS, 
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTPASSNUM, WEMS_CLEANABLE_TARGET_NOTES.CTBAGS, 
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTNOTEUSER
-                                            FROM WEMS_CLEANABLE_TARGET_NOTES
-                                            LEFT JOIN EMPLOYEE ON EMPLOYEE.EMPLOYEEID = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
-                                            where WEMS_CLEANABLE_TARGET_NOTES.CTID = :CTID and 
-                                            WEMS_CLEANABLE_TARGET_NOTES.EVENTID = :EVENTID and  
-                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEEID) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID = 0))ORDER BY ENTER_DATETIME")
+													$qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.NAME, t.CTSTATUS, t.CTPASSNUM,
+                                											t.CTBAGS, t.CTNOTEUSER
+																			from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEEID")
        																		OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        
        																		oci_bind_by_name($qry, ":CTID", $lConponent, -1);
@@ -1877,13 +1822,27 @@ else
     								<li>
     									<div id="lview1">
     										
-		
+    										
+    										
+    										
+    										
+    										
+    										
+    										
+    										
+    										
+    										
+    										
+    										
     										
     										
 <!--
      ************************************************************************************************************************************************
-                                                       Interlockings 
-  
+                                                       Interlockings Interlockings Interlockings Interlockings Interlockings
+   Interlockings Interlockings Interlockings Interlockings Interlockings                                                     
+                                                                 Interlockings Interlockings Interlockings Interlockings Interlockings
+                        Interlockings Interlockings Interlockings Interlockings Interlockings                       
+                                            Interlockings Interlockings Interlockings Interlockings Interlockings
      ************************************************************************************************************************************************
      -->  
 			
@@ -1923,7 +1882,7 @@ else
 												<tr>
 													<td>Interlocking:</td>
 													<td>
-														<select name="iLoc" id = "iLoc" onchange="getILEmployees();getILConponentDetails();"> 
+														<select name="iConponent" id = "iConponent" onchange="getILConponentDetails();getILEmployees(); "> 
 														<option value= "" ></option>
 														 
 														<?php 
@@ -2024,7 +1983,7 @@ else
 												</tr>
 												
 												<tr>
-													<td> Support Document:</td><td> <input name="fileToUpload[]" id= "rDoc" size="75" type="file" multiple="multiple" value="<?php echo $isupportDoc; ?>" />	<?php //echo $supportDoc; ?></td></tr>
+													<td> Support Document:</td><td> <input name="ifileToUpload[]" id= "rDoc" size="75" type="file" multiple="multiple" value="<?php echo $isupportDoc; ?>" />	<?php //echo $supportDoc; ?></td></tr>
 												</tr>
 												 <tr>
 						
@@ -2032,18 +1991,18 @@ else
 						
 												<td>  Support Documents attached:</td>
 						
-												<td><select name="ilDownloadFile" id = "ilDownloadFile"> 
+												<td><select name="downloadFile" id = "downloadFile"> 
 						
 												<option value= 0 selected>  </option>
 												
 												<?php 
 																						
 																											
-														$qryDoc = oci_parse($c, "SELECT ID from WEMS_LOCDOCS where EVENTID = :EVENTID and MARKERID = :MARKERID")
+														$qryDoc = oci_parse($c, "SELECT ID from WEMS_LOCDOCS where EVENTID = :EVENTID and MARKERID = :CTID")
                                                         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
           
                                                         oci_bind_by_name($qryDoc, ":EVENTID", $eventID, -1);
-                                                        oci_bind_by_name($qryDoc, ":MARKERID", $iloc, -1);
+                                                        oci_bind_by_name($qryDoc, ":CTID", $iConponent, -1);
           
                                                         oci_execute($qryDoc);
          
@@ -2129,7 +2088,6 @@ else
 													
 													<td><td><textarea rows="10" cols="100" name="iHistory" id="iHistory">
 													<?php
-													/*
 													$interlocComments = "";
 													$qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.NAME, t.CTSTATUS, 
                                 											 t.CTNOTEUSER
@@ -2155,8 +2113,7 @@ else
        				                    
 
        								}
-									   echo $interlocComments;	
-									   */			
+									   echo $interlocComments;				
 									?>
 													</textarea></td></td>
 												</tr>
@@ -2217,33 +2174,31 @@ ________________________________________________________________________________
 												<tr>
 													<td>Parking Lots:</td>
 													<td>
-														<select name="plLoc" id = "plLoc" onchange="getPLConponentDetails();getPLEmployees(); "> 
+														<select name="plConponent" id = "plConponent" onchange="getPLConponentDetails(); getPLEmployees(); "> 
 														<option value= "" ></option>
 														 
 														<?php 
 																						
 																											
-														$qry = oci_parse($c, "select MARKERID, MARKERNAME from WEMS_LOCATION where LOC_CD = 'P' order by MARKERNAME")
+														$qry = oci_parse($c, "select CTID, FULLNAME from WEMS_CLEANABLE_TARGET where TYPE = 'P' order by FULLNAME")
 														OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 														 
 														
 														 
 														oci_execute($qry);
-                                                        while($row = oci_fetch_array($qry))
+														while($row = oci_fetch_array($qry))
 														{
-														    $id = $row['MARKERID'];
-														    $desc = $row['MARKERNAME'];
-														    	
-														    if($id == $lLoc)
-														        echo "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
-														        else
-														            echo "<option value=\"$id\" > $desc </option>";
-														
+														    if($plConponent == $row[CTID])
+														    {
+														    echo "<option value= \"$row[CTID]\" selected=\"selected\"> $row[FULLNAME] </option>";
+														    }
+														    else {
+														        echo "<option value= \"$row[CTID]\" > $row[FULLNAME] </option>";
+														    }
+														    													
 														}
 														
 														?>
-														
-														
 														
 														</select>
 														
@@ -2287,50 +2242,7 @@ ________________________________________________________________________________
 													</select></td>
 												</tr>
 												
-												<tr>
-													<td> Support Document:</td><td> <input name="fileToUpload[]" id= "rDoc" size="75" type="file" multiple="multiple" value="<?php echo $plsupportDoc; ?>" /></td>
-												</tr>
 												
-												<tr>
-						
-						
-						
-												<td>  Support Documents attached:</td>
-						
-												<td><select name="plDownloadFile" id = "plDownloadFile"> 
-						
-												<option value= 0 selected>  </option>
-												
-												<?php 
-																						
-																											
-														$qryDoc = oci_parse($c, "SELECT ID from WEMS_LOCDOCS where EVENTID = :EVENTID and MARKERID = :MARKERID")
-                                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-          
-                                                        oci_bind_by_name($qryDoc, ":EVENTID", $eventID, -1);
-                                                        oci_bind_by_name($qryDoc, ":MARKERID", $plConponent, -1);
-          
-                                                        oci_execute($qryDoc);
-         
-														while($row = oci_fetch_array($qryDoc))
-														{
-														   
-														        echo "<option value= \"$row[ID]\" > $row[ID] </option>";
-													
-														}
-														
-														?>
-												
-												
-												
-						
-												</select>
-						
-												<input class="Download" type="submit" value="Download" name="SUBMIT" id="SUBMIT" />
-												</td>
-												
-						
-												</tr>	
 												
 												<tr>
 												
@@ -2464,7 +2376,7 @@ ________________________________________________________________________________
      
      <div style="background-color:#FFF2F2;" id="view4"  > 
       
-     			<form action="../classes/createPDF.php"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
+     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
               
                
       				<fieldset id="reports">
@@ -2472,9 +2384,9 @@ ________________________________________________________________________________
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
+                      
 							
                       		<a href="http://webz8dev.lirr.org/~hdesai/WEMS/wemsViewer/eventMaint.php">Reports</a>
-
         				</table>
         
       				</fieldset>
@@ -2627,7 +2539,7 @@ ________________________________________________________________________________
           var loc = document.getElementById('lLoc').value;
           //alert(loc);
           var eventId = "<?php echo $eventID; ?>";
-          var locCD = 0;
+        
          
  		  
  		 
@@ -2650,7 +2562,7 @@ ________________________________________________________________________________
           //client.open("GET", url, true);
           
            client.onreadystatechange = function() {GangListDetailhandler(client)};
-           client.open("GET", "getGangList.php?loc=" + loc + "&eventId=" + eventId+"&conponent="+conponent+"&locCD="+locCD);
+           client.open("GET", "getGangList.php?loc=" + loc + "&eventId=" + eventId+"&conponent="+conponent);
            client.send("");
 
                
@@ -2677,7 +2589,6 @@ ________________________________________________________________________________
           		  
           		  opt.innerHTML = val[i].NAME;
         		  opt.value = val[i].FORMANID;
-        		  
         		  var assignLoc = document.createElement('text');
           		  var assignLoc = val[i].LOCATION;
           		  
@@ -2838,7 +2749,7 @@ ________________________________________________________________________________
               var forman = document.getElementById('lForman');
              //forman.options.length = 0;
               var pass = document.getElementById('lPassNum');
-              //var bags = document.getElementById('lNumBags');
+              var bags = document.getElementById('lNumBags');
               
            
               var gangButton = document.getElementById('gangEnterUpdate');
@@ -2846,9 +2757,9 @@ ________________________________________________________________________________
 
 
 
-            
+              
               var downloadFile = document.getElementById('downloadFile');
-              downloadFile.options.length = 0;
+              
              // var length = downloadFile.options.length;
              // for (i = 0; i < length; i++) {
            	 //  downloadFile.options[i] = null;
@@ -2885,8 +2796,8 @@ ________________________________________________________________________________
                      txtNew.text = val[i].PASS;
                      pass.value = txtNew.text;
 
-                    //txtNew.text = val[i].BAGS;
-                    // bags.value = txtNew.text;
+                     txtNew.text = val[i].BAGS;
+                     bags.value = txtNew.text;
 
                      var doctxt = txtNew.text;
 
@@ -2913,14 +2824,14 @@ ________________________________________________________________________________
 					  }
             		 //---------------------------------
             		 
-            		// txtNew.text = val[i].GANG;
-            		// forman.value = txtNew.text;
+            		 txtNew.text = val[i].GANG;
+            		 forman.value = txtNew.text;
             		 
             		 txtNew.text = val[i].GANG;
             		 forman.value = txtNew.text;
   					
-            		// txtNew.text = val[i].BAGS;
-                    // bags.value = txtNew.text;  
+            		 txtNew.text = val[i].BAGS;
+                     bags.value = txtNew.text;  
 						
                     
 
@@ -2982,7 +2893,7 @@ ________________________________________________________________________________
         	   var status = document.getElementById('lStatus');
         	   var forman = document.getElementById('lForman');
         	   var pass = document.getElementById('lPassNum');
-        	   //var bags = document.getElementById('lNumBags');
+        	   var bags = document.getElementById('lNumBags');
         	   var comments = document.getElementById('lHistory');
         	   
         	   var chkBox = document.getElementById('allConponents');
@@ -2999,8 +2910,8 @@ ________________________________________________________________________________
                txtNew.text = "";
                pass.value = txtNew.text;
 
-              // txtNew.text = "";
-              // bags.value = txtNew.text;
+               txtNew.text = "";
+               bags.value = txtNew.text;
 
                txtNew.text = "";
                comments.value = txtNew.text;
@@ -3049,6 +2960,107 @@ ________________________________________________________________________________
 																		//___________________________________________
 
 
+
+
+
+
+
+
+
+
+
+             //----------------------------------------------------------------------------------------------------------------------------
+             //---------------------------------------------------------------------------------------------------------------------------
+
+                      //THIS WILL FILL THE SELECT BOX WITH THE CONPONENT LIST.  DATA FILL WILL BE ON THE CONPONENT CLICK EVENT 
+/*
+                        function getILConponentData() 
+                        {
+                     	   	var param = document.getElementById('iLoc').value;
+
+                     	   	
+                     	   	if (window.XMLHttpRequest)
+                            	{
+                                  var client = new XMLHttpRequest();
+                            	}
+                            	else
+                            	{
+                                  if (window.ActiveXObject)
+                                  {
+                   	           		var client = new ActiveXObject("Microsoft.XMLHTTP");
+                                  }
+                            	}
+                   
+                           
+                             client.onreadystatechange = function() {ilConponentHandler(client)};
+                             client.open("GET", "getConponentInfo.php?param=" + param);
+                             client.send("");
+                   
+                        
+
+                        } // getConponentData() 
+
+
+                        
+                        function ilConponentHandler(obj)
+                        {
+
+
+                     	   var status = document.getElementById('iStatus');
+                     	   var forman = document.getElementById('iForman');
+                     	  // var pass = document.getElementById('iPassNum');
+                     	  // var bags = document.getElementById('iNumBags');
+                     	   var comments = document.getElementById('iHistory');
+                     	   
+                     	   var txtNew = document.createElement('text');
+
+                            txtNew.text = "";
+                            status.value = txtNew.text;
+
+                            txtNew.text = "";
+                            forman.value = txtNew.text;
+                            
+                          //  txtNew.text = "";
+                          //  pass.value = txtNew.text;
+
+                           // txtNew.text = "";
+                           // bags.value = txtNew.text;
+
+                            txtNew.text = "";
+                            comments.value = txtNew.text;
+
+             				
+                           var lConponent = document.getElementById('iConponent');
+                           document.getElementById('iConponent').options.length = 0;
+                           var length = lConponent.options.length;
+                           for (i = 0; i < length; i++) {
+                         	  lConponent.options[i] = null;
+                         	}
+                           
+                           if(obj.readyState == 4 && obj.status == 200)
+                           {	
+                         	  
+                            	 var val = eval('(' + obj.responseText + ')');
+                     		  	
+                         	  for (var i = 0; i < val.length; i++)
+                               {
+                         	      
+                         		  var opt = document.createElement('option');
+                         		  
+                         		  opt.innerHTML = val[i].FULLNAME;
+                       		   	  opt.value = val[i].CTID;
+                         		  lConponent.appendChild(opt);  
+                         		        
+                         	     
+                         	  }
+
+
+                               
+                            } // end if(obj.readyState == 4 && obj.status == 200)
+                 
+                          } //conponentHandler(obj)
+
+*/
 //__________________________________________________________________________________________________________________________________________________
 
 //__________________________________________________________________________________________________________________________________________________
@@ -3058,8 +3070,8 @@ ________________________________________________________________________________
                         {
                 	 			
                      	 
-                          //var loc = document.getElementById('iConponent').value;
-                          var loc = document.getElementById('iLoc').value;
+                          var loc = document.getElementById('iConponent').value;
+                          
                           //alert(loc);
                           var eventId = "<?php echo $eventID; ?>";
                         
@@ -3085,8 +3097,7 @@ ________________________________________________________________________________
                           //client.open("GET", url, true);
                           
                            client.onreadystatechange = function() {ilGangListDetailhandler(client)};
-                           //client.open("GET", "getGangList.php?loc=" + loc + "&eventId=" + eventId + "&locCd=" + locCD);
-                           client.open("GET", "getGangListNoConponent.php?loc="+loc+"&eventId="+eventId);
+                           client.open("GET", "getGangList.php?loc=" + loc + "&eventId=" + eventId);
                            client.send("");
 
                                
@@ -3095,15 +3106,14 @@ ________________________________________________________________________________
                         function ilGangListDetailhandler(obj)
                         {
                            var iforman = document.getElementById('iForman');
-                           var location = document.getElementById('iLoc').value;
+                           
                            
                            iforman.options.length = 0;
-                           
                           
                            
                            if(obj.readyState == 4 && obj.status == 200)
                            {
-                        	   
+
                              var val = eval('(' + obj.responseText + ')');
 
                              for(var i = 0; i < val.length; i++)
@@ -3116,19 +3126,18 @@ ________________________________________________________________________________
                         		  var assignLoc = document.createElement('text');
                           		  var assignLoc = val[i].LOCATION;
                           		  
-                            		
-                          		 if(assignLoc == location)
+                          		  
+                          		 if(assignLoc != "")
                           		 {
                               		    opt.setAttribute("selected","selected");
                             			iforman.appendChild(opt);
                             			
                             			//alert(assignLoc);
-                            			//alert(location);
                           		 }
                           		 else
                           		 {
                           		  		iforman.appendChild(opt);
-                              		  	//alert(assignLoc);
+                              		  	
                           		 }  
                           		        
 
@@ -3138,15 +3147,39 @@ ________________________________________________________________________________
                           } //handler(obj)
 
                 		
+
+
+
+
+
+
+                        
+
+
+
+
+
+
+
+
+
+
+
+
                           //___________________________________________________________________________________________________________________________
                           //____________________________________________________________________________________________________________________________
 
 
+
+
+
+
+                          
                           	 		function getILConponentDetails() 
                                      {
                           	 			
                                   	 
-                                       var loc = document.getElementById('iLoc').value;
+                                       var param = document.getElementById('iConponent').value;
                                        
                                       
                                        var eventId = "<?php echo $eventID; ?>";
@@ -3173,7 +3206,7 @@ ________________________________________________________________________________
                                        //client.open("GET", url, true);
                                        //alert(param);
                                         client.onreadystatechange = function() {ILconponentDetailhandler(client)};
-                                        client.open("GET", "getStationInfoNoConponent.php?loc=" + loc + "&eventId=" + eventId);
+                                        client.open("GET", "getStationInfo.php?param=" + param + "&eventId=" + eventId);
                                         client.send("");
 
                                             
@@ -3184,15 +3217,14 @@ ________________________________________________________________________________
                                         var status = document.getElementById('iStatus');
                                         var comments = document.getElementById('iHistory');
                                        
-                                        //var forman = document.getElementById('iForman');
-                                       	//forman.options.length = 0;
+                                        var forman = document.getElementById('iForman');
+                                       //forman.options.length = 0;
                                         //var pass = document.getElementById('lPassNum');
                                         //var bags = document.getElementById('lNumBags');
                                         
-                                        var downloadFile = document.getElementById('ilDownloadFile');
-             							downloadFile.options.length = 0;
                                      
-           							 
+                                     
+                          			    
                                         if(obj.readyState == 4 && obj.status == 200)
                                         {
 
@@ -3212,40 +3244,8 @@ ________________________________________________________________________________
                                                txtNew.text = val[i].COMMENTS;
                                                comments.value = txtNew.text;
 
-                                      		   //txtNew.text = val[i].GANG;
-                                      		   //forman.value = txtNew.text;
-
-
-
-                                         		//-------------------------------
-                                               //Grab all the attached documents and list in a option	
-                          					// alert(val[i].SUPPORTDOCS);
-                                               txtNew.text = val[i].SUPPORTDOCS;
-                                              
-                                               var doctxt = txtNew.text;
-                                               	
-                          					  var docArray = new Array();
-                          					  
-                          					  docArray = doctxt.split(",");
-                          					  
-                          					  for(var x=0;x<docArray.length;x++){
-                          						
-                          							var opt = docArray[x];
-                          	                        var el = document.createElement("option");
-                            	                      		
-                          		                    el.innerHTML= opt;
-                          	                        el.value = opt;
-                          	                        downloadFile.appendChild(el);
-                          					  }
-                                      		 //---------------------------------
-
-
-
-
-
-
-
-                                      		   
+                                      		   txtNew.text = val[i].GANG;
+                                      		   forman.value = txtNew.text;
 
                                            } //end for(var i = 0; i < val.length; i++)
                                          } // end if(obj.readyState == 4 && obj.status == 200)
@@ -3284,14 +3284,104 @@ ________________________________________________________________________________
 
 
 
+
+             //----------------------------------------------------------------------------------------------------------------------------
+             //---------------------------------------------------------------------------------------------------------------------------
+
+                      //THIS WILL FILL THE SELECT BOX WITH THE CONPONENT LIST.  DATA FILL WILL BE ON THE CONPONENT CLICK EVENT 
+/*
+                        function getPLConponentData() 
+                        {
+                     	   	var param = document.getElementById('plLoc').value;
+
+                     	   	
+                     	   	if (window.XMLHttpRequest)
+                            	{
+                                  var client = new XMLHttpRequest();
+                            	}
+                            	else
+                            	{
+                                  if (window.ActiveXObject)
+                                  {
+                   	           		var client = new ActiveXObject("Microsoft.XMLHTTP");
+                                  }
+                            	}
+                   
+                           
+                             client.onreadystatechange = function() {plConponentHandler(client)};
+                             client.open("GET", "getConponentInfo.php?param=" + param);
+                             client.send("");
+                   
+                        
+
+                        } // getConponentData() 
+
+
+                     
+                        function plConponentHandler(obj)
+                        {
+
+
+                     	   var status = document.getElementById('plStatus');
+                     	   var forman = document.getElementById('plForman');
+                     	 
+                     	   var comments = document.getElementById('plHistory');
+                     	   
+                     	   var txtNew = document.createElement('text');
+
+                            txtNew.text = "";
+                            status.value = txtNew.text;
+
+                            txtNew.text = "";
+                            forman.value = txtNew.text;
+                            
+                
+
+                            txtNew.text = "";
+                            comments.value = txtNew.text;
+
+             				
+                           var lConponent = document.getElementById('plConponent');
+                           document.getElementById('plConponent').options.length = 0;
+                           var length = lConponent.options.length;
+                           for (i = 0; i < length; i++) {
+                         	  lConponent.options[i] = null;
+                         	}
+                           
+                           if(obj.readyState == 4 && obj.status == 200)
+                           {	
+                         	  
+                            	 var val = eval('(' + obj.responseText + ')');
+                     		  	
+                         	  for (var i = 0; i < val.length; i++)
+                               {
+                         	      
+                         		  var opt = document.createElement('option');
+                         		  
+                         		  opt.innerHTML = val[i].FULLNAME;
+                       		   	  opt.value = val[i].CTID;
+                         		  lConponent.appendChild(opt);  
+                         		        
+                         	     
+                         	  }
+
+
+                               
+                            } // end if(obj.readyState == 4 && obj.status == 200)
+                 
+                          } //conponentHandler(obj)
+
+*/
+//__________________________________________________________________________________________________________________________________________________
+
 //__________________________________________________________________________________________________________________________________________________
 
 
                         function getPLEmployees() 
                         {
                 	 			
-                     	
-                          var loc = document.getElementById('plLoc').value;
+                     	 
+                          var loc = document.getElementById('plConponent').value;
                           
                           //alert(loc);
                           var eventId = "<?php echo $eventID; ?>";
@@ -3318,7 +3408,7 @@ ________________________________________________________________________________
                           //client.open("GET", url, true);
                          
                            client.onreadystatechange = function() {plGangListDetailhandler(client)};
-                           client.open("GET", "getGangListNoConponent.php?loc="+loc+"&eventId="+eventId);
+                           client.open("GET", "getGangList.php?loc=" + loc + "&eventId=" + eventId);
                            client.send("");
 
                                
@@ -3326,9 +3416,8 @@ ________________________________________________________________________________
                  
                         function plGangListDetailhandler(obj)
                         {
-                       	 //alert("test");
                            var plforman = document.getElementById('plForman');
-                           var location = document.getElementById('plLoc').value;
+                           
                            
                            plforman.options.length = 0;
                           
@@ -3348,20 +3437,20 @@ ________________________________________________________________________________
                         		  var assignLoc = document.createElement('text');
                           		  var assignLoc = val[i].LOCATION;
                           		  
-                            		if(assignLoc == location)
-                            		 {
-                                		    opt.setAttribute("selected","selected");
-                                		    plForman.appendChild(opt);
-                              			
-                              			//alert(assignLoc);
-                              			//alert(location);
-                            		 }
-                            		 else
-                            		 {
-                            			 plForman.appendChild(opt);
-                                		  	//alert(assignLoc);
-                            		 }  
-                          		
+                           		
+                          		 if(assignLoc != "")
+                          		 {
+                              		    opt.setAttribute("selected","selected");
+                            			plForman.appendChild(opt);
+                            			
+                            			//alert(assignLoc);
+                          		 }
+                          		 else
+                          		 {
+                          		  		plForman.appendChild(opt);
+                              		  	
+                          		 }  
+                          		        
 
                               } //end for(var i = 0; i < val.length; i++)
                             } // end if(obj.readyState == 4 && obj.status == 200)
@@ -3373,33 +3462,41 @@ ________________________________________________________________________________
 
 
 
-//????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+
 
                         
 
-                        
 
 
 
 
 
-//???????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????
+
+
+
+
+
+
                           //___________________________________________________________________________________________________________________________
                           //____________________________________________________________________________________________________________________________
 
 
+
+
+
+
+                          
                           	 		function getPLConponentDetails() 
                                      {
                           	 			
                                   	 
-                                       var loc = document.getElementById('plLoc').value;
+                                       var param = document.getElementById('plConponent').value;
                                        
                                       
                                        var eventId = "<?php echo $eventID; ?>";
                                      
-                                       var downloadFile = document.getElementById('plDownloadFile');
-           							downloadFile.options.length = 0;
-                                      // alert(eventId);
+                                       //alert(param);
+                                       //alert(eventId);
                               		  
                               		 
                                        if (window.XMLHttpRequest)
@@ -3421,7 +3518,7 @@ ________________________________________________________________________________
                                        //client.open("GET", url, true);
                                        
                                         client.onreadystatechange = function() {PLconponentDetailhandler(client)};
-                                        client.open("GET", "getStationInfoNoConponent.php?loc=" + loc + "&eventId=" + eventId);
+                                        client.open("GET", "getStationInfo.php?param=" + param + "&eventId=" + eventId);
                                         client.send("");
 
                                             
@@ -3459,32 +3556,9 @@ ________________________________________________________________________________
                                                txtNew.text = val[i].COMMENTS;
                                                plHistory.value = txtNew.text;
                                                
-                                              // alert(val[i].GANG);
+                                               //alert(val[i].GANG);
                                       		   txtNew.text = val[i].GANG;
                                         	   plForman.value = txtNew.text;
-
-
-                                          	 //-------------------------------
-                                               //Grab all the attached documents and list in a option	
-                          					
-                                               txtNew.text = val[i].SUPPORTDOCS;
-                                               
-                                               var doctxt = txtNew.text;
-                                               	
-                          					  var docArray = new Array();
-                          					  
-                          					  docArray = doctxt.split(",");
-                          					  
-                          					  for(var x=0;x<docArray.length;x++){
-                          						
-                          							var opt = docArray[x];
-                          	                        var el = document.createElement("option");
-                            	                     // alert(el);		
-                          		                    el.innerHTML= opt;
-                          	                        el.value = opt;
-                          	                        downloadFile.appendChild(el);
-                          					  }
-                                      		 //---------------------------------
                                         	   
                                         	   
 

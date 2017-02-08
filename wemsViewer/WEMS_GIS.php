@@ -17,7 +17,10 @@ if($task == "Create Storm")
     				<?php echo "<input class=\"submitAdd\" type=\"submit\" value=\"Assign Gang\" name=\"SUBMIT\" id=\"SUBMIT\" />"; ?>
     				<?php echo "<input class=\"submitAdd\" type=\"submit\" value=\"Reports\" name=\"SUBMIT\" id=\"SUBMIT\" />"; ?>
     				
-		
+    				
+    				
+    				
+    				
     				
          		</span>   
 
@@ -27,11 +30,11 @@ if($task == "Create Storm")
 
 */
 
+ 
 
 
 
-
-$test = "";
+//$test = "";
 
 session_start();
 
@@ -39,7 +42,7 @@ if (!isset($_SESSION['loggedin']) )
 {
     $_SESSION['loggedin'] = false;
 }
-
+/*
 require '../wemsDatabase.php';
 
 $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
@@ -50,12 +53,10 @@ OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1
 
 $cDirty = 0;
 $cClean = 0;
-$cBlue = 0;
 $cCleaning = 0;
 
 $tDirty = 0;
 $tClean = 0;
-$tBlue = 0;
 $tCleaning = 0;
 
 $qry = oci_parse($c, "select MARKERID, MARKERTYPE from location where GIS_JOIN_ID is not null and LOC_CD != 'V'")
@@ -183,7 +184,7 @@ while($row = oci_fetch_array($qry)){
 
 }
 
-
+*/
  
 
 ?>
@@ -196,7 +197,7 @@ while($row = oci_fetch_array($qry)){
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -206,6 +207,7 @@ while($row = oci_fetch_array($qry)){
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" type="text/css" href="css/theme/dbootstrap/dbootstrap.css">
         <link rel="stylesheet" type="text/css" href="css/main.css">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
     </head>
     <body class="dbootstrap">
     
@@ -223,32 +225,41 @@ while($row = oci_fetch_array($qry)){
             <div class="headerTitle">
              
                 <span id="headerTitleSpan">
-                  WEMS<font color="#4272AF">...................................</font>     
+                  WEMS<font color="#4272AF">...................</font>     
                 </span>
                 
                 
                 
 				
-			
+				<span style="float:right">
+                	
+				<?php	
+				
+				include 'getTally.php';
+				
+				
+					echo "Stations:"; 
+					echo "<img src=\"../images/Red.png\" alt=\"red\"><font color=\"red\">$sDirty</font>";
+					echo "<img src=\"../images/yellow.png\" alt=\"yellow\"><font color=\"yellow\">$sInProgress</font>";
+					echo "<img src=\"../images/green.png\" alt=\"green\"><font color=\"lawnGreen\">$sClean</font>";
+					echo"<font color=\"#4272AF\">...</font>";
+					
+					echo "Interlockings:"; 
+					echo "<img src=\"../images/Red.png\" alt=\"red\"><font color=\"red\">$iDirty</font>";
+					echo "<img src=\"../images/yellow.png\" alt=\"yellow\"><font color=\"yellow\">$iInProgress</font>";
+					echo "<img src=\"../images/green.png\" alt=\"green\"><font color=\"lawnGreen\">$iClean</font>";
+					echo"<font color=\"#4272AF\">...</font>";
+					
+					echo "Parking Lots: ";
+					echo "<img src=\"../images/Red.png\" alt=\"red\"><font color=\"red\">$pDirty</font>";
+					echo "<img src=\"../images/yellow.png\" alt=\"yellow\"><font color=\"yellow\">$pInProgress</font>";
+					echo "<img src=\"../images/green.png\" alt=\"green\"><font color=\"lawnGreen\">$pClean</font>";
+					
+				?>	
+				</span>       
 				
          		
-         		<span style="float:right">
-                	
-					
-					Stations: 
-					<img src="../images/Red.png" alt="red"><font color="red"><?php echo $cDirty;?></font>
-					<img src="../images/yellow.png" alt="yellow"><font color="yellow"><?php echo $cCleaning;?></font>
-					<img src="../images/ltBlue.png" alt="blue"> <font color="skyblue"><?php echo $cBlue;?></font>
-					<img src="../images/green.png" alt="green"><font color="lawnGreen"><?php echo $cClean;?></font>
-					<font color="#4272AF">.....</font> 
-					Interlockings: 
-					<img src="../images/Red.png" alt="red"><font color="red"><?php echo $tDirty;?></font>
-					<img src="../images/yellow.png" alt="yellow"><font color="yellow"><?php echo $tCleaning;?></font>
-					<img src="../images/ltBlue.png" alt="blue"> <font color="skyblue"><?php echo $tBlue;?></font>
-					<img src="../images/green.png" alt="green"><font color="lawnGreen"><?php echo $tClean;?></font>
-					
-					
-				</span>       
+         		
                
                 <div id="subHeaderTitleSpan" class="subHeaderTitle">
                 

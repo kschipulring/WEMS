@@ -70,7 +70,7 @@ define([
         operationalLayers: [
 	{
             type: 'dynamic',
-            url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/WEMS/MapServer',
+            url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/WEMS/MapServer', 
             title: 'WEMS',
             options: {
                 id: 'WEMS',
@@ -79,7 +79,7 @@ define([
                 outFields: ['*'], 
                 mode: 1
             }
-  },
+  }, 
 	{
       type: 'dynamic',
       url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_DRAINAGE/MapServer',

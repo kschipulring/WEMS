@@ -114,7 +114,7 @@ if(isset($_POST['login']))
 					       // echo $group . "<br><br>";
 					       //echo $group . "<br><br>";
 					    
-					         if(strpos($group, "CMCAdmin") !== false) {
+					         if(strpos($group, "WEMS_Admin") !== false) {
 					    
 					            // $userGroup = "CMCAdmin";
 					       
@@ -137,7 +137,8 @@ if(isset($_POST['login']))
 					    
 					    header("Location: $returnPage");
 					    
-					    
+					    //$error = $_SESSION["group"] . ", " . $_SESSION['user'] = $username . ", " . $_SESSION['loggedin'] . ", " . $returnPage;
+					    //return false;
 					    
 					    
 						//header("Location: $returnPage?group=$userGroup");		
@@ -145,7 +146,10 @@ if(isset($_POST['login']))
 					}
 					else
 					{
-						header("index.php");
+						//header("index.php");
+						
+						$error = $_SESSION["group"] . ", " . $_SESSION['user'] = $username . ", " . $_SESSION['loggedin'] = true;
+						return false;
 					}
 					
 
@@ -246,7 +250,7 @@ if(isset($_POST['login']))
 
   
         
-        if (isset($_SESSION['group'])) echo $_SESSION["group"];
+       // if (isset($_SESSION['group'])) echo $_SESSION["group"];
 
 	echo "<span style=color:red ><center>$error</center></span>";
 	

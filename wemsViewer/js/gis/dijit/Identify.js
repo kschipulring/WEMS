@@ -115,18 +115,18 @@ define([
                 	
                 	
                 	
-                	
-
                 	/*
+
+                	
                 	this.map.infoWindow.setTitle("WEMS");
                 	this.map.infoWindow.setContent("WEMS INFO and link to WEMS data entry screen");
                 	//this.map.infoWindow.setContent(evt.mapPoint.text);
                 	var mapPoint = evt.mapPoint;
                 	this.map.infoWindow.show(mapPoint);
                 	
-                    */
+                    
                 	
-                	
+                	*/
                 	
                 	
                 	
@@ -338,20 +338,191 @@ define([
                        // } else {
                        //     return;
                     	 
+                    	 
+                    	
                     	 for (var prop in result.feature.attributes) {
-                             templateString += '<b>' + prop + '</b>: ';
-                    		 //templateString += '<b>TEST</b>: ';
-                             templateString += result.feature.attributes[prop];
+                    		 
+                             //templateString += '<b>' + prop + '</b>: ';
+                    		 //templateString += '<b>TEST2</b>: ';
+                             
+                             // prop is the title
+                            /* 
+                             if(prop == "STATUS")
+                            	 {
+                            	    var stat = result.feature.attributes[prop];
+                            	 
+                            	 	if(stat == 1)
+                            	 	{templateString += "Dirty";}
+                            	 	
+                            	 	if(stat == 2)
+                            	 	{templateString += "In Progress";}
+                            	 	
+                            	 	if(stat == 3)
+                            	 	{templateString += "A conponent is clean but another is not";}
+                            	 	
+                            	 	if(stat == 4)
+                            	 	{templateString += "Clean";}
+                            	 }
+                             else
+                            	 {
+                            	 templateString += result.feature.attributes[prop];
+                            	 }
+                             // result.feature.attributes[prop] is the result 
+                             
                              templateString += '<br/>';
+                             
+                            */
+                             
+                             if(prop == "WEMS.WEMS_VIEW.MARKERID")
+                        	 {
+                            	//templateString += '<b>' + prop + '</b>: ';
+                            	 //templateString += result.feature.attributes[prop];
+                            	 
+                            		 
+                            		//Call getGISData.php
+                            		//************************************************************************************
+                         		  
+                          		 
+                                   if (window.XMLHttpRequest)
+                                   {
+                                         // If IE7, Mozilla, Safari, etc: Use native object
+                                         var client = new XMLHttpRequest();
+                                   }
+                                   else
+                                   {
+                                         if (window.ActiveXObject)
+                                         {
+                          	           // ...otherwise, use the ActiveX control for IE5.x and IE6
+                          	           var client = new ActiveXObject("Microsoft.XMLHTTP");
+                                         }
+                                   }
+                          
+                                  
+                                   
+                                    client.onreadystatechange = function() {GISData(client)};
+                                    client.open("GET", "getGISData.php?markerid=" + result.feature.attributes[prop]);
+                                    client.send("");
+
+                                // templateString += '<b>' + prop + '</b>: ';
+                               	// templateString += result.feature.attributes[prop];
+                               	// templateString += '<br/>';       
+                             
+                          
+                                 function GISData(obj)
+                                 {
+                                    //var forman = document.getElementById('lForman');
+                                    //var location = document.getElementById('lLoc').value;
+                                    //var conponent = document.getElementById('lConponent').value;
+                                    
+                                    //forman.options.length = 0;
+                                   
+                                    
+                                   if(obj.readyState == 4 && obj.status == 200)
+                                    {
+										
+										//templateString += '<b>' + prop + '</b>: ';
+                                	 	//templateString += result.feature.attributes[prop];
+                                	 	//templateString += '<br/>'; 
+										
+                                      var val = eval('(' + obj.responseText + ')');
+
+                                      for(var i = 0; i < val.length; i++)
+                                      {
+
+                                         
+                                   		  
+                                   		  //opt.innerHTML = val[i].NAME;
+                                 		  //opt.value = val[i].FORMANID;
+                                 		  //var assignLoc = document.createElement('text');
+                                   		  //var assignLoc = val[i].LOCATION;
+                                   		  
+                                   		  
+                                   		//{\"FOREMAN\": \"$foreman\",\"STATUS\": \"$row[STATUS]\",\"BAGS\": \"$row[CT_BAGS]\",\"FULLNAME\": \"$row[FULLNAME]\",\"PASSNUM\": \"$row[CT_PASSNUM]\"}                                   		        
+                                    	  	
+                                    	  
+                                    	  	templateString += '<b>CONPONENT</b>: ';
+                                 			templateString += val[i].FULLNAME;
+                                 			templateString += '<br/>';  
+                                    	  
+                                   			templateString += '<b>FOREMAN ASSIGNED</b>: ';
+                                   			templateString += val[i].FOREMAN;
+                                   			templateString += '<br/>';  
+                                   			
+                                   			templateString += '<b>STATUS</b>: ';
+                                   			templateString += val[i].STATUS;
+                                   			templateString += '<br/>'; 
+                                   			
+                                   			templateString += '<b>NUMBER OF BAGS USED</b>: ';
+                                   			templateString += val[i].BAGS;
+                                   			templateString += '<br/>';
+                                   			
+                                   			templateString += '<b>PASS NUMBER</b>: ';
+                                   			templateString += val[i].PASSNUM;
+                                   			templateString += '<br/><br/>';
+                                   			
+                                   			
+                                       } //end for(var i = 0; i < val.length; i++)
+                                      
+                                      
+                                     } // end if(obj.readyState == 4 && obj.status == 200)
+                                  
+                                	 
+                                	
+                                	 
+                                   } 
+
+                            		 
+                            		 
+                            		                             		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		//************************************************************************************ 
+                            	 
+                            	 templateString += '<br/>'; 
+                            		 
+                        	 }
+                             else
+                        	 {
+                        	 	//templateString += result.feature.attributes[prop];
+                        	 }
+                         // result.feature.attributes[prop] is the result 
+                         
+                         
+                             
+                             
+                             
+                             
+                             
+                             
+                             
+                            // templateString += result.feature.attributes[prop];
+                            // templateString += '<br/>';
+                             
+                             
+                             
+                             
+                             
+                             
                          }
                     	 
-                    	 templateString += "<A href=eventMaint.php>WEMS</A>";
+                    	templateString += "<A href=eventMaint.php>WEMS</A>"; 
+                    	
+                    	//******if changes don't show up delete cache******
+                    	// templateString += "????";
                     	 //if(result.layerName != "Tracks")
                     		 //{
                     	 
                     		 	result.feature.setInfoTemplate(new PopupTemplate({
                     		 		title: result.layerName,//"dirty"
-                    		 		// title: 'TEST',//"dirty"
+                    		 		 //title: 'TEST',//"dirty"
                     		 		description: templateString
                     		 		}));
                     		 //}
