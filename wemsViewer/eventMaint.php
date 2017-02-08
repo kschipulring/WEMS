@@ -1215,7 +1215,7 @@ else
 													
 													<?php 
 
-                                   $qry = oci_parse($c, "SELECT EMPLOYEEID, NAME from EMPLOYEE where DEPTCODE is not NULL order by NAME")
+                                   $qry = oci_parse($c, "SELECT EMPLOYEEID, NAME from EMPLOYEE where DEPTCODE is not NULL and DELETED = 0 order by NAME")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                    oci_execute($qry);
