@@ -3152,7 +3152,7 @@ ________________________________________________________________________________
                                        var eventId = "<?php echo $eventID; ?>";
                                      
                                        
-                              		  
+                              		  //alert(loc);
                               		 
                                        if (window.XMLHttpRequest)
                                        {
@@ -3399,7 +3399,7 @@ ________________________________________________________________________________
                                      
                                        var downloadFile = document.getElementById('plDownloadFile');
            							downloadFile.options.length = 0;
-                                      // alert(eventId);
+                                     //alert(loc);
                               		  
                               		 
                                        if (window.XMLHttpRequest)

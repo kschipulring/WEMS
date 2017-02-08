@@ -99,7 +99,7 @@
                                             LEFT JOIN EMPLOYEE ON EMPLOYEE.EMPLOYEEID = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
                                             where WEMS_CLEANABLE_TARGET_NOTES.CTID = :CTID and 
                                             WEMS_CLEANABLE_TARGET_NOTES.EVENTID = :EVENTID and  
-                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEEID) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID == 0))ORDER BY ENTER_DATETIME")
+                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEEID) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID = 0))ORDER BY ENTER_DATETIME")
        								OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        
        								oci_bind_by_name($qry, ":CTID", $CTID, -1);
