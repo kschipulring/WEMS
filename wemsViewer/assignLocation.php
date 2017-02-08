@@ -6,14 +6,26 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                             $lPassNum, $lNumBags, $lcomments, $lUser, $Loc_Type)
 {
       
-      
+      $crewsize = 0;
       
         require '../wemsDatabase.php';
         $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
         OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
         
+        $crewSize = oci_parse($c, "select EMP_ASSIGNED from WEMS_GANG WHERE FORMANID = :FORMANID AND EVENTID = :EVENTID")
+        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
         
         
+        oci_bind_by_name($crewSize, ":FORMANID",  $lForman, -1);
+        oci_bind_by_name($crewSize, ":EVENTID",  $eventID, -1);
+        
+        oci_execute($crewSize);
+        
+        //for each conponent make a note that a gang has been assigned / unassigned........
+        while($row = oci_fetch_array($crewSize))
+        {
+            $crewsize = $row['EMP_ASSIGNED'];
+        }
         
                
                 
@@ -57,7 +69,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
             {
                 
                 $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
-                                        ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
+                                        ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS, CREWSIZE = :CREWSIZE
                                         WHERE MARKERID = :MARKERID AND TYPE = :TYPE")
                                                         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
                 
@@ -67,7 +79,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                         oci_bind_by_name($qry, ":CTPASSNUM", $lPassNum, -1);
                                                         oci_bind_by_name($qry, ":CTBAGS", $lNumBags, -1);
                                                         oci_bind_by_name($qry, ":TYPE", $Loc_Type, -1);
-                
+                                                        oci_bind_by_name($qry, ":CREWSIZE",  $crewsize, -1);
                 
                                                         oci_execute($qry);
                                                         
@@ -84,7 +96,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
             else 
             {
                         $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
-                                        ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
+                                        ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS, CREWSIZE = :CREWSIZE
                                         WHERE MARKERID = :MARKERID AND TYPE = :TYPE")
                                                     OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
             
@@ -95,7 +107,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                     oci_bind_by_name($qry, ":CTPASSNUM", $lPassNum, -1);
                                                     oci_bind_by_name($qry, ":CTBAGS", $lNumBags, -1);
                                                     oci_bind_by_name($qry, ":TYPE", $Loc_Type, -1);
-                                                    
+                                                    oci_bind_by_name($qry, ":CREWSIZE",  $crewsize, -1);
             
             
                                                     oci_execute($qry);
@@ -116,8 +128,8 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                     {
                                                         $ctid = $row['CTID'];
                                                        
-                                                        $ctQry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME, MARKERID)
-                                                                                 VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE, :MARKERID) ")
+                                                        $ctQry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME, MARKERID, CREWSIZE)
+                                                                                 VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE, :MARKERID, :CREWSIZE) ")
                                                                                                   OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
                                                                                                    
                                                         
@@ -131,6 +143,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                                                                   oci_bind_by_name($ctQry, ":CTSTARTTIME", $lNoteTime, -1);
                                                                                                   oci_bind_by_name($ctQry, ":CTNOTEUSER", $lUser, -1);
                                                                                                   oci_bind_by_name($ctQry, ":MARKERID", $lLoc, -1);
+                                                                                                  oci_bind_by_name($ctQry, ":CREWSIZE", $crewsize, -1);
                                                                                                    
                                                                                                   oci_execute($ctQry);
                                                                                                    
@@ -157,7 +170,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
             if($lStatus == 4) // 4 is clean free up the gange for other locations
             {
                     $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
-                                        ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
+                                        ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS, CREWSIZE = :CREWSIZE
                                         WHERE CTID = :CTID")
                                                         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
                 
@@ -166,6 +179,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                         oci_bind_by_name($qry, ":CTID", $lConponent, -1);
                                         oci_bind_by_name($qry, ":CTPASSNUM", $lPassNum, -1);
                                         oci_bind_by_name($qry, ":CTBAGS", $lNumBags, -1);
+                                        oci_bind_by_name($qry, ":CREWSIZE", $crewsize, -1);
                 
                 
                                         oci_execute($qry);
@@ -185,7 +199,8 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
             else 
             {
                     $qry = oci_parse($c, "update WEMS_CLEANABLE_TARGET SET NOTIFYTIME = to_date(:NOTIFYTIME, 'mm/dd/yyyy hh:mi AM'),
-                                        ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS
+                                        ASSIGNED_SITEFOREMEN = :ASSIGNED_SITEFOREMEN, CT_STATUS = :CT_STATUS, CT_PASSNUM = :CTPASSNUM, CT_BAGS = :CTBAGS,
+                                        CREWSIZE = :CREWSIZE
                                         WHERE CTID = :CTID ")
                                                     OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
             
@@ -195,7 +210,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                     oci_bind_by_name($qry, ":CTID", $lConponent, -1);
                                                     oci_bind_by_name($qry, ":CTPASSNUM", $lPassNum, -1);
                                                     oci_bind_by_name($qry, ":CTBAGS", $lNumBags, -1);
-            
+                                                    oci_bind_by_name($qry, ":CREWSIZE", $crewsize, -1);
             
                                                     oci_execute($qry);
                                                     
@@ -221,8 +236,8 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                     
                                                     
                                                     
-              $qry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME, MARKERID)
-                                          VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE, :LOC) ")
+              $qry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME, MARKERID, CREWSIZE)
+                                          VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE, :LOC, :CREWSIZE) ")
                                                                                               OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
                                                                                                
                                                     
@@ -236,7 +251,8 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                           oci_bind_by_name($qry, ":CTSTARTTIME", $lNoteTime, -1);
                                           oci_bind_by_name($qry, ":CTNOTEUSER", $lUser, -1);
                                           oci_bind_by_name($qry, ":LOC", $lLoc, -1);
-                                                                                               
+                                          oci_bind_by_name($qry, ":CREWSIZE", $crewsize, -1);
+                                          
                                           oci_execute($qry);
                                                                                                
                                                     
