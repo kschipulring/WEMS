@@ -18,13 +18,11 @@ define([
     'esri/dijit/PopupTemplate',
     'dojo/text!./Identify/templates/Identify.html',
     'dojo/i18n!./Identify/nls/resource',
+
     'dijit/form/Form',
     'dijit/form/FilteringSelect',
-    'xstyle/css!./Identify/css/Identify.css',
-    'esri/InfoTemplate'    
-], function (declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, MenuItem, lang, array, all, topic, query, domStyle, 
-		domClass, Moveable, Memory, IdentifyTask, IdentifyParameters, PopupTemplate, IdentifyTemplate, i18n, 
-		InfoTemplate) {
+    'xstyle/css!./Identify/css/Identify.css'
+], function (declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, MenuItem, lang, array, all, topic, query, domStyle, domClass, Moveable, Memory, IdentifyTask, IdentifyParameters, PopupTemplate, IdentifyTemplate, i18n) {
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
         widgetsInTemplate: true,
         templateString: IdentifyTemplate,
@@ -35,8 +33,8 @@ define([
         identifies: {},
         infoTemplates: {},
         ignoreOtherGraphics: true,
-        createDefaultInfoTemplates: true, //false to prevent the automatic creation of infoTemplates.
-        draggable: true, //This will allow you to drag the Popup
+        createDefaultInfoTemplates: true,
+        draggable: false,
         layerSeparator: '||',
         allLayersId: '***',
 
@@ -100,41 +98,6 @@ define([
             this.map.on('click', lang.hitch(this, function (evt) {
                 if (this.mapClickMode === 'identify') {
                     this.executeIdentifyTask(evt);
-                	
-                	//**********************************************
-                	//call popup function here 
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	/*
-
-                	
-                	this.map.infoWindow.setTitle("WEMS");
-                	this.map.infoWindow.setContent("WEMS INFO and link to WEMS data entry screen");
-                	//this.map.infoWindow.setContent(evt.mapPoint.text);
-                	var mapPoint = evt.mapPoint;
-                	this.map.infoWindow.show(mapPoint);
-                	
-                    
-                	
-                	*/
-                	
-                	
-                	
-                	
-                	
-                	
-                	
-                	//**********************************************
                 }
             }));
             if (this.mapRightClickMenu) {
@@ -187,7 +150,6 @@ define([
             }
         },
         executeIdentifyTask: function (evt) {
-        	
             if (!this.checkForGraphicInfoTemplate(evt)) {
                 return;
             }
@@ -219,18 +181,9 @@ define([
 
             if (identifies.length > 0) {
                 this.map.infoWindow.setTitle( this.i18n.mapInfoWindow.identifyingTitle );
-            	this.map.infoWindow.setTitle( 'test');
-            	
                 this.map.infoWindow.setContent('<div class="loading"></div>');
                 this.map.infoWindow.show(mapPoint);
-                
-                //****************************************************************************************************************
-                
-               all(identifies).then(lang.hitch(this, 'identifyCallback', identifiedlayers), lang.hitch(this, 'identifyError'));
-               
-                
-                
-                
+                all(identifies).then(lang.hitch(this, 'identifyCallback', identifiedlayers), lang.hitch(this, 'identifyError'));
             }
         },
 
@@ -323,221 +276,228 @@ define([
             return layerIds;
 
         },
-
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+       
         identifyCallback: function (identifiedlayers, responseArray) {
             var fSet = [];
+            var templateStr = "";
             array.forEach(responseArray, function (response, i) {
-                var ref = identifiedlayers[i].ref.id;
+                var ref = identifiedlayers[i].ref;
                 array.forEach(response, function (result) {
-                    result.feature.geometry.spatialReference = this.map.spatialReference; //temp workaround for ags identify bug. remove when fixed.
-                    if (result.feature.infoTemplate === undefined) {
-                        //var infoTemplate = this.getInfoTemplate(ref, null, result);
-                    	 var templateString = '';
-                       // if (infoTemplate) {
-                       //     result.feature.setInfoTemplate(infoTemplate);
-                       // } else {
-                       //     return;
-                    	 
-                    	 
+                    result.feature.geometry.spatialReference = this.map.spatialReference; 
+                    if (result.feature.infoTemplate === undefined) 
+                    {
                     	
-                    	 for (var prop in result.feature.attributes) {
-                    		 
-                             //templateString += '<b>' + prop + '</b>: ';
-                    		 //templateString += '<b>TEST2</b>: ';
-                             
-                             // prop is the title
-                            /* 
-                             if(prop == "STATUS")
-                            	 {
-                            	    var stat = result.feature.attributes[prop];
-                            	 
-                            	 	if(stat == 1)
-                            	 	{templateString += "Dirty";}
-                            	 	
-                            	 	if(stat == 2)
-                            	 	{templateString += "In Progress";}
-                            	 	
-                            	 	if(stat == 3)
-                            	 	{templateString += "A conponent is clean but another is not";}
-                            	 	
-                            	 	if(stat == 4)
-                            	 	{templateString += "Clean";}
-                            	 }
-                             else
-                            	 {
-                            	 templateString += result.feature.attributes[prop];
-                            	 }
-                             // result.feature.attributes[prop] is the result 
-                             
-                             templateString += '<br/>';
-                             
-                            */
-                             
-                             if(prop == "WEMS.WEMS_VIEW.MARKERID")
-                        	 {
-                            	//templateString += '<b>' + prop + '</b>: ';
-                            	 //templateString += result.feature.attributes[prop];
-                            	 
+                        var infoTemplate = this.getInfoTemplate(ref, null, result);
+                       
+                        if (infoTemplate) 
+                        {
+                        	
+                            result.feature.setInfoTemplate(infoTemplate);
+                            
+                            
+                            for (var prop in result.feature.attributes) 
+                            {
+                            
+                            	if(prop == "WEMS.WEMS_VIEW.MARKERID")
+                           	 	{
+                            		
+                            		
+                            		 if (window.XMLHttpRequest)
+                                     {
+                                           // If IE7, Mozilla, Safari, etc: Use native object
+                                           var client = new XMLHttpRequest();
+                                     }
+                                     else
+                                     {
+                                           if (window.ActiveXObject)
+                                           {
+                            	           // ...otherwise, use the ActiveX control for IE5.x and IE6
+                            	           var client = new ActiveXObject("Microsoft.XMLHTTP");
+                                           }
+                                     }
                             		 
-                            		//Call getGISData.php
-                            		//************************************************************************************
-                         		  
-                          		 
-                                   if (window.XMLHttpRequest)
-                                   {
-                                         // If IE7, Mozilla, Safari, etc: Use native object
-                                         var client = new XMLHttpRequest();
-                                   }
-                                   else
-                                   {
-                                         if (window.ActiveXObject)
-                                         {
-                          	           // ...otherwise, use the ActiveX control for IE5.x and IE6
-                          	           var client = new ActiveXObject("Microsoft.XMLHTTP");
-                                         }
-                                   }
-                          
-                                  
-                                   
-                                    client.onreadystatechange = function() {GISData(client)};
-                                    client.open("GET", "getGISData.php?markerid=" + result.feature.attributes[prop]);
-                                    client.send("");
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 
+                            		 client.onreadystatechange = function() {GISData(client)};
 
-                                // templateString += '<b>' + prop + '</b>: ';
-                               	// templateString += result.feature.attributes[prop];
-                               	// templateString += '<br/>';       
-                             
-                          
-                                 function GISData(obj)
-                                 {
-                                    //var forman = document.getElementById('lForman');
-                                    //var location = document.getElementById('lLoc').value;
-                                    //var conponent = document.getElementById('lConponent').value;
+                            		 client.open("GET", "getGISData.php?markerid="+result.feature.attributes[prop], false);
+                                     client.send("");
+                            		
+                            		
+                                     
+                                           
+                                     
+                                     function GISData(obj)
+                                     {
+                                    	 
+                        	 
+                                    	 if(obj.readyState == 4 && obj.status == 200)
+                                    	 {
+                                    	 
+                                    		 //templateString += '<b>' + prop + '</b>: ';
+                                    		 //templateString += result.feature.attributes[prop];
+                                    		 //templateString += '<br/>'; 
+                                    	 
+                                    	 
+                                    	 
+                                    		 //alert(obj.responseText);
+                                    	 
+                                    		 var str = obj.responseText;
+                                    	 
+                                    		 var beginning = str.split("~")[0];
+                                    	 
+                                    		 //alert(beginning);	
+                                    	 
+                                    	 
+                                    	
+                                    		 var val = eval('(' + beginning + ')');
                                     
-                                    //forman.options.length = 0;
-                                   
-                                    
-                                   if(obj.readyState == 4 && obj.status == 200)
-                                    {
-										
-										//templateString += '<b>' + prop + '</b>: ';
-                                	 	//templateString += result.feature.attributes[prop];
-                                	 	//templateString += '<br/>'; 
-										
-                                      var val = eval('(' + obj.responseText + ')');
-
-                                      for(var i = 0; i < val.length; i++)
-                                      {
-
-                                         
-                                   		  
-                                   		  //opt.innerHTML = val[i].NAME;
-                                 		  //opt.value = val[i].FORMANID;
-                                 		  //var assignLoc = document.createElement('text');
-                                   		  //var assignLoc = val[i].LOCATION;
-                                   		   
-                                   		  
-                                   		//{\"FOREMAN\": \"$foreman\",\"STATUS\": \"$row[STATUS]\",\"BAGS\": \"$row[CT_BAGS]\",\"FULLNAME\": \"$row[FULLNAME]\",\"PASSNUM\": \"$row[CT_PASSNUM]\"}                                   		        
-                                    	  	
-                                    	  
-                                    	  	templateString += '<b>CONPONENT</b>: ';
-                                 			templateString += val[i].FULLNAME;
-                                 			templateString += '<br/>';  
-                                    	  
-                                   			templateString += '<b>FOREMAN ASSIGNED</b>: ';
-                                   			templateString += val[i].FOREMAN;
-                                   			templateString += '<br/>';  
-                                   			
-                                   			templateString += '<b>STATUS</b>: ';
-                                   			templateString += val[i].STATUS;
-                                   			templateString += '<br/>'; 
-                                   			
-                                   			templateString += '<b>NUMBER OF BAGS USED</b>: ';
-                                   			templateString += val[i].BAGS;
-                                   			templateString += '<br/>';
-                                   			
-                                   			templateString += '<b>PASS NUMBER</b>: ';
-                                   			templateString += val[i].PASSNUM;
-                                   			templateString += '<br/><br/>';
-                                   			
-                                   			templateString += '<b>NOTE</b>: ';
-                                   			templateString += val[i].NOTE;
-                                   			templateString += '<br/><br/>';
-                                   			
-                                   			
-                                       } //end for(var i = 0; i < val.length; i++)
                                       
+                                    		 //alert(val[i].FULLNAME);	
                                       
-                                     } // end if(obj.readyState == 4 && obj.status == 200)
-                                  
-                                	 
-                                	
-                                	 
-                                   } 
-
-                            		 
-                            		 
-                            		                             		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		 
-                            		//************************************************************************************ 
-                            	 
-                            	 templateString += '<br/>'; 
-                            		 
-                        	 }
-                             else
-                        	 {
-                        	 	//templateString += result.feature.attributes[prop];
-                        	 }
-                         // result.feature.attributes[prop] is the result 
-                         
-                         
-                             
-                             
-                             
-                             
-                             
-                             
-                             
-                            // templateString += result.feature.attributes[prop];
-                            // templateString += '<br/>';
-                             
-                             
-                             
-                             
-                             
-                             
-                         }
-                    	 
-                    	templateString += "<A href=eventMaint.php>WEMS</A>"; 
-                    	
-                    	//******if changes don't show up delete cache******
-                    	// templateString += "????";
-                    	 //if(result.layerName != "Tracks")
-                    		 //{
-                    	 
-                    		 	result.feature.setInfoTemplate(new PopupTemplate({
-                    		 		title: result.layerName,//"dirty"
-                    		 		 //title: 'TEST',//"dirty"
-                    		 		description: templateString
-                    		 		}));
-                    		 //}
-                    	 
-                      //  }
+                                     
+                                    		 for(var i = 0; i < val.length; i++)
+                                    		 {
+                                   		  
+                                    		                                      	  
+                                    			 templateStr += '<b>CONPONENT</b>: ';
+                                    			 templateStr += val[i].FULLNAME;
+                                    			 templateStr += '<br/>';  
+                                  			
+                                    			 templateStr += '<b>FOREMAN ASSIGNED</b>: ';
+                                    			 templateStr += val[i].FOREMAN;
+                                    			 templateStr += '<br/>';  
+                                    			
+                                    			 templateStr += '<b>STATUS</b>: ';
+                                    			 templateStr += val[i].STATUS;
+                                    			 templateStr += '<br/>'; 
+                                    			
+                                    			 templateStr += '<b>NUMBER OF BAGS USED</b>: ';
+                                    			 templateStr += val[i].BAGS;
+                                    			 templateStr += '<br/>';
+                                    			
+                                    			 templateStr += '<b>PASS NUMBER</b>: ';
+                                    			 templateStr += val[i].PASSNUM;
+                                    			 templateStr += '<br/><br/>';
+                                    			
+                                    			 templateStr += '<b>NOTE</b>: ';
+                                    			 templateStr += val[i].NOTE;
+                                    			 templateStr += '<br/><br/>';
+                                    			
+                                    			
+                                    		 } //end for(var i = 0; i < val.length; i++)
+                                    		 
+                                    		 
+                                    		 //alert(templateStr);
+                                    		 /*
+                                    		    result.feature.setInfoTemplate(new PopupTemplate({
+                                 		 		title: result.layerName,//"dirty"
+                                 		 		 //title: 'TEST',//"dirty"
+                                 		 		description: templateStr
+                                 		 		}));
+                                    		  */   
+                                    		    
+                                      } // end if(obj.readyState == 4 && obj.status == 200)
+                                    	 
+                                     }// function GISData(obj)		
+                                     
+                           	 	} //if(prop == "WEMS.WEMS_VIEW.MARKERID")
+                            
+                            	
+                            }//for (var prop in result.feature.attributes) 
+                            
+                            
+                            
+                            
+                        } 
+                        else
+                        {
+                            return;
+                        }
+                        
+                        
+                        
+                      
+                       
+                        result.feature.setInfoTemplate(new PopupTemplate({
+            		 		title: result.layerName,//"dirty"
+            		 		 //title: 'TEST',//"dirty"
+            		 		description: templateStr
+            		 		}));
+                        fSet.push(result.feature);
+                        
+                        
                     }
+                    
+                    
+                    
+                    
+                    
+                    
+                   
                     fSet.push(result.feature);
                 }, this);
             }, this);
             this.map.infoWindow.setFeatures(fSet);
+            //this.map.infoWindow.setFeatures(result.feature);
         },
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         identifyError: function (err) {
             this.map.infoWindow.hide();
             topic.publish('viewer/handleError', {
@@ -550,11 +510,8 @@ define([
         },
 
         getInfoTemplate: function (layer, layerId, result) {
-           // var popup = null, 
-           //     content = null;
-        	 var popup = null, 
-                 content = null; 
-            
+            var popup = null, 
+                content = null;
             if (result) {
                 layerId = result.layerId;
             } else if (layerId === null) {
@@ -568,14 +525,11 @@ define([
                     if (popup) {
                         if (typeof (popup.declaredClass) !== 'string') { // has it been created already?
                             if (popup.content) {
-                               // content = popup.content;
-                            	 content = "LINE_NAME: = " + result.feature.attribute.LINE_NAME;
+                                content = popup.content;
                             }
                             popup = new PopupTemplate(popup);
                             if (content) {
-                               // popup.setContent(content);
-                                content = "LINE_NAME: = " + result.feature.attribute.LINE_NAME;
-
+                                popup.setContent(content);
                             }
                             this.identifies[layer.id][layerId] = popup;
                         }
@@ -745,7 +699,7 @@ define([
                 if (!infoTemplate) {
                     return false;
                 }
-            } 
+            }
 
             // all tests pass so include this sublayer
             return true;
@@ -778,41 +732,28 @@ define([
             return !(((layer.maxScale !== 0 && mapScale < layer.maxScale) || (layer.minScale !== 0 && mapScale > layer.minScale)));
         },
 
-        setMapClickMode: function (mode) 
-        {
+        setMapClickMode: function (mode) {
             this.mapClickMode = mode;
             var map = this.map;
-            array.forEach(map.graphicsLayerIds, function (layerID)
-            		{
-                    	var layer = map.getLayer(layerID);
-                    	if (layer) 
-                    	{
-                    		// add back any infoTemplates that
-                    		// had been previously removed
-                	
-                    		if (mode === 'identify') 
-                    		{
-                    	 		if (this.infoTemplates[layer.id]) 
-                     			{
-                    				layer.infoTemplate = lang.clone(this.infoTemplates[layer.id]);
-                    			}
-                   
-                    			// remove any infoTemplates that might
-                    			// interfere with clicking on a feature
-                        
-                    		} 
-                    		else 
-                    		{
-                    			if (layer.infoTemplate) 
-                    			{
-                    				this.infoTemplates[layer.id] = lang.clone(layer.infoTemplate);
-                    				layer.infoTemplate = null;
-                    			}
-                    		}
-                    
-                    	}
-            		}, 
-            	this);
+            array.forEach(map.graphicsLayerIds, function (layerID) {
+                var layer = map.getLayer(layerID);
+                if (layer) {
+                    // add back any infoTemplates that
+                    // had been previously removed
+                    if (mode === 'identify') {
+                        if (this.infoTemplates[layer.id]) {
+                            layer.infoTemplate = lang.clone(this.infoTemplates[layer.id]);
+                        }
+                    // remove any infoTemplates that might
+                    // interfere with clicking on a feature
+                    } else {
+                        if (layer.infoTemplate) {
+                            this.infoTemplates[layer.id] = lang.clone(layer.infoTemplate);
+                            layer.infoTemplate = null;
+                        }
+                    }
+                }
+            }, this);
         }
     });
 });

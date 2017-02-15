@@ -1,11 +1,5 @@
  <?php 
- ob_end_clean();
- ob_end_flush();
-
- 
- 
-
- 
+  
   require '../wemsDatabase.php';
     
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
@@ -42,7 +36,7 @@
     }
     
     
-    ob_start();
+     
     $json = "[";
      
     
@@ -86,12 +80,9 @@
     //$json .= "{\"CTID\": \"99999999\",\"FULLNAME\": \"All Conponents\"},";
     
     $json .= "]";
-    $json .= "~";
-    ob_end_clean();
-   // ob_end_clean();
-   // 
     
     
+     
     
     echo $json;
     

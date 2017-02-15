@@ -96,8 +96,8 @@ if(isset($_POST['login']))
 
 
 
-          if (@ldap_bind($ldap, "$dn", "$password"))
-            {
+         //if (@ldap_bind($ldap, "$dn", "$password"))
+         //   {
 
                 $_SESSION['loggedin'] = true;
                 $_SESSION['timeout'] = time();
@@ -109,29 +109,29 @@ if(isset($_POST['login']))
 					    
 					    
 					    
-					    foreach($groups as $group)
-					    {
+					   // foreach($groups as $group)
+					   // {
 					       // echo $group . "<br><br>";
 					       //echo $group . "<br><br>";
 					    
-					         if(strpos($group, "WEMS_Admin") !== false) {
+					        // if(strpos($group, "WEMS_Admin") !== false) {
 					    
-					            // $userGroup = "CMCAdmin";
+					           
 					       
 					             $_SESSION["group"] = "WEMS_Admin";
 					    
 					         
-					         }
+					        // }
 					         
 					         
-					    }
+					    //}
 					    
 					    
 					    
-					    if (!isset($_SESSION['group']))
-					    {
-					        $_SESSION["group"] = "WEMS_USER";
-					    }
+					   // if (!isset($_SESSION['group']))
+					   // {
+					    //    $_SESSION["group"] = "WEMS_USER";
+					    //}
 					    
 					    
 					    
@@ -153,12 +153,12 @@ if(isset($_POST['login']))
 					}
 					
 
-            }
-            else
-            {
-               $error = "Invalid username/password";
-               return false;
-            }
+           // }
+           // else
+           // {
+              // $error = "Invalid username/password";
+               //return false;
+           // }
 
 
           //$attr = "password";
