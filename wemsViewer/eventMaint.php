@@ -1,6 +1,11 @@
 <?php
-  
+ob_start();
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/tcpdf/6.2.12" );
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/LIRR/1.0.4.3" );
+$library_path = '../lib/';
+set_include_path(get_include_path() . PATH_SEPARATOR . $library_path);  
 //session_start(); //echo $_SESSION['group']
+
 
 $eventErrMsg = "";
 $gangErrMsg = "";
@@ -71,6 +76,11 @@ else
 {
 
     require '../wemsDatabase.php';
+    require_once('tcpdf/tcpdf.php');
+    require_once '../classes/databaseClass.php';
+    require_once '../classes/eventClass.php';
+    require_once '../classes/locationClass.php';
+    require_once '../classes/cleanableTargetClass.php';
     
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
     OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
@@ -929,8 +939,7 @@ else
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                      
- 
+                        
              			</table>
     	
       				</fieldset>
@@ -2493,7 +2502,7 @@ ________________________________________________________________________________
      
      <div style="background-color:#FFF2F2;" id="view4"  > 
       
-     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
+     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" target="WEMS_REPORT" onsubmit="validateEventLocation();">
               
                
       				<fieldset id="reports">
@@ -2501,9 +2510,40 @@ ________________________________________________________________________________
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                      
-							
-                      		<a href="http://webz8dev.lirr.org/~hdesai/WEMS/wemsViewer/eventMaint.php">Reports</a>
+<tr>
+							     <td>Event:</td>
+								 <td><select name="eventId" id = "eventId" onChange="getLocationByEvent()"> <option value='0' selected> Select Event  </option>
+								<?php 
+
+                                $eventObj = new event();
+                                $result = $eventObj->getEventList();
+                                if($result){
+                                    while($row = oci_fetch_array($result[0])){                                    
+                                        $id = $row['EVENTID'];
+                                        $desc = $row['EXTERNALID'];
+    									echo "<option value=\"$id\" > $desc : $id </option>";
+                                    }
+                                }
+                                oci_free_statement($result[0]);
+				               ?> 
+                                </select></td>
+							</tr>
+                            <tr>
+							     <td>Location:</td>
+								 <td><select name="locationId[]" id = "locationId" multiple size ="1">
+								 <option selected="selected">Select Location</option>
+                                </select></td>
+							</tr>
+                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="create PDF" /></td></tr> 
+                            
+                            <?php 
+                            if(isset($task) && $task == 'create PDF') {
+                                include_once '../classes/eventPDFClass.php';
+                                $pdf = new eventPDF();                                
+                                $pdf->createEventPDF($_POST);
+                            }
+                            ?>
+
         				</table>
         
       				</fieldset>
@@ -3578,12 +3618,62 @@ ________________________________________________________________________________
     		   }
     		});
 
+    		   function getLocationByEvent()
+    		   {
+    			   var eventId = document.getElementById('eventId').value;    			   
+    			   if (window.XMLHttpRequest)
+                   {
+                         // If IE7, Mozilla, Safari, etc: Use native object
+                         var client = new XMLHttpRequest();
+                   }
+                   else
+                   {
+                         if (window.ActiveXObject)
+                         {
+          	           // ...otherwise, use the ActiveX control for IE5.x and IE6
+          	           var client = new ActiveXObject("Microsoft.XMLHTTP");
+                         }
+                   }
+          
+                  //client.onreadystatechange = function() {};
+                  client.open("GET", "getLocationList.php?eventId=" + eventId);
+                  client.send("");
+                  var location = document.getElementById('locationId');
+                  
+                  document.getElementById('locationId').options.length = 0;
+                  document.getElementById('locationId').size = 6;
+                  var length = location.options.length;
+                   
+                  if(client.readyState == 4 && client.status == 200)
+                  {	
+                	  
+                   	 var val = eval('(' + client.responseText + ')');
+            		  	
+                	  for (var i = 0; i < val.length; i++)
+                      {
+                	      var opt = document.createElement('option');                		  
+                		  opt.innerHTML = val[i].MARKERNAME;
+              		   	  opt.value = val[i].MARKERID;
+                		  location.appendChild(opt);
+                	  }
+                   }	       
+    		   }
 
-    		
-    		
-    		
-    		
-       </script>
+    		   function validateEventLocation()
+    		   {    			   
+    			   if(document.getElementById('eventId').value == '' || document.getElementById('eventId').value == 0){
+    				   if(document.getElementById('locationId').value == ''){
+     					    alert("Please select Event & Location for Report");
+          			   } else {
+         				    alert("Please select Event for Report");
+          			   }
+    			   } else {
+    				   if(document.getElementById('locationId').value == ''){
+   					    alert("Please select Location for Report");
+        				   }
+        		   }
+        	   }
+    		   </script>
     
     
     
