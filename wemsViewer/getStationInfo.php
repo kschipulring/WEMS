@@ -25,7 +25,7 @@
 
    		/*	
 	    $qry = oci_parse($c, "SELECT ct.NOTIFYTIME, ct.ASSIGNED_CREWSIZE, ct.ASSIGNED_SITEFOREMEN, ct.CT_STATUS, ct.CT_PASSNUM, ct.CT_BAGS, e.NAME
-								from WEMS_CLEANABLE_TARGET ct, EMPLOYEE e where e.EMPLOYEEID = ct.ASSIGNED_SITEFOREMEN AND CTID = :CTID")
+								from WEMS_CLEANABLE_TARGET ct, EMPLOYEE e where e.EMPLOYEENUMBER = ct.ASSIGNED_SITEFOREMEN AND CTID = :CTID")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                    oci_bind_by_name($qry, ":CTID", $CTID, -1);
@@ -103,7 +103,7 @@
 
       /* $qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.NAME, t.CTSTATUS, t.CTPASSNUM,
       //                          t.CTBAGS, t.CTNOTEUSER
-								from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEEID ORDER BY ENTER_DATETIME")
+								from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEENUMBER ORDER BY ENTER_DATETIME")
        								OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        */
     					$qry = oci_parse($c, "SELECT TO_CHAR(WEMS_CLEANABLE_TARGET_NOTES.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
@@ -111,10 +111,10 @@
                                             WEMS_CLEANABLE_TARGET_NOTES.CTPASSNUM, WEMS_CLEANABLE_TARGET_NOTES.CTBAGS, 
                                             WEMS_CLEANABLE_TARGET_NOTES.CTNOTEUSER
                                             FROM WEMS_CLEANABLE_TARGET_NOTES
-                                            LEFT JOIN EMPLOYEE ON EMPLOYEE.EMPLOYEEID = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
+                                            LEFT JOIN EMPLOYEE ON EMPLOYEE.EMPLOYEENUMBER = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
                                             where WEMS_CLEANABLE_TARGET_NOTES.CTID = :CTID and 
                                             WEMS_CLEANABLE_TARGET_NOTES.EVENTID = :EVENTID and  
-                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEEID) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID is NULL))ORDER BY ENTER_DATETIME")
+                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEENUMBER) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID is NULL))ORDER BY ENTER_DATETIME")
     																OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        								oci_bind_by_name($qry, ":CTID", $CTID, -1);
        								oci_bind_by_name($qry, ":EVENTID", $eventID, -1);

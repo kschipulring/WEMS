@@ -3,7 +3,10 @@ define([
    'esri/geometry/Extent',
    'esri/config',
    'esri/tasks/GeometryService',
-   'esri/layers/ImageParameters'
+   'esri/layers/ImageParameters',
+   'esri/dijit/Basemap', 
+   'esri/dijit/BasemapLayer',
+   'esri/geometry/Point'
 ], function (units, Extent, esriConfig, GeometryService, ImageParameters) {
 
     // url to your proxy page, must be on same machine hosting you app. See proxy folder for readme.
@@ -27,11 +30,14 @@ define([
 		
         mapOptions: {
 			navigationMode: 'classic',
-			basemap: 'gray',
+			basemap: 'streets',
 			center: [-73.7918315, 40.6985694],
             zoom: 11,
             sliderStyle: 'small',
-			minZoom: 8
+			minZoom: 3,
+			showLabels: false, 
+			showAttribution: false
+	
 						
         },
 		
@@ -158,7 +164,7 @@ define([
                 options: {}
             },
             geocoder: {
-                include: true,
+                include: false,
                 id: 'geocoder',
                 type: 'domNode',
                 path: 'gis/dijit/Geocoder',
@@ -198,7 +204,7 @@ define([
                 type: 'titlePane',
                 path: 'gis/dijit/Identify',
                 title: 'Identify',
-                open: false,
+                open: true,
                 position: 3,
                 options: 'config/identify'
             },
@@ -238,7 +244,7 @@ define([
                 }
             },
             scalebar: {
-                include: true,
+                include: false,
                 id: 'scalebar',
                 type: 'map',
                 path: 'esri/dijit/Scalebar',
@@ -250,7 +256,7 @@ define([
                 }
             },
             locateButton: {
-                include: true,
+                include: false,
                 id: 'locateButton',
                 type: 'domNode',
                 path: 'gis/dijit/LocateButton',
@@ -327,7 +333,7 @@ define([
                     layerControlLayerInfos: true,
                     separated: true,
                     vectorReorder: true,
-                    overlayReorder: true
+                    overlayReorder: false
                 }
             },
             bookmarks: {
@@ -533,7 +539,7 @@ define([
 				}
 			},
             help: {
-                include: true,
+                include: false,
                 id: 'help',
                 type: 'floating',
                 path: 'gis/dijit/Help',

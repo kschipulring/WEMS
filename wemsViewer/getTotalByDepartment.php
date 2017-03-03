@@ -8,9 +8,14 @@ OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1
 //$eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
 
 $output = "";
+
+$tforman = 0;
+$tEmp = 0;
+$tTotal = 0;
+
 //$eventID = 86;
 
-$qry = oci_parse($c, "select sum(g.EMP_ASSIGNED) as EMPTOTAL, e.DEPTCODE as DEPTCD from WEMS_GANG g, EMPLOYEE e where g.FORMANID = e.EMPLOYEEID and g.EVENTID = :EVENTID
+$qry = oci_parse($c, "select sum(g.EMP_ASSIGNED) as EMPTOTAL, e.DEPTCODE as DEPTCD from WEMS_GANG g, WEMS_EMPLOYEE e where g.FORMANID = e.EMPLOYEENUMBER and g.EVENTID = :EVENTID
 group by e.DEPTCODE")
 OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
@@ -26,7 +31,7 @@ while($row = oci_fetch_array($qry))
     
     
     
-    $qry2 = oci_parse($c, "select count(e.DEPTCODE) as FORMAN_CNT from WEMS_GANG g, EMPLOYEE e where g.FORMANID = e.EMPLOYEEID and 
+    $qry2 = oci_parse($c, "select count(e.DEPTCODE) as FORMAN_CNT from WEMS_GANG g, WEMS_EMPLOYEE e where g.FORMANID = e.EMPLOYEENUMBER and 
         g.EVENTID = :EVENTID and e.DEPTCODE = :DEPARTMENTCD")
     OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     
@@ -61,11 +66,14 @@ while($row = oci_fetch_array($qry))
     
    // echo $dept . " Total Forman = " . $formanTotal . " Total Employees = " . $empTotal . " Total = ". $total . "<br>";
 
-           $output .= $dept . "    Forman = " . $formanTotal . "     Employees = " . $empTotal . "   Total = ". $total . "<br><br>";
-           
-           
+           //$output .= $dept . "    Forman = " . $formanTotal . "     Employees = " . $empTotal . "   Total = ". $total . "<br><br>";
+          $output.= "<tr><td>" . $dept . ":  </td>  <td> Forman = " . $formanTotal . "</td><td> Employees = " . $empTotal . "</td> <td> Total: " . $total . "</td></tr>";
+         
+          $tforman = $tforman + $formanTotal;
+          $tEmp = $tEmp + $empTotal;
+          $tTotal = $tTotal + $total;
 }
 
-//echo $output;
+ $output.= "<tr><td>______</td></tr><tr><td></td>  <td> Total Forman = " . $tforman . "</td><td> Total Employees = " . $tEmp . "</td> <td> Total: " . $tTotal . "</td></tr>";
 
 ?>

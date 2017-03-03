@@ -43,7 +43,7 @@
     
 
     
-	    $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEEID ")
+	    $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER ")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                   

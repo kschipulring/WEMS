@@ -42,15 +42,17 @@ define([
 			
 			
             // examples of custom basemaps 
-            lirrbase: {
-                title: 'LIRR Base',
-                basemap: new Basemap({
-                    id: 'lirrbase',
-                    layers: [new BasemapLayer({
-                        url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/BaseMaps/MapServer'
-                    })]
-                })
-            },
+    	   /*
+    	   lirrbase: {
+               title: 'LIRR_BASEMAP',
+               basemap: new Basemap({
+                   id: 'lirrbase',
+                   layers: [new BasemapLayer({
+                       url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_BASEMAP_V1/MapServer'
+                   })]
+               })
+           },
+           */
 			streets: {
                 title: 'Streets',
                 basemap: new Basemap({
@@ -106,9 +108,6 @@ define([
                     id: 'gray',
                     layers: [new BasemapLayer({
                         url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer'
-                    }), new BasemapLayer({
-                        url: 'http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer',
-                        isReference: true
                     })]
                 })
             },

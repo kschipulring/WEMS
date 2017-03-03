@@ -59,7 +59,7 @@
         
         if($foreman != "")
         {
-            $qry2 = oci_parse($c, "select NAME from EMPLOYEE where EMPLOYEEID = :FOREMAN")
+            $qry2 = oci_parse($c, "select NAME from EMPLOYEE where EMPLOYEENUMBER = :FOREMAN")
                                         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
                                          
                                         oci_bind_by_name($qry2, ":FOREMAN", $foreman, -1);

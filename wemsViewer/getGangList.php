@@ -31,7 +31,7 @@
     
 
     
-	    $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEEID order by e.NAME")
+	    $qry = oci_parse($c, "select g.FORMANID, e.LST_NME, g.ASSIGN_LOC from WEMS_GANG g, WEMS_EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER order by e.LST_NME")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                   
@@ -54,11 +54,11 @@
          					    {
          					        if($ASSIGNED_SITEFORMEN == $forman)
          					        {
-         					            $json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[NAME]\",\"LOCATION\": \"$conponent\"},";
+         					            $json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[LST_NME]\",\"LOCATION\": \"$conponent\"},";
          					        }
          					        else 
          					        {
-         					            $json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[NAME]\",\"LOCATION\": \"\"},";
+         					            $json .= "{\"FORMANID\": \"$forman\",\"NAME\": \"$row[LST_NME]\",\"LOCATION\": \"\"},";
          					        }
          					         
          					    }
