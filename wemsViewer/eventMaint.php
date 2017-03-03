@@ -1,6 +1,11 @@
 <?php
-  
+ob_start();
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/tcpdf/6.2.12" );
+set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/LIRR/1.0.4.3" );
+$library_path = '../lib/';
+set_include_path(get_include_path() . PATH_SEPARATOR . $library_path);  
 //session_start(); //echo $_SESSION['group']
+
 
 $eventErrMsg = "";
 $gangErrMsg = "";
@@ -16,7 +21,7 @@ $parkingLotErrMsg = "";
 $parkingLotSuccessMsg = "";
 
 $lStatus = "";
-$gStartTm = ""; 
+$gStartTm = "";
 $lLoc = "";
 
 $tabindex = 0;
@@ -71,6 +76,12 @@ else
 {
 
     require '../wemsDatabase.php';
+    require_once('tcpdf/tcpdf.php');
+    require_once '../classes/databaseClass.php';
+    require_once '../classes/eventClass.php';
+    require_once '../classes/gangClass.php';
+    require_once '../classes/locationClass.php';
+    require_once '../classes/cleanableTargetClass.php';
     
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
     OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
@@ -112,15 +123,7 @@ else
     {
        
         //header("Location: http://arcgisupg.lirr.org/gisweb/wemsViewer/WEMS_GIS.html");
-        //header("Location: http://webz8dev.lirr.org/~tebert/wems/wemsViewer/WEMS_GIS.php");
-        
-        
-        
-       // <script type="text/javascript" language="Javascript">window.open('http://www.example.com');</script>
-        
-        
-        
-        
+        header("Location: http://webz8dev.lirr.org/~tebert/wems/wemsViewer/WEMS_GIS.php");
     }
     
     
@@ -156,7 +159,7 @@ else
         }
         
         
-        $qry2 = oci_parse($c, "UPDATE WEMS_CLEANABLE_TARGET SET ASSIGNED_CREWSIZE = NULL, ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = 1, CT_PASSNUM = NULL, CT_BAGS = NULL")
+        $qry2 = oci_parse($c, "UPDATE WEMS_ABLE_TARGET SET ASSIGNED_CREWSIZE = NULL, ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = 1, CT_PASSNUM = NULL, CT_BAGS = NULL")
         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
         
        
@@ -643,9 +646,9 @@ else
     							
     							oci_execute($closeLocQry);
     							
-    	*/						
-    						
-    	$closeLocQry = oci_parse($c, "Update WEMS_LOCATION set STATUS = 4, LOCATION_PASSNUM = NULL")
+    							
+    							
+    	$closeLocQry = oci_parse($c, "Update WEMS_LOCATION set STATUS = 1, LOCATION_PASSNUM = NULL")
     							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     							
     								
@@ -654,7 +657,7 @@ else
     						$eventID = 0;
     						$eventType = 0;
     						$openTime = "";
-    						
+    	*/					
     						$EventSuccessMsg = "Success";
     						
         }// if(!strlen($errMsg))
@@ -665,17 +668,17 @@ else
     {
     
         
-        $gStartTm = isset($_POST['gStartTm'])  ? $_POST['gStartTm'] : "";
+        
         $forman = isset($_POST['forman'])  ? $_POST['forman'] : "";
         $gEmpNum = isset($_POST['gEmpNum'])  ? $_POST['gEmpNum'] : "";
+        $gStartTm = isset($_POST['gStartTm'])  ? $_POST['gStartTm'] : "";
         
-        $gStatus = isset($_POST['gStatus'])  ? $_POST['gStatus'] : "";
         
         $gUser = $_SESSION['user'];
         
         $gangErrMsg = "";
         
-        if($forman == 0)$gangErrMsg .= "<li>Please enter a Foreman</li>";
+        if($forman == 0)$gangErrMsg .= "<li>Please enter a Forman</li>";
         if($gStartTm == "")$gangErrMsg .= "<li>Please enter a start date</li>";
      
         
@@ -701,8 +704,8 @@ else
         
         
     
-        $qry = oci_parse($c, "insert into WEMS_GANG (EVENTID, FORMANID, EMP_ASSIGNED, OPENTIME, OPENUSER, STATUS)
-							VALUES (:EVENTID, :FORMANID, :EMP_ASSIGNED, to_date(:OPENTIME, 'mm/dd/yyyy HH:MI AM'), :OPENUSER, :STATUS)")
+        $qry = oci_parse($c, "insert into WEMS_GANG (EVENTID, FORMANID, EMP_ASSIGNED, OPENTIME, OPENUSER)
+							VALUES (:EVENTID, :FORMANID, :EMP_ASSIGNED, to_date(:OPENTIME, 'mm/dd/yyyy HH:MI AM'), :OPENUSER)")
     							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     
     							oci_bind_by_name($qry, ":EVENTID",  $eventID, -1);
@@ -711,12 +714,12 @@ else
     							oci_bind_by_name($qry, ":OPENTIME", $gStartTm, -1);
     							//oci_bind_by_name($qry, ":CLOSETIME", $gEndTm, -1);
     							oci_bind_by_name($qry, ":OPENUSER", $gUser, -1);
-    							oci_bind_by_name($qry, ":STATUS", $gStatus, -1);
+    
     
     							oci_execute($qry);
     							
-    	$updateQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED, ENTER_DATETIME, STATUS)
-							VALUES (:EVENTID, :FORMANID, to_date(:NOTETIME, 'mm/dd/yyyy HH:MI AM'), :NOTEUSER, :EVENTUPDATE, :EMP_ASSIGNED, SYSDATE, :STATUS)")
+    	$updateQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED, ENTER_DATETIME)
+							VALUES (:EVENTID, :FORMANID, to_date(:NOTETIME, 'mm/dd/yyyy HH:MI AM'), :NOTEUSER, :EVENTUPDATE, :EMP_ASSIGNED, SYSDATE)")
     														OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     							
     							oci_bind_by_name($updateQry, ":EVENTID",  $eventID, -1);
@@ -725,8 +728,7 @@ else
     							oci_bind_by_name($updateQry, ":NOTEUSER", $gUser, -1);
     							oci_bind_by_name($updateQry, ":EVENTUPDATE", $gComments, -1);
     							oci_bind_by_name($updateQry, ":EMP_ASSIGNED", $gEmpNum, -1);
-    							oci_bind_by_name($updateQry, ":STATUS", $gStatus, -1);
-    							
+    
     							oci_execute($updateQry);
     							
     							$successMsg = "Success";
@@ -744,7 +746,6 @@ else
         
         $forman = isset($_POST['forman'])  ? $_POST['forman'] : "";
         $gEmpNum = isset($_POST['gEmpNum'])  ? $_POST['gEmpNum'] : "";
-        $gStatus = isset($_POST['gStatus'])  ? $_POST['gStatus'] : "";
         $gStartTm = isset($_POST['gStartTm'])  ? $_POST['gStartTm'] : "";
         $gHour = isset($_POST['gStartHr'])  ? $_POST['gStartHr'] : "";
         $gMin = isset($_POST['gStartMin'])  ? $_POST['gStartMin'] : "";
@@ -769,12 +770,11 @@ else
         
         
         $qry = oci_parse($c, "Update WEMS_GANG SET EVENTID = :EVENTID, FORMANID = :FORMANID, EMP_ASSIGNED = :EMP_ASSIGNED, OPENTIME = to_date(:OPENTIME, 'mm/dd/yyyy HH:MI AM'), 
-                                        OPENUSER = :OPENUSER, STATUS = :STATUS where EVENTID = :EVENTID and FORMANID = :FORMANID")
+                                        OPENUSER = :OPENUSER where EVENTID = :EVENTID and FORMANID = :FORMANID")
         							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
         
         							oci_bind_by_name($qry, ":EVENTID",  $eventID, -1);
         							oci_bind_by_name($qry, ":FORMANID", $forman, -1);
-        							oci_bind_by_name($qry, ":STATUS", $gStatus , -1);
         							oci_bind_by_name($qry, ":EMP_ASSIGNED", $gEmpNum , -1);
         							oci_bind_by_name($qry, ":OPENTIME", $gStartTm, -1);
         							//oci_bind_by_name($qry, ":CLOSETIME", $gEndTm, -1);
@@ -785,8 +785,8 @@ else
         							oci_execute($qry);
         							
         							
-        $updateQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED, ENTER_DATETIME, STATUS)
-							VALUES (:EVENTID, :FORMANID, to_date(:NOTETIME, 'mm/dd/yyyy HH:MI AM'), :NOTEUSER, :EVENTUPDATE, :EMP_ASSIGNED, SYSDATE, :STATUS)")
+        $updateQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED, ENTER_DATETIME)
+							VALUES (:EVENTID, :FORMANID, to_date(:NOTETIME, 'mm/dd/yyyy HH:MI AM'), :NOTEUSER, :EVENTUPDATE, :EMP_ASSIGNED, SYSDATE)")
         														OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
         															
         														oci_bind_by_name($updateQry, ":EVENTID",  $eventID, -1);
@@ -795,7 +795,7 @@ else
         														oci_bind_by_name($updateQry, ":NOTEUSER", $gUser, -1);
         														oci_bind_by_name($updateQry, ":EVENTUPDATE", $gComments, -1);
         														oci_bind_by_name($updateQry, ":EMP_ASSIGNED", $gEmpNum, -1);
-        														oci_bind_by_name($updateQry, ":STATUS", $gStatus , -1);
+        							
         														oci_execute($updateQry);
         														
         														$successMsg = "Success";
@@ -909,7 +909,7 @@ else
     		<li><a href="#view2">Gang Assignments</a></li> 
     		<li><a href="#view3">Location Assignments</a></li> 
     		<li><a href="#view4">Reports</a></li> 
-    		<li><a href="#view5">Maps</a></li> 
+    		<li><a href="#view5">Visualization</a></li> 
     	</ul> 
     	</div>
     	<div class="tabcontents"> 
@@ -929,8 +929,7 @@ else
     	
     	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                      
- 
+                        
              			</table>
     	
       				</fieldset>
@@ -1220,20 +1219,20 @@ else
 
 					<tr><th colspan = "2" align="center">Create Gang</th></tr>
 					<tr>
-					<td>Foreman:</td>
+					<td>Forman:</td>
 					<td><select name="forman" id = "forman" onchange="getGangData()">
 					<option value= "" >  </option>
 													
 													<?php 
- 
-                                   $qry = oci_parse($c, "SELECT EMPLOYEENUMBER, FST_NME, LST_NME from WEMS_EMPLOYEE where DIV_CD = '2' order by LST_NME")
+
+                                   $qry = oci_parse($c, "SELECT EMPLOYEEID, NAME from EMPLOYEE where DEPTCODE is not NULL order by NAME")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                    oci_execute($qry);
 
                                    while($row = oci_fetch_array($qry)){
-                                     $id = $row['EMPLOYEENUMBER'];
-                                     $desc = $row['LST_NME'] . ", ". $row['FST_NME'];
+                                     $id = $row['EMPLOYEEID'];
+                                     $desc = $row['NAME'];
 									
 										if($id == $forman)
 										{
@@ -1271,6 +1270,7 @@ else
 														?>
 														</select>
 													</td>
+
 												</tr>	 
 												
 												
@@ -1290,22 +1290,17 @@ else
         										$gMin = isset($_POST['gStartMin'])  ? $_POST['gStartMin'] : "";
         										$gAmPm = isset($_POST['gAmPm'])  ? $_POST['gAmPm'] : "";
         										-->
+
 												<tr>
 													<td>Start Date Time</td>
-													<td><input readonly type="text" name="gStartTm" size="20" tabindex="24" id="gStartTm" value="<?php $gStartTm ?>"/><img src="cal.gif" width="16" border="0" id="gangStartTm" alt="Click here to pick date" />  
+													<td><input readonly type="text" name="gStartTm" size="20" tabindex="24" id="gStartTm" value=""/><img src="cal.gif" width="16" border="0" id="gangStartTm" alt="Click here to pick date" />  
 													<select name="gStartHr" id="gStartHr">
 													
 													<?php
 													for ($x = 1; $x <= 12; $x++) {
 														    
-						                                    if($x == $gHour) 
-						                                    {
-						                                        echo "<option value= \"$x\" selected> $x </option>";
-						                                    }
-						                                    else {
-						                                        echo "<option value= \"$x\"> $x </option>";
-						                                    }
-														   
+						
+														    echo "<option value= \"$x\"> $x </option>";
 														}
 														?>
 													 </select> 
@@ -1317,17 +1312,9 @@ else
 													  <?php
 														
 														for ($x = 0; $x <= 59; $x++) {
-														    
-														    if($x == $gMin)
-														    {
-														      if($x < 10) $x = "0".  $x;
-														      echo "<option value= \"$x\" selected> $x </option>";
-														    }
-														    else 
-														    {
-														        if($x < 10) $x = "0".  $x;
-														        echo "<option value= \"$x\"> $x </option>";
-														    }
+														    if($x < 10) $x = "0".  $x;
+														   
+														    echo "<option value= \"$x\"> $x </option>";
 														}
 														
 														
@@ -1336,25 +1323,11 @@ else
 													 </select>
 													 
 													 <select name="gAmPm" id="gAmPm">
-													 <?php 
-													   if($gAmPm == 0)
-													   {
-													     echo"<option value= \"0\" selected>AM</option>";
-													   }
-													   else
-													   {
-													     echo"<option value=\"0\">AM</option>";
-													   } 
+													 
 													
-													   if($gAmPm == 1)
-													   {
-													       echo"<option value= \"1\" selected>PM</option>";
-													   }
-													   else
-													   {
-														  echo"<option value= \"1\">PM</option>";
-													   }
-														?>
+													 <option value= "0">AM</option>
+													 
+													 <option value= "1">PM</option>
 													 </select>
 													 
 													 </td>
@@ -1417,22 +1390,49 @@ else
 												</tr>
 												
 												
-								</table>				
 												
-									<table align="center" width = "80%">			
+												
+												
 								<?php 
-								
-								
-								
+								/*
+     		                     $qry = oci_parse($c, "select distinct w.formanid ,d.deptname DEPT, w.emp_assigned as CNT
+								from wems_gang w, dept d, employee e
+								where d.deptcode = e.deptcode
+								and e.employeeid = w.formanid
+								and d.deptcode is not null
+								and eventID = :EVENTID
+								order by d.deptname")
+       								                     OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+       
+       								                     
+       							oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
+       							oci_execute($qry);
+     	
+     	
+     							while($row = oci_fetch_array($qry))
+       							{
+       							     $dept = $row['DEPT'];
+       							     $empCnt = $row['CNT'];
+       							     
+       							     
+       							    
+       								echo "<tr><td colspan=\"2\"> " . $dept . " - " .  $empCnt . "</td></tr>";
+       								
+       								
+       								$deptchange = $row['DEPT'];
+       							
+       							
+       							}
+     	                      */
 								if($eventID > 0)
 								{
 								    include 'getTotalByDepartment.php';
-								    echo $output;
+								    echo "<tr><td colspan=\"2\"> " . $output . "</td></tr>";
 								}
 							  	
        	                    ?>
      	
-								</table>				
+												
 												
 												
 												
@@ -1443,7 +1443,7 @@ else
 												
 												
              
-        									
+        									</table>
                
       				
       
@@ -1510,7 +1510,7 @@ else
 												<tr ><th colspan = "2" align="center">location Maintenance</th></tr>
 												<tr>
 													<td>Location:</td>
-													<td><select name="lLoc" id = "lLoc" onchange="getConponentData();getEmployees();"> <option value= 0 selected>  </option>
+													<td><select name="lLoc" id = "lLoc" onchange="getConponentData()"> <option value= 0 selected>  </option>
 													
 
 													<?php 
@@ -1584,7 +1584,7 @@ else
 														if($lConponent !=  "")	
 														{
 														   
-														  $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER ")
+														  $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEEID ")
                                                                 OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                   
@@ -1632,7 +1632,7 @@ else
                                                             }
 
 
-	                                                        $qry = oci_parse($c, "select g.FORMANID, e.LST_NME, g.ASSIGN_LOC from WEMS_GANG g, WEMS_EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER ")
+	                                                        $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEEID ")
                                                             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                   
@@ -1858,14 +1858,14 @@ else
 													<?php
 													$locComments = "";
 													$qry = oci_parse($c, "SELECT TO_CHAR(WEMS_CLEANABLE_TARGET_NOTES.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTNOTES, WEMS_EMPLOYEE.LST_NME, WEMS_CLEANABLE_TARGET_NOTES.CTSTATUS, 
+                                            WEMS_CLEANABLE_TARGET_NOTES.CTNOTES, EMPLOYEE.NAME, WEMS_CLEANABLE_TARGET_NOTES.CTSTATUS, 
                                             WEMS_CLEANABLE_TARGET_NOTES.CTPASSNUM, WEMS_CLEANABLE_TARGET_NOTES.CTBAGS, 
                                             WEMS_CLEANABLE_TARGET_NOTES.CTNOTEUSER
                                             FROM WEMS_CLEANABLE_TARGET_NOTES
-                                            LEFT JOIN WEMS_EMPLOYEE ON WEMS_EMPLOYEE.EMPLOYEENUMBER = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
+                                            LEFT JOIN EMPLOYEE ON EMPLOYEE.EMPLOYEEID = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
                                             where WEMS_CLEANABLE_TARGET_NOTES.CTID = :CTID and 
                                             WEMS_CLEANABLE_TARGET_NOTES.EVENTID = :EVENTID and  
-                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = WEMS_EMPLOYEE.EMPLOYEENUMBER) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID = 0))ORDER BY ENTER_DATETIME")
+                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEEID) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID = 0))ORDER BY ENTER_DATETIME")
        																		OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        
        																		oci_bind_by_name($qry, ":CTID", $lConponent, -1);
@@ -2163,7 +2163,7 @@ else
 													$interlocComments = "";
 													$qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.NAME, t.CTSTATUS, 
                                 											 t.CTNOTEUSER
-																			from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEENUMBER")
+																			from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEEID")
        																		OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        
        																		oci_bind_by_name($qry, ":CTID", $iConponent, -1);
@@ -2425,9 +2425,9 @@ ________________________________________________________________________________
 													<td><td><textarea rows="10" cols="100" name="plHistory" id="plHistory">
 													<?php
 													$plComments = "";
-													$qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.LST_NME, t.CTSTATUS, 
+													$qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.NAME, t.CTSTATUS, 
                                 											t.CTNOTEUSER
-																			from WEMS_CLEANABLE_TARGET_NOTES t, WEMS_EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEENUMBER")
+																			from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEEID")
        																		OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
        
        																		oci_bind_by_name($qry, ":CTID", $plConponent, -1);
@@ -2492,27 +2492,86 @@ ________________________________________________________________________________
      
      
      
-     <div style="background-color:#FFF2F2;" id="view4"  > 
-      
-     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
-              
-               
-      				<fieldset id="reports">
-        				<legend>Reports </legend>
-    	
-    	
-        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                      
-							
-                      		<a href="http://webz8dev.lirr.org/~hdesai/WEMS/wemsViewer/eventMaint.php">Reports</a>
-        				</table>
-        
-      				</fieldset>
+     <div style="background-color:#FFF2F2;" id="view4"  >
+     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="eventPDFForm" id="eventPDFForm" target="WEMS_REPORT" onsubmit="return validateEventLocation();">
+                <fieldset id="reports">
+        				<legend>Platform Assignment Report </legend>
+        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width="100%">
+<tr>
+							     <td>Event:</td>
+								 <td><select name="eventId" id = "eventId" onChange="getLocationByEvent()"> <option value='0' selected> Select Event  </option>
+								<?php 
 
-      
+                                $eventObj = new event();
+                                $result = $eventObj->getEventList();
+                                if($result){
+                                    while($row = oci_fetch_array($result[0])){                                    
+                                        $id = $row['EVENTID'];
+                                        $desc = $row['EXTERNALID'];
+    									echo "<option value=\"$id\" > $desc : $id </option>";
+                                    }
+                                }
+                                oci_free_statement($result[0]);
+				               ?> 
+                                </select></td>
+							</tr>
+                            <tr>
+							     <td>Location:</td>
+								 <td><select name="locationId[]" id = "locationId" multiple size ="1" width = "100%">
+								 <option selected="selected">Select Location</option>
+                                </select></td>
+							</tr>
+                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Platform Assignment PDF" /></td></tr> 
+                            
+                            <?php 
+                            if(isset($task) && $task == 'Create Platform Assignment PDF') {
+                                include_once '../classes/eventPDFClass.php';
+                                $pdf = new eventPDF();                                
+                                $pdf->createEventPDF($_POST);
+                            }
+                            ?>
+
+        				</table>        
+      				</fieldset>
       			</form>
-     
-     	</div>
+      			<br></br>
+                <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gangPDFForm" id="gangPDFForm" target="WEMS_REPORT2" onsubmit="validateEvent();">
+                <fieldset id="departmentWiseReport">
+        				<legend>Department Wise Report</legend>    
+        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
+                            <tr>
+							     <td>Event:</td>
+								 <td><select name="eventId" id = "eventId"> <option value='0' selected> Select Event  </option>
+								<?php 
+
+                                $eventObj = new event();
+                                $result = $eventObj->getEventList();
+                                if($result){
+                                    while($row = oci_fetch_array($result[0])){                                    
+                                        $id = $row['EVENTID'];
+                                        $desc = $row['EXTERNALID'];
+    									echo "<option value=\"$id\" > $desc : $id </option>";
+                                    }
+                                }
+                                oci_free_statement($result[0]);
+				               ?> 
+                                </select></td>
+							</tr>
+                           
+                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Department Wise Employee PDF" /></td></tr> 
+                            
+                            <?php 
+                            if(isset($task) && $task == 'Create Department Wise Employee PDF') {
+                                include_once '../classes/employeePDFClass.php';
+                                $pdf = new employeePDF();                               
+                                $pdf->createEmployeePDF($_POST);
+                            }
+                            ?>
+
+        				</table>
+      				</fieldset>
+      			</form>
+        </div>
      
    <!--
      ************************************************************************************************************************************************
@@ -2527,27 +2586,10 @@ ________________________________________________________________________________
               
 
       				
-      				<!--
-      				<input class="GIS" type="submit" value="Stations Map" name="SUBMIT" id="SUBMIT" />
-      				<br /><br />
-      				<input class="GIS" type="submit" value="Interlockings Map" name="SUBMIT" id="SUBMIT" />
-      				<br /><br />
-      				<input class="GIS" type="submit" value="Parking Lot Map" name="SUBMIT" id="SUBMIT" />
-      				<br /><br />
+      				<input class="GIS" type="submit" value="GIS" name="SUBMIT" id="SUBMIT" />
       				
-                -->
-               
-                
-                <button onclick="StationsMap('sta')">Stations Map</button>
-                <br /><br />
-                <button onclick="StationsMap('il')">Interlockings Map</button>
-                <br /><br />
-                <button onclick="StationsMap('pl')">Parking Lot Map</button>
-                <br /><br />
-                <button onclick="StationsMap('sen')">Sentinel Map</button>
-                <br /><br />
-                
-                
+      				
+
       			</form>
      
      	</div>
@@ -2558,7 +2600,7 @@ ________________________________________________________________________________
      ************************************************************************************************************************************************
      -->
    
-    	
+    		
       
        <div style="background-color:#FFF2F2;" id="view6"  > 
       
@@ -2574,15 +2616,6 @@ ________________________________________________________________________________
     </body>
 
       <script language="JavaScript" type="text/javascript">
-
-      function StationsMap(map)
-      {
-     		if(map == 'sta') window.open('WEMS_stationsMap.html');
-     		if(map == 'sta') window.open('WEMS_GIS.php');
-     		if(map == 'sta') window.open('WEMS_GIS.php');
-     		if(map == 'sen') window.open('http://www.Sentinelfm.com/login.aspx');
-      }
-      
 
       Calendar.setup(
         		{
@@ -2806,8 +2839,6 @@ ________________________________________________________________________________
           	 
               var empNum = document.getElementById('gEmpNum');
               var comments = document.getElementById('gHistory');
-              var status = document.getElementById('gStatus');
-              var dteTm = document.getElementById('gStartTm');
               
               var gangButton = document.getElementById('gangEnterUpdate');
               
@@ -2819,6 +2850,9 @@ ________________________________________________________________________________
               {
 
                 var val = eval('(' + obj.responseText + ')');
+                
+                
+                
                 
 
                 for(var i = 0; i < val.length; i++)
@@ -2837,15 +2871,9 @@ ________________________________________________________________________________
 
                      txtNew.text = val[i].BUTTON;
                      gangButton.value = txtNew.text;
+						
+                    
 
-	
-                     txtNew.text = val[i].STATUS;
-                     status.value = txtNew.text;
-
-                    // txtNew.text = val[i].DATETIME;
-                    // dteTm.value = txtNew.text;
-                     
-                     
 
                  } //end for(var i = 0; i < val.length; i++)
                } // end if(obj.readyState == 4 && obj.status == 200)
@@ -3213,7 +3241,7 @@ ________________________________________________________________________________
                                        var eventId = "<?php echo $eventID; ?>";
                                      
                                        
-                              		  //alert(loc);
+                              		  
                               		 
                                        if (window.XMLHttpRequest)
                                        {
@@ -3460,7 +3488,7 @@ ________________________________________________________________________________
                                      
                                        var downloadFile = document.getElementById('plDownloadFile');
            							downloadFile.options.length = 0;
-                                     //alert(loc);
+                                      // alert(eventId);
                               		  
                               		 
                                        if (window.XMLHttpRequest)
@@ -3579,12 +3607,68 @@ ________________________________________________________________________________
     		   }
     		});
 
+    		   function getLocationByEvent()
+    		   {
+    			   var eventId = document.eventPDFForm.eventId.value;    			   
+    			   if (window.XMLHttpRequest)
+                   {                         
+                         var xRequest = new XMLHttpRequest();
+                   } else if (window.ActiveXObject){
+          	           var xRequest = new ActiveXObject("Microsoft.XMLHTTP");                       
+                   }
+          
+    			   xRequest.onreadystatechange = function() {
+                	  var location = document.eventPDFForm.locationId;
+                      
+                      document.eventPDFForm.locationId.options.length = 0;
+                      document.eventPDFForm.locationId.size = 6;
+                      var length = location.options.length;
+                      
+                      if(xRequest.readyState == 4 && xRequest.status == 200)
+                      {
+                     	 var val = eval('(' + xRequest.responseText + ')');            		  	
+                    	  for (var i = 0; i < val.length; i++)
+                          {
+                    	      var opt = document.createElement('option');                		  
+                    		  opt.innerHTML = val[i].MARKERNAME;
+                  		   	  opt.value = val[i].MARKERID;              		   	  
+                    		  location.appendChild(opt);
+                    	  }
+                       }
+                  };
+    			   
+                  xRequest.open("GET", "getLocationList.php?eventId=" + eventId + "&random=" + Math.random());
+                  xRequest.send(null);
+                  	       
+    		   }
 
-    		
-    		
-    		
-    		
-       </script>
+    		   function validateEventLocation()
+    		   {    			   
+    			   if(document.eventPDFForm.eventId.value == '' || document.eventPDFForm.eventId.value == 0){
+    				   if(document.eventPDFForm.locationId.value == ''){
+     					    alert("Please select Event & Location for Report");
+      					   return false;
+          			   } else {
+         				    alert("Please select Event for Report");
+          				   return false;
+          			   }
+    			   } else {
+    				   if(document.eventPDFForm.locationId.value == ''){
+   					    alert("Please select Location for Report");
+      					 return false;
+       				    }
+        		   }
+    			   return true;
+        	   }
+    		   function validateEvent()
+    		   {    			   
+    			   if(document.gangPDFForm.eventId.value == '' || document.gangPDFForm.eventId.value == 0){
+    				   alert("Please select Event for Report");
+    				   return false;          			   
+    			   }
+    			   return true;
+        	   }
+    		   </script>
     
     
     
