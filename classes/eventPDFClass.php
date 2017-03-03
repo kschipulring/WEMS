@@ -53,6 +53,7 @@ class eventPDF extends PDF {
         return $eventData;   
     }
     
+    
     public function createEventPDF($formData){
         $eventData = array();
         ob_clean();        
@@ -67,23 +68,19 @@ class eventPDF extends PDF {
             $outputFileName = "/tmp/wems_".uniqid().".pdf";
             $tableString = '';
             
-            $eventData = $this->getEventData($formData["eventId"], $formData["locationId"]);
-            /*echo "<pre>";
-            var_dump($eventData);
-            echo "</pre>";
-            exit();*/            
+            $eventData = $this->getEventData($formData["eventId"], $formData["locationId"]);         
             $this->eventName =  $eventData["event"]["EVENTDESC"] ." - ". $eventData["event"]["EXTERNALID"];
             if (isset($eventData['location'])) {               
                 if (is_array($eventData["location"])) {                   
                     $tableString = "<table width=\"100%\"><thead><tr><th style=\"width:15%; text-align:right;background-color: #f0eec2;\">Location</th>";
                     $tableString .= "<th style=\"width:15%; text-align:center;background-color: #f0eec2;\">Station</th>";
-                    $tableString .= "<th style=\"width:5%; text-align:center;background-color: #f0eec2;\">Dept</th>";
+                    $tableString .= "<th style=\"width:14%; text-align:center;background-color: #f0eec2;\">Dept</th>";
                     $tableString .= "<th style=\"width:15%; text-align:center;background-color: #f0eec2;\">Gang Forman</th>";
-                    $tableString .= "<th style=\"width:5%; text-align:center;background-color: #f0eec2;\">Crew</th>";
+                    $tableString .= "<th style=\"width:3%; text-align:center;background-color: #f0eec2;\">Crew</th>";
                     $tableString .= "<th style=\"width:15%; text-align:center;background-color: #f0eec2;\">Start Time</th>";
                     $tableString .= "<th style=\"width:15%; text-align:center;background-color: #f0eec2;\">End Time</th>";
                     $tableString .= "<th style=\"width:10%; text-align:center;background-color: #f0eec2;\">Assign By</th>";
-                    $tableString .= "<th style=\"width:5%; text-align:center;background-color: #f0eec2;\">Qty Used</th></tr></thead>";
+                    $tableString .= "<th style=\"width:3%; text-align:center;background-color: #f0eec2;\">Qty Used</th></tr></thead>";
                     $tableString .= "<tbody>";
                     foreach($eventData["location"] as $key => $componentDetails){
                         
@@ -99,17 +96,19 @@ class eventPDF extends PDF {
                                 $stationName =  $component["FULLNAME"];
                                 $station =  $component["FULLNAME"];
                             } else {
+                                
+                                
                                 $stationName = '';
                             }
                             $tableString .= "<tr><td style=\"width:15%; text-align:center;font-size: 8pt;\">".$name."</td>";
                             $tableString .= "<td style=\"width:15%; text-align:center;font-size: 8pt;\">".$stationName."</td>";
-                            $tableString .= "<td style=\"width:5%; text-align:center;font-size: 8pt;\">".$component["DEPTABBR"]."</td>";
+                            $tableString .= "<td style=\"width:14%; text-align:center;font-size: 8pt;\">".$component["DEPTABBR"]."</td>";
                             $tableString .= "<td style=\"width:15%; text-align:center;font-size: 8pt;\">".$component["EMPNAME"]."</td>";
-                            $tableString .= "<td style=\"width:5%; text-align:center;font-size: 8pt;\">3</td>";
+                            $tableString .= "<td style=\"width:3%; text-align:center;font-size: 8pt;\">".$component["CREWSIZE"]."</td>";
                             $tableString .= "<td style=\"width:15%; text-align:center;font-size: 8pt;\">".$component["CTSTARTTIME"]."</td>";
                             $tableString .= "<td style=\"width:15%; text-align:center;font-size: 8pt;\">".$component["CTENDTIME"]."</td>";
                             $tableString .= "<td style=\"width:10%; text-align:center;font-size: 8pt;\">".$component["CTNOTEUSER"]."</td>";
-                            $tableString .= "<td style=\"width:5%; text-align:center;font-size: 8pt;\">".$component["CTBAGS"]."</td></tr>"; 
+                            $tableString .= "<td style=\"width:3%; text-align:center;font-size: 8pt;\">".$component["CTBAGS"]."</td></tr>"; 
                             $location = $key;
                         }
                     }

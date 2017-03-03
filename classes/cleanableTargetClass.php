@@ -5,7 +5,7 @@ class cleanableTarget extends database {
         try{        
             $result = array();
             if(isset($eventId) && isset($markerId)){
-                $qry = "select ct.CTID,ct.FULLNAME, ctn.EVENTID, CTN.FORMANID, ctn.CTBAGS, TO_CHAR(ctn.CTSTARTTIME , 'DD/MM/YYYY HH:MI:SS')  CTSTARTTIME, TO_CHAR(ctn.CTENDTIME , 'DD/MM/YYYY HH:MI:SS') CTENDTIME, ctn.CTNOTEUSER, e.NAME EMPNAME , d.DEPTABBR  from WEMS_CLEANABLE_TARGET ct inner join WEMS_CLEANABLE_TARGET_NOTES ctn on ct.CTID = ctn.CTID  inner join EMPLOYEE e on e.EMPLOYEEID = ctn.FORMANID
+                $qry = "select ct.CTID,ct.FULLNAME, ctn.EVENTID, CTN.FORMANID, ctn.CTBAGS, TO_CHAR(ctn.CTSTARTTIME , 'DD/MM/YYYY HH:MI:SS')  CTSTARTTIME, TO_CHAR(ctn.CTENDTIME , 'DD/MM/YYYY HH:MI:SS') CTENDTIME, ctn.CTNOTEUSER, e.NAME EMPNAME , d.DEPTABBR, ctn.CREWSIZE  from WEMS_CLEANABLE_TARGET ct inner join WEMS_CLEANABLE_TARGET_NOTES ctn on ct.CTID = ctn.CTID  inner join EMPLOYEE e on e.EMPLOYEEID = ctn.FORMANID
 inner join DEPT d on d.DEPTCODE = e.DEPTCODE where ct.MARKERID = ". $markerId ." and ctn.EVENTID = ". $eventId." order by ctn.CTID, ct.FULLNAME, CTSTARTTIME DESC";
                 $result = $this->getRecord($qry);            
             }
