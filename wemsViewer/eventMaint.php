@@ -2492,15 +2492,10 @@ ________________________________________________________________________________
      
      
      
-     <div style="background-color:#FFF2F2;" id="view4"  > 
-      
+     <div style="background-color:#FFF2F2;" id="view4"  >
      			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="eventPDFForm" id="eventPDFForm" target="WEMS_REPORT" onsubmit="return validateEventLocation();">
-              
-               
-      				<fieldset id="reports">
+                <fieldset id="reports">
         				<legend>Platform Assignment Report </legend>
-    	
-    	
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width="100%">
 <tr>
 							     <td>Event:</td>
@@ -2536,21 +2531,15 @@ ________________________________________________________________________________
                             }
                             ?>
 
-        				</table>
-        
+        				</table>        
       				</fieldset>
-
-      
       			</form>
       			<br></br>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gangPDFForm" id="gangPDFForm" target="WEMS_REPORT2" onsubmit="validateEvent();">
-              
-               
-      				<fieldset id="departmentWiseReport">
-        				<legend>Department Wise Report</legend>    	
-    	
+                <fieldset id="departmentWiseReport">
+        				<legend>Department Wise Report</legend>    
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-<tr>
+                            <tr>
 							     <td>Event:</td>
 								 <td><select name="eventId" id = "eventId"> <option value='0' selected> Select Event  </option>
 								<?php 
@@ -2580,13 +2569,9 @@ ________________________________________________________________________________
                             ?>
 
         				</table>
-        
       				</fieldset>
-
-      
       			</form>
-     
-     	</div>
+        </div>
      
    <!--
      ************************************************************************************************************************************************
