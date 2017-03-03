@@ -1270,7 +1270,27 @@ else
 														?>
 														</select>
 													</td>
+
+												</tr>	 
+												
+												
+												<tr>
+													<td>Status</td>
+													<td>
+														<select name="gStatus" id="gStatus">
+														  <option value= "0" > Unassigned </option>
+														  <option value= "1" > Assigned </option>
+														  <option value= "3" > Closed </option>
+														</select>
+													</td>
 												</tr>	
+												<!--  
+												$gStartTm = isset($_POST['gStartTm'])  ? $_POST['gStartTm'] : "";
+       											$gHour = isset($_POST['gStartHr'])  ? $_POST['gStartHr'] : "";
+        										$gMin = isset($_POST['gStartMin'])  ? $_POST['gStartMin'] : "";
+        										$gAmPm = isset($_POST['gAmPm'])  ? $_POST['gAmPm'] : "";
+        										-->
+
 												<tr>
 													<td>Start Date Time</td>
 													<td><input readonly type="text" name="gStartTm" size="20" tabindex="24" id="gStartTm" value=""/><img src="cal.gif" width="16" border="0" id="gangStartTm" alt="Click here to pick date" />  
