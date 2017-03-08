@@ -67,7 +67,7 @@ while($row = oci_fetch_array($qry))
    // echo $dept . " Total Forman = " . $formanTotal . " Total Employees = " . $empTotal . " Total = ". $total . "<br>";
 
            //$output .= $dept . "    Forman = " . $formanTotal . "     Employees = " . $empTotal . "   Total = ". $total . "<br><br>";
-          $output.= "<tr><td>" . $dept . ":  </td>  <td> Forman = " . $formanTotal . "</td><td> Employees = " . $empTotal . "</td> <td> Total: " . $total . "</td></tr>";
+          $output.= "<tr><td>" . $deptCd . ":  </td>  <td> Forman = " . $formanTotal . "</td><td> Employees = " . $empTotal . "</td> <td> Total: " . $total . "</td></tr>";
          
           $tforman = $tforman + $formanTotal;
           $tEmp = $tEmp + $empTotal;

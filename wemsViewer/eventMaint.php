@@ -11,7 +11,7 @@ $eventErrMsg = "";
 $gangErrMsg = "";
 $locationErrMsg = "";
 
-
+ 
 $eventSuccessMsg = "";
 $gangSuccessMsg = "";
 $interlockingErrMsg = "";
@@ -72,7 +72,7 @@ if($_SESSION['group'] != "WEMS_Admin")
     header("Location: login.php?returnPage=$returnPage");
    
 }
-else 
+else  
 {
 
     require '../wemsDatabase.php';
@@ -1225,14 +1225,14 @@ else
 													
 													<?php 
 
-                                   $qry = oci_parse($c, "SELECT EMPLOYEEID, NAME from EMPLOYEE where DEPTCODE is not NULL order by NAME")
+$qry = oci_parse($c, "SELECT EMPLOYEENUMBER, FST_NME, LST_NME from WEMS_EMPLOYEE where DIV_CD = '2' order by LST_NME")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                    oci_execute($qry);
 
                                    while($row = oci_fetch_array($qry)){
-                                     $id = $row['EMPLOYEEID'];
-                                     $desc = $row['NAME'];
+                                     $id = $row['EMPLOYEENUMBER'];
+                                     $desc = $row['LST_NME'] . ", ". $row['FST_NME'];
 									
 										if($id == $forman)
 										{
