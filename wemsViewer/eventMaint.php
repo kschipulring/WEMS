@@ -909,7 +909,7 @@ else
     		<li><a href="#view2">Gang Assignments</a></li> 
     		<li><a href="#view3">Location Assignments</a></li> 
     		<li><a href="#view4">Reports</a></li> 
-    		<li><a href="#view5">Visualization</a></li> 
+    		<li><a href="#view5">Map</a></li> 
     	</ul> 
     	</div>
     	<div class="tabcontents"> 

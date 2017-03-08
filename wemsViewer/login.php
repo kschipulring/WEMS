@@ -17,7 +17,7 @@ session_start();
 
 
   
-$inactive = 1200;  //600 = 10 min
+$inactive = 7200;  //600 = 10 min
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
 {
   
