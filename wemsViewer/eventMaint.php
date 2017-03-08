@@ -159,7 +159,7 @@ else
         }
         
         
-        $qry2 = oci_parse($c, "UPDATE WEMS_ABLE_TARGET SET ASSIGNED_CREWSIZE = NULL, ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = 1, CT_PASSNUM = NULL, CT_BAGS = NULL")
+        $qry2 = oci_parse($c, "UPDATE WEMS_CLEANABLE_TARGET SET ASSIGNED_CREWSIZE = NULL, ASSIGNED_SITEFOREMEN = NULL, CT_STATUS = 1, CT_PASSNUM = NULL, CT_BAGS = NULL")
         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
         
        
@@ -1225,7 +1225,7 @@ else
 													
 													<?php 
 
-$qry = oci_parse($c, "SELECT EMPLOYEENUMBER, FST_NME, LST_NME from WEMS_EMPLOYEE where DIV_CD = '2' order by LST_NME")
+$qry = oci_parse($c, "SELECT EMPLOYEENUMBER, FST_NME, LST_NME from WEMS_EMPLOYEE where DIV_CD = '1' order by LST_NME")
                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                    oci_execute($qry);
@@ -1392,43 +1392,19 @@ $qry = oci_parse($c, "SELECT EMPLOYEENUMBER, FST_NME, LST_NME from WEMS_EMPLOYEE
 												
 												
 												
-												
+								</table>	
+								<table align="center" width = "80%">			
 								<?php 
-								/*
-     		                     $qry = oci_parse($c, "select distinct w.formanid ,d.deptname DEPT, w.emp_assigned as CNT
-								from wems_gang w, dept d, employee e
-								where d.deptcode = e.deptcode
-								and e.employeeid = w.formanid
-								and d.deptcode is not null
-								and eventID = :EVENTID
-								order by d.deptname")
-       								                     OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-       
-       								                     
-       							oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-       							oci_execute($qry);
-     	
-     	
-     							while($row = oci_fetch_array($qry))
-       							{
-       							     $dept = $row['DEPT'];
-       							     $empCnt = $row['CNT'];
-       							     
-       							     
-       							    
-       								echo "<tr><td colspan=\"2\"> " . $dept . " - " .  $empCnt . "</td></tr>";
-       								
-       								
-       								$deptchange = $row['DEPT'];
-       							
-       							
-       							}
-     	                      */
+
 								if($eventID > 0)
 								{
 								    include 'getTotalByDepartment.php';
-								    echo "<tr><td colspan=\"2\"> " . $output . "</td></tr>";
+								    echo $output;
 								}
+							  	
+       	                    ?>
+     	
+								</table>
 							  	
        	                    ?>
      	
@@ -2586,7 +2562,10 @@ ________________________________________________________________________________
               
 
       				
-      				<input class="GIS" type="submit" value="GIS" name="SUBMIT" id="SUBMIT" />
+      			<button onclick="StationsMap('sta')">Stations Map</button>
+                <br /><br />
+                <button onclick="StationsMap('sen')">Sentinel Map</button>
+                <br /><br />
       				
       				
 
@@ -2616,6 +2595,15 @@ ________________________________________________________________________________
     </body>
 
       <script language="JavaScript" type="text/javascript">
+
+
+      function StationsMap(map)
+      {
+     		if(map == 'sta') window.open('WEMS_stationsMap.html');
+     		
+     		if(map == 'sen') window.open('http://www.Sentinelfm.com/login.aspx');
+      }
+      
 
       Calendar.setup(
         		{
