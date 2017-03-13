@@ -2491,6 +2491,7 @@ ________________________________________________________________________________
 				               ?> 
                                 </select></td>
 							</tr>
+							<tr><td></td><td></td></tr>
                             <tr>
 							     <td>Location:</td>
 								 <td><select name="locationId[]" id = "locationId" multiple size ="1" width = "100%">
@@ -2545,6 +2546,47 @@ ________________________________________________________________________________
                             ?>
 
         				</table>
+      				</fieldset>
+      			</form><br></br>
+                <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="datewiseEventPDFForm" id="datewiseEventPDFForm" target="WEMS_REPORT2" onsubmit="validateDatewiseEvent();">
+                <fieldset id="DateRangeReports">
+        				<legend>Platform Assignment Report For Data Range</legend>
+        				<table align = "center" class="table" border="0" width="100%">
+                            <tr>
+							     <td width="10%">Date From:</td>
+								 <td width="40%"><input readonly type="text" name="reportFromDate" size="20" tabindex="24" id="reportFromDate" value=""/><img src="cal.gif" width="16" border="0" id="reportFromTime" alt="Click here to pick date" /></td>
+								 <td width="10%"> To:</td>
+								 <td width="40%"><input readonly type="text" name="reportToDate" size="20" tabindex="24" id="reportToDate" value=""/><img src="cal.gif" width="16" border="0" id="reportToTime" alt="Click here to pick date" /></td>
+							</tr>							
+							<tr><td></td><td></td></tr>
+                            <tr>
+							     <td>Location:</td>
+								 <td><select name="locationId" id = "locationId"> <option value='0' selected> Select Location  </option>
+								<?php                                
+                                $locationObj = new location();
+                                $result = $locationObj->getLocationList();
+                                if($result){
+                                    while($row = oci_fetch_array($result[0])){                                    
+                                        $id = $row['MARKERID'];
+                                        $desc = $row['MARKERNAME'];                                        
+    									echo "<option value=\"$id\" > $desc </option>";
+                                    }
+                                }
+                                oci_free_statement($result[0]);
+				               ?> 
+                                </select></td>
+							</tr>
+                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Datewise Platform Assignment PDF" /></td></tr> 
+                            
+                            <?php 
+                            if(isset($task) && $task == 'Create Datewise Platform Assignment PDF') {
+                                include_once '../classes/eventPDFClass.php';
+                                $pdf = new eventPDF();                                
+                                $pdf->createDatewiseEventPDF($_POST);
+                            }
+                            ?>
+
+        				</table>        
       				</fieldset>
       			</form>
         </div>
@@ -2650,7 +2692,27 @@ ________________________________________________________________________________
 
 		        		}  );
 				
-				
+				Calendar.setup(
+		        		{
+		        			inputField : "reportFromDate",
+		        			ifFormat   : "%m/%d/%Y",
+		        			displayArea: "start_display",
+		        			daFormat   : "%m/%d/%Y",
+		        			button     : "reportFromTime",
+		        			weekNumbers: false
+
+		        		}  );
+        		
+				Calendar.setup(
+		        		{
+		        			inputField : "reportToDate",
+		        			ifFormat   : "%m/%d/%Y",
+		        			displayArea: "start_display",
+		        			daFormat   : "%m/%d/%Y",
+		        			button     : "reportToTime",
+		        			weekNumbers: false
+
+		        		}  );
 
       	var tabs = $('#tabs-titles li'); //grab tabs
       	var contents = $('#tabs-contents li'); //grab contents
@@ -3654,6 +3716,21 @@ ________________________________________________________________________________
     				   alert("Please select Event for Report");
     				   return false;          			   
     			   }
+    			   return true;
+        	   }
+
+    		   function validateDatewiseEvent()
+    		   {      
+    			   if((document.datewiseEventPDFForm.reportFromDate.value == '' || document.datewiseEventPDFForm.reportFromDate.value == 0) || (document.datewiseEventPDFForm.reportToDate.value == '' || document.datewiseEventPDFForm.reportToDate.value == 0)){
+    				   alert("Please select Date Range for Report");
+    				   return false;          			   
+    			   } else {
+    				   if(document.datewiseEventPDFForm.locationId.value === '0'){
+     					    alert("Please select Location for Report");
+        					 return false;
+         				    }
+        			   }
+    			   
     			   return true;
         	   }
     		   </script>
