@@ -19,7 +19,7 @@ function getDBtype($pre){
 	switch($pre){
 		case "l":
 			$type = "S";
-			break;
+			break; 
 		case "i":
 			$type = "I";
 			break;
