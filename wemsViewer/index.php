@@ -24,7 +24,7 @@ function getDBtype($pre){
 			$type = "I";
 			break;
 		case "pl":
-			$type = "P";
+			$type = "P"; 
 			break;
 	}
 
