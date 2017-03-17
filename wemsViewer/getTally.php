@@ -128,7 +128,4 @@ while($row = oci_fetch_array($qry))
 {
     $pDirty = $row['DIRTY'];
 }
-
-
-
 ?>

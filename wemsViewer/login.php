@@ -16,8 +16,8 @@
 session_start(); 
 
 
-  
-$inactive = 7200;  //600 = 10 min
+/*  
+$inactive = 100;  //600 = 10 min
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
 {
   
@@ -30,7 +30,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
           }
 } 
   
-
+*/
 //if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
 //{
 //	header("location: index.php");

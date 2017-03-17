@@ -190,9 +190,6 @@ while($row = oci_fetch_array($qry)){
 ?>
 
 
-
-
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -219,64 +216,56 @@ while($row = oci_fetch_array($qry)){
             
         <div class="appHeader">
             <div class="headerLogo">
-                <img alt="logo" src="images/mta_info.png" height="36" />
-                
+                <img alt="logo" src="images/MTA_NYC_logo.svg" height="36" />
             </div>
             <div class="headerTitle">
              
                 <span id="headerTitleSpan">
-                  WEMS<font color="#4272AF">...................</font>     
+                  WEMS<!--  <font color="#4272AF">...................</font> -->    
                 </span>
                 
                 
                 
 				
-				<span style="float:right">
-                	
-				<?php	
-				
-				include 'getTally.php';
-				
-				
-					echo "Stations:"; 
-					echo "<img src=\"../images/Red.png\" alt=\"red\"><font color=\"red\">$sDirty</font>";
-					echo "<img src=\"../images/yellow.png\" alt=\"yellow\"><font color=\"yellow\">$sInProgress</font>";
-					echo "<img src=\"../images/green.png\" alt=\"green\"><font color=\"lawnGreen\">$sClean</font>";
-					echo"<font color=\"#4272AF\">...</font>";
+				<span id="headerStatusIconsSpan">  	
+					<?php
+					include 'getTally.php';
+					include_once "../classes/HLfuncs.php";
+					?>
 					
-					echo "Interlockings:"; 
-					echo "<img src=\"../images/Red.png\" alt=\"red\"><font color=\"red\">$iDirty</font>";
-					echo "<img src=\"../images/yellow.png\" alt=\"yellow\"><font color=\"yellow\">$iInProgress</font>";
-					echo "<img src=\"../images/green.png\" alt=\"green\"><font color=\"lawnGreen\">$iClean</font>";
-					echo"<font color=\"#4272AF\">...</font>";
+					Stations:
+					<?=HLfuncs::item($sDirty, "dirty") ?>
+					<?=HLfuncs::item($sInProgress, "inprogress") ?>
+					<?=HLfuncs::item($sClean, "clean", "circle") ?>
+					<span class="HLspacer">.....</span> 
 					
-					echo "Parking Lots: ";
-					echo "<img src=\"../images/Red.png\" alt=\"red\"><font color=\"red\">$pDirty</font>";
-					echo "<img src=\"../images/yellow.png\" alt=\"yellow\"><font color=\"yellow\">$pInProgress</font>";
-					echo "<img src=\"../images/green.png\" alt=\"green\"><font color=\"lawnGreen\">$pClean</font>";
+					<!-- Interlockings:
+					<?=HLfuncs::item($iDirty, "dirty", "triangle") ?>
+					<?=HLfuncs::item($iInProgress, "inprogress", "triangle") ?>
+					<?=HLfuncs::item($iClean, "clean", "triangle") ?>
+					<span class="HLspacer">.....</span> 
+					 -->
 					
-				?>	
+					Parking Lots:
+					<?=HLfuncs::item($pDirty, "dirty", "rect") ?>
+					<?=HLfuncs::item($pInProgress, "inprogress", "rect") ?>
+					<?=HLfuncs::item($pClean, "clean", "rect") ?>
 				</span>       
-				
-         		
-         		
-               
+
                 <div id="subHeaderTitleSpan" class="subHeaderTitle">
                 
                 
                 </div>
-                
-         
-
-               
             </div>
              
-           
-            
-            <div class="headerLinks">
-           
-            
-                <div> 
+            <div class="search wems_gis">
+                <div id='geocodeDijit'>
+                </div>
+            </div>
+            <div class="headerLinks wems_gis">
+           		<div id="helpDijit">
+                </div>
+            <div> 
 		
 		
     	
@@ -309,6 +298,7 @@ while($row = oci_fetch_array($qry)){
             <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.3/es5-shim.min.js"></script>
         <![endif]-->
         <script type="text/javascript" src="//js.arcgis.com/3.14compact/"></script>
+        <script type="text/javascript" src="js/viewer/getTally.js"></script>
         <script type="text/javascript">
             // get the config file from the url if present
             var file = 'config/viewer', s = window.location.search, q = s.match(/config=([^&]*)/i);
