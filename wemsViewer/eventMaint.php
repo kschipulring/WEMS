@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();       
 // error and success msg rows
 function getErScRows($erMsg, $scMsg, $colSpan = 6){
