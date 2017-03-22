@@ -1,6 +1,6 @@
 <?php
 
-$wemsDBusername = "WEMS";
+$wemsDBusername = "WEMS"; 
 $wemsDBpassword = "wems";
 $wemsDatabase = "WEATTEST"; 
 
