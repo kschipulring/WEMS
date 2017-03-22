@@ -118,7 +118,7 @@ if(isset($_POST['login']))
 					    
 					           
 					       
-					             $_SESSION["group"] = "WEMS_Admin";
+					             $_SESSION["group"] = "WEMS_Admin"; 
 					    
 					         
 					        // }
