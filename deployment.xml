@@ -3,7 +3,7 @@
     <name>WEMS</name>
     <description>got rid of config &#13; &#13; config update</description>
     <version>
-        <release>0.1.2 </release>
+        <release>0.1.2</release>
     </version>
     <appdir>data</appdir>
     <scriptsdir>scripts</scriptsdir>
@@ -19,6 +19,7 @@
       <validation>
         <enums>
           <enum>TEST</enum>
+          <enum>QA</enum>
           <enum>PRODUCTION</enum>
         </enums>
       </validation>
