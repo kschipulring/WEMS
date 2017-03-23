@@ -179,7 +179,7 @@ function downloadFields($pre, $bType="CTID"){
 
 	$outStr .= "</select><input class='Download' type='submit' value='Download' name='SUBMIT' id='{$pre}SUBMIT' />";
 
-	return $outStr;
+	return $outStr;  
 }
 
 ob_start();
@@ -201,7 +201,7 @@ $parkingLotSuccessMsg = "";
 $lStatus = "";
 $gStartTm = "";
 $lLoc = "";
-$tabindex = 0;
+$tabindex = 0;cd 
 
 // missing vars newly added
 $gEmpNum = 0;

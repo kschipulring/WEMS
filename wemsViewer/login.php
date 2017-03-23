@@ -1,4 +1,4 @@
-<?php
+ls<?php
  require_once('oracle_session.class.php');
  
  
