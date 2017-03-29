@@ -618,39 +618,7 @@ function PLconponentDetailhandler(obj){
  * LOCATIONS
  * */
 
-function getLocationByEvent() {
-	/*
-	var eventId = document.getElementById('eventId').value;
-	if(window.XMLHttpRequest) {
-		// If IE7, Mozilla, Safari, etc: Use native object
-		var client = new XMLHttpRequest();
-	} else {
-		if(window.ActiveXObject) {
-			// ...otherwise, use the ActiveX control for IE5.x and IE6
-			var client = new ActiveXObject("Microsoft.XMLHTTP");
-		}
-	}
-
-	//client.onreadystatechange = function() {};
-	client.open("GET", "getLocationList.php?eventId=" + eventId);
-	client.send("");
-	var location = document.getElementById('locationId');
-
-	document.getElementById('locationId').options.length = 0;
-	document.getElementById('locationId').size = 6;
-	var length = location.options.length;
-
-	if(client.readyState == 4 && client.status == 200) {
-		var val = JSON.parse( client.responseText );
-
-		for(var i = 0; i < val.length; i++) {
-			var opt = document.createElement('option');
-			opt.innerHTML = val[i].MARKERNAME;
-			opt.value = val[i].MARKERID;
-			location.appendChild(opt);
-		}
-	}*/
-	 
+function getLocationByEvent() {	
 	var eventId = document.eventPDFForm.eventId.value;    			   
 	if (window.XMLHttpRequest){                         
 		var xRequest = new XMLHttpRequest();
@@ -680,19 +648,7 @@ function getLocationByEvent() {
 	xRequest.send(null);
 }
 
-function validateEventLocation(){    			   
-	/*if(document.getElementById('eventId').value == '' || document.getElementById('eventId').value == 0){
-		if(document.getElementById('locationId').value == ''){
-			alert("Please select Event & Location for Report");
-		} else {
-			alert("Please select Event for Report");
-		}
-	} else {
-		if(document.getElementById('locationId').value == ''){
-			alert("Please select Location for Report");
-		}
-	}*/
-	
+function validateEventLocation(){
 	if(document.eventPDFForm.eventId.value == '' || document.eventPDFForm.eventId.value == 0){
 		if(document.eventPDFForm.locationId.value == ''){
 			alert("Please select Event & Location for Report");
@@ -795,43 +751,23 @@ window.onload = function() {
 		weekNumbers: false
 	}); 
 	
-	Calendar.setup(
-		        
-			{
-			       
-			inputField : "reportFromDate",
-			       
-			ifFormat   : "%m/%d/%Y",
-			       
-			displayArea: "start_display",
-			       
-			daFormat   : "%m/%d/%Y",
-			       
-			button     : "reportFromTime",
-			       
+	Calendar.setup({			       
+			inputField : "reportFromDate",			       
+			ifFormat   : "%m/%d/%Y",			       
+			displayArea: "start_display",			       
+			daFormat   : "%m/%d/%Y",			       
+			button     : "reportFromTime",			       
 			weekNumbers: false
-
-			       
-			}  );
+	});
 			        
-			Calendar.setup(
-			       
-			{
-			       
-			inputField : "reportToDate",
-			       
-			ifFormat   : "%m/%d/%Y",
-			       
-			displayArea: "start_display",
-			       
-			daFormat   : "%m/%d/%Y",
-			       
-			button     : "reportToTime",
-			       
+	Calendar.setup({			       
+			inputField : "reportToDate",			       
+			ifFormat   : "%m/%d/%Y",			       
+			displayArea: "start_display",			       
+			daFormat   : "%m/%d/%Y",			       
+			button     : "reportToTime",			       
 			weekNumbers: false
-
-			       
-			}  );
+	});
 
 	
 	//Prevent the backspace button from being used to go back in web page navigation
@@ -872,16 +808,14 @@ window.onhashchange = clickedTab;
 
 function validateDatewiseEvent()
 {      
-if((document.datewiseEventPDFForm.reportFromDate.value == '' || document.datewiseEventPDFForm.reportFromDate.value == 0) || (document.datewiseEventPDFForm.reportToDate.value == '' || document.datewiseEventPDFForm.reportToDate.value == 0)){
-alert("Please select Date Range for Report");
-return false;          
-
-} else {
-if(document.datewiseEventPDFForm.locationId.value === '0'){
-   alert("Please select Location for Report");
-  return false;
-       }
-    }
-
-return true;
-    }
+	if((document.datewiseEventPDFForm.reportFromDate.value == '' || document.datewiseEventPDFForm.reportFromDate.value == 0) || (document.datewiseEventPDFForm.reportToDate.value == '' || document.datewiseEventPDFForm.reportToDate.value == 0)){
+		alert("Please select Date Range for Report");
+		return false; 
+	} else {
+		if(document.datewiseEventPDFForm.locationId.value === '0'){
+			alert("Please select Location for Report");
+			return false;
+	    }
+	}	
+	return true;
+}

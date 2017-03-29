@@ -93,7 +93,7 @@ class employeePDF extends PDF {
                 }
             }  
                  
-            $reportLogo = "itLogo.png";
+            $reportLogo = "lirrhead.jpg";
             $logoWidth = 30;
             $reportTitle = $pageTitle;           
             
