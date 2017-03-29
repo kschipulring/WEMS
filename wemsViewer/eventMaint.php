@@ -269,7 +269,7 @@ $inactive = 2400; //600 = 10 min
 $lConponent="";
 $iConponent="";
 $plConponent="";
-$siConponent="";
+$siConponent=""; 
 
 if (isset($_SESSION['timeout'])) {
 	$session_life = time() - $_SESSION['timeout'];
@@ -294,7 +294,7 @@ if($_SESSION['group'] != "WEMS_Admin"){
 	header("Location: login.php?returnPage=$returnPage");
 }else{
 	require '../wemsDatabase.php';
-	require_once('tcpdf/tcpdf.php');
+	//require_once('tcpdf/tcpdf.php');
 	require_once '../classes/databaseClass.php';
 	require_once '../classes/eventClass.php';
 	require_once '../classes/gangClass.php';
