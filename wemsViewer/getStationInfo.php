@@ -1,163 +1,100 @@
- <?php 
-  
-  require '../wemsDatabase.php';
+ <?php
+require '../wemsDatabase.php';
     
-    $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
-    OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
+$c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
+OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
 
-    $CTID = isset($_GET['param']) ? $_GET['param'] : -1;
-    $eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
+$CTID = isset($_GET['param']) ? $_GET['param'] : -1;
+$eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
     
-    $comments = "";
+$comments = "";
     
-    //$eventID = 0;
-    $empAssigned= "";
-    $button = "";
-    $noteTime = "";
-    $forman = "";
-    $crewSize = "";
-    $bags = "";
-    $pass = "";
-    $status = "";
-    $formanName = "";
-    $supportDocs = "";
-    
-
-   		/*	
-	    $qry = oci_parse($c, "SELECT ct.NOTIFYTIME, ct.ASSIGNED_CREWSIZE, ct.ASSIGNED_SITEFOREMEN, ct.CT_STATUS, ct.CT_PASSNUM, ct.CT_BAGS, e.NAME
-								from WEMS_CLEANABLE_TARGET ct, EMPLOYEE e where e.EMPLOYEENUMBER = ct.ASSIGNED_SITEFOREMEN AND CTID = :CTID")
-                                       OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-
-                                   oci_bind_by_name($qry, ":CTID", $CTID, -1);
-                                   //oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-
-                                   oci_execute($qry);
+//$eventID = 0;
+$empAssigned= "";
+$button = "";
+$noteTime = "";
+$forman = "";
+$crewSize = "";
+$bags = "";
+$pass = "";
+$status = "";
+$formanName = "";
+$supportDocs = "";
 
 
-      while($row = oci_fetch_array($qry))
-       {
-
-          $noteTime = $row['NOTIFYTIME'];
-       	  $forman = $row['ASSIGNED_SITEFOREMEN'];
-       	  $formanName = $row['NAME'];
-       	  $crewSize = $row['ASSIGNED_CREWSIZE'];
-          $bags = $row['CT_BAGS'];
-       	  $pass = $row['CT_PASSNUM'];
-       	  $status = $row['CT_STATUS'];
-       	  $button = "Update Station";
-       } 
-      */
-    
-    
-            
+$qryDoc = oci_parse($c, "SELECT ID from WEMS_LOCDOCS where EVENTID = :EVENTID and MARKERID = :CTID")
+OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
           
-         $qryDoc = oci_parse($c, "SELECT ID from WEMS_LOCDOCS where EVENTID = :EVENTID and MARKERID = :CTID")
-         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+oci_bind_by_name($qryDoc, ":EVENTID", $eventID, -1);
+oci_bind_by_name($qryDoc, ":CTID", $CTID, -1);
           
-         oci_bind_by_name($qryDoc, ":EVENTID", $eventID, -1);
-         oci_bind_by_name($qryDoc, ":CTID", $CTID, -1);
-          
-         oci_execute($qryDoc);
+oci_execute($qryDoc);
          
-          
-         
-         while($row = oci_fetch_array($qryDoc))
-         {
-             	
-             $supportDocs = $supportDocs . $row['ID'] . ",";
-             // $supportDoc = $row['ID'];
-             	
-         }
+while( ($row = oci_fetch_array($qryDoc)) !== false ){
+	$supportDocs = $supportDocs . $row['ID'] . ",";
+}
           
    
+$qry = oci_parse($c, "SELECT NOTIFYTIME, ASSIGNED_CREWSIZE, ASSIGNED_SITEFOREMEN, CT_STATUS, CT_PASSNUM, CT_BAGS, NAME
+				from WEMS_CLEANABLE_TARGET  where CTID = :CTID")
+OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
     
+oci_bind_by_name($qry, ":CTID", $CTID, -1);
+//oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
     
+oci_execute($qry);
     
-    $qry = oci_parse($c, "SELECT NOTIFYTIME, ASSIGNED_CREWSIZE, ASSIGNED_SITEFOREMEN, CT_STATUS, CT_PASSNUM, CT_BAGS, NAME
-								from WEMS_CLEANABLE_TARGET  where CTID = :CTID")
-    								OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-    
-    								oci_bind_by_name($qry, ":CTID", $CTID, -1);
-    								//oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-    
-    								oci_execute($qry);
-    
-    
-    								while($row = oci_fetch_array($qry))
-    								{
-    
-    								    $noteTime = $row['NOTIFYTIME'];
-    								    $forman = $row['ASSIGNED_SITEFOREMEN'];
-    								   // $formanName = $row['NAME'];
-    								    $crewSize = $row['ASSIGNED_CREWSIZE'];
-    								    $bags = $row['CT_BAGS'];
-    								    $pass = $row['CT_PASSNUM'];
-    								    $status = $row['CT_STATUS'];
-    								    $button = "Update Station";
-    								}
-    
-    
-    
-    
-    
+while($row = oci_fetch_array($qry)){
+	$noteTime = $row['NOTIFYTIME'];
+	$forman = $row['ASSIGNED_SITEFOREMEN'];
+	// $formanName = $row['NAME'];
+	$crewSize = $row['ASSIGNED_CREWSIZE'];
+	$bags = $row['CT_BAGS'];
+	$pass = $row['CT_PASSNUM'];
+	$status = $row['CT_STATUS'];
+	$button = "Update Station";
+}
 
-      /* $qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.NAME, t.CTSTATUS, t.CTPASSNUM,
-      //                          t.CTBAGS, t.CTNOTEUSER
-								from WEMS_CLEANABLE_TARGET_NOTES t, EMPLOYEE e where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEENUMBER ORDER BY ENTER_DATETIME")
-       								OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-       */
-    					$qry = oci_parse($c, "SELECT TO_CHAR(WEMS_CLEANABLE_TARGET_NOTES.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTNOTES, EMPLOYEE.NAME, WEMS_CLEANABLE_TARGET_NOTES.CTSTATUS, 
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTPASSNUM, WEMS_CLEANABLE_TARGET_NOTES.CTBAGS, 
-                                            WEMS_CLEANABLE_TARGET_NOTES.CTNOTEUSER
-                                            FROM WEMS_CLEANABLE_TARGET_NOTES
-                                            LEFT JOIN EMPLOYEE ON EMPLOYEE.EMPLOYEENUMBER = WEMS_CLEANABLE_TARGET_NOTES.FORMANID 
-                                            where WEMS_CLEANABLE_TARGET_NOTES.CTID = :CTID and 
-                                            WEMS_CLEANABLE_TARGET_NOTES.EVENTID = :EVENTID and  
-                                            ((WEMS_CLEANABLE_TARGET_NOTES.FORMANID = EMPLOYEE.EMPLOYEENUMBER) or (WEMS_CLEANABLE_TARGET_NOTES.FORMANID is NULL))ORDER BY ENTER_DATETIME")
-    																OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-       								oci_bind_by_name($qry, ":CTID", $CTID, -1);
-       								oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-       								oci_execute($qry);
+$qry = oci_parse($c, "SELECT TO_CHAR(W.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
+                   W.CTNOTES, E.NAME, W.CTSTATUS, 
+                   W.CTPASSNUM, W.CTBAGS, 
+                   W.CTNOTEUSER
+                   FROM WEMS_CLEANABLE_TARGET_NOTES W
+                   LEFT JOIN EMPLOYEE E ON E.EMPLOYEENUMBER = W.FORMANID 
+                   where W.CTID = :CTID and 
+                   W.EVENTID = :EVENTID and  
+                   ((W.FORMANID = E.EMPLOYEENUMBER) or (W.FORMANID is NULL)) ORDER BY ENTER_DATETIME")
+OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+
+oci_bind_by_name($qry, ":CTID", $CTID, -1);
+oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
+oci_execute($qry);
        
 
-       								while($row = oci_fetch_array($qry))
-       								{
+while($row = oci_fetch_array($qry)){
+	$nNoteTime = $row['CTSTARTTIME'];
+	$nUser = $row['CTNOTEUSER'];
+	$nNote = $row['CTNOTES'];
+	$nForman = $row['NAME'];
+	$nBags = $row['CTBAGS'];
+	$nPass = $row['CTPASSNUM'];
+	$nStatus = $row['CTSTATUS'];
+	   
+	$qry2 = oci_parse($c, "SELECT STATUS from WEMS_LOCATION_STATUS WHERE STATUSID = :STATUSID")
+	OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+   
+	oci_bind_by_name($qry2, ":STATUSID", $nStatus, -1);
+   
+	oci_execute($qry2);
+   
+	while($row = oci_fetch_array($qry2)){
+		$nStatus = $row['STATUS'];
+	}
 
-       								    $nNoteTime = $row['CTSTARTTIME'];
-       								    $nUser = $row['CTNOTEUSER'];
-       								    $nNote = $row['CTNOTES'];
-       								    $nForman = $row['NAME'];
-       								    $nBags = $row['CTBAGS'];
-       								    $nPass = $row['CTPASSNUM'];
-       								    $nStatus = $row['CTSTATUS'];
-       								    
-       								    $qry2 = oci_parse($c, "SELECT STATUS from WEMS_LOCATION_STATUS WHERE STATUSID = :STATUSID")
-       								     OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-       								    
-       								      oci_bind_by_name($qry2, ":STATUSID", $nStatus, -1);
-       								    
-       								    								oci_execute($qry2);
-       								    
-       								    								while($row = oci_fetch_array($qry2))
-       								    								{
-       								    								    $nStatus = $row['STATUS'];
-       								    								}
-       								    
-       								    
-       								    
-       								    
-       								    
-       				$comments .= $nNoteTime . ",  user: " . $nUser . ",  " . $nNote . ", Forman: " . $nForman . ", Bags: " . $nBags . ", Pass #: " . $nPass . ", Status: " .  $nStatus . "\\n";
-       				                    
+	$comments .= $nNoteTime . ",  user: " . $nUser . ",  " . $nNote . ", Forman: " . $nForman . ", Bags: " . $nBags . ", Pass #: " . $nPass . ", Status: " .  $nStatus . "\\n";
+}
 
-       								}
-
-       								//$comments = str_replace('"', '\"', $comments);
-       								//$comments = "event ID = " .  $eventID;
-
-
-    $json = "[{
+$json = "[{
         \"GANG\": \"$forman\",
         \"FORMANNAME\": \"$formanName\",
         \"COMMENTS\": \"$comments\",
@@ -169,11 +106,6 @@
         \"SUPPORTDOCS\": \"$supportDocs\"
         }]";
 
+echo $json;
 
-
-  echo $json;
-
-
-  oci_close($c);
-
-?>
+oci_close($c);

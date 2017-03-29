@@ -16,8 +16,8 @@
 session_start(); 
 
 
-  
-$inactive = 7200;  //600 = 10 min
+/*  
+$inactive = 100;  //600 = 10 min
 if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
 {
   
@@ -30,7 +30,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
           }
 } 
   
-
+*/
 //if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] == true)
 //{
 //	header("location: index.php");
@@ -108,7 +108,7 @@ if(isset($_POST['login']))
 					{
 					    
 					    
-					    
+					     
 					   // foreach($groups as $group)
 					   // {
 					       // echo $group . "<br><br>";
@@ -118,7 +118,7 @@ if(isset($_POST['login']))
 					    
 					           
 					       
-					             $_SESSION["group"] = "WEMS_Admin";
+					             $_SESSION["group"] = "WEMS_Admin"; 
 					    
 					         
 					        // }

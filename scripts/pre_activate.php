@@ -39,19 +39,19 @@ $environment = getenv('ZS_APP_ENVIRONMENT');
 switch($environment) {
     
     case 'TEST':
-        rename('cmcDatabase.test.php', 'cmcDatabase.php');
-        unlink('cmcDatabase.prod.php' ) ;
+        rename('wemsDatabase.test.php', 'wemsDatabase.php');
+        unlink('wemsDatabase.prod.php' ) ;
         break;
     
     case 'QA':
-        rename('cmcDatabase.test.php', 'cmcDatabase.php');
-        unlink('cmcDatabase.prod.php' ) ;
+        rename('wemsDatabase.test.php', 'wemsDatabase.php');
+        unlink('wemsDatabase.prod.php' ) ;
         break;
 
     
     case 'PRODUCTION':
-        rename('cmcDatabase.prod.php', 'cmcDatabase.php');
-        unlink('cmcDatabase.test.php' ) ;
+        rename('wemsDatabase.prod.php', 'wemsDatabase.php');
+        unlink('wemsDatabase.test.php' ) ;
         break;
 }
 
@@ -71,10 +71,7 @@ if (file_exists($applicationLibPath)) {
     $target = $applicationLibPath . "/jscalendar";
     symlink($calendarLibDirectory, $target);
     
-    $graphLibDirectory = zend_deployment_library_path('jpgraph');
-    $gTarget = $applicationLibPath . "/jpgraph";
-    symlink($graphLibDirectory, $gTarget);
-    
+   
     $excelLibDirectory = zend_deployment_library_path('PHPExcel');
     $eTarget = $applicationLibPath . "/PHPExcel";
     symlink($excelLibDirectory, $eTarget);
@@ -84,18 +81,6 @@ if (file_exists($applicationLibPath)) {
 }
 
 
-chown("M7Reports/VersionReport/SWVersion.png", 'apache');
-
-chmod("M7Reports/VersionReport/SWVersion.png", 0664);
-
-chgrp("M7Reports/VersionReport/SWVersion.png", 'apache');
-
-
-chown("M7Reports/sandbox/routepct.png", 'apache');
-
-chmod("M7Reports/sandbox/routepct.png", 0664);
-
-chgrp("M7Reports/sandbox/routepct.png", 'apache');
 
 
 ?>

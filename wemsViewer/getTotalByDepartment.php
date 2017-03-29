@@ -49,8 +49,8 @@ while($row = oci_fetch_array($qry))
     
     $total = $empTotal + $formanTotal;
     
-    
-    $qry3 = oci_parse($c, "select DEPTNAME from DEPT where DEPTCODE = :DEPTCODE")
+     
+    $qry3 = oci_parse($c, "select DEPT_NAME from WEMS_DEPT where DEPT_NUM = :DEPTCODE")
             OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
    
             oci_bind_by_name($qry3, ":DEPTCODE", $deptCd, -1);
@@ -59,7 +59,7 @@ while($row = oci_fetch_array($qry))
             
             while($row = oci_fetch_array($qry3))
             {
-                $dept = $row['DEPTNAME'];
+                $dept = $row['DEPT_NAME'];
             }
     
     
@@ -67,7 +67,7 @@ while($row = oci_fetch_array($qry))
    // echo $dept . " Total Forman = " . $formanTotal . " Total Employees = " . $empTotal . " Total = ". $total . "<br>";
 
            //$output .= $dept . "    Forman = " . $formanTotal . "     Employees = " . $empTotal . "   Total = ". $total . "<br><br>";
-          $output.= "<tr><td>" . $deptCd . ":  </td>  <td> Forman = " . $formanTotal . "</td><td> Employees = " . $empTotal . "</td> <td> Total: " . $total . "</td></tr>";
+          $output.= "<tr><td>" . $dept . ":  </td>  <td> Forman = " . $formanTotal . "</td><td> Employees = " . $empTotal . "</td> <td> Total: " . $total . "</td></tr>";
          
           $tforman = $tforman + $formanTotal;
           $tEmp = $tEmp + $empTotal;

@@ -143,6 +143,7 @@ define([
 },{
       type: 'dynamic',
       url: 'http://www.orthos.dhses.ny.gov/arcgis/rest/services/elevation_contours/MapServer',
+      /*url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/elevation_contours/MapServer',*/
       title: 'USGS 10 Meter Contours',
       options: {
           id: 'nfhl',
@@ -208,6 +209,7 @@ define([
                 position: 3,
                 options: 'config/identify'
             },
+
            // wems: {
            //     include: true,
            //     id: 'wems',
@@ -218,6 +220,7 @@ define([
             //    position: 3,
             //    options: 'config/wems'
             //},
+
             basemaps: {
                 include: true,
                 id: 'basemaps',

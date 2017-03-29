@@ -1,15 +1,8 @@
 <?php
 
-$cmcDBusername = "CMC_SO";
-$cmcDBpassword = "cmcentral";
-$cmcDatabase = "cmctest";
+$wemsDBusername = "WEMS";
+$wemsDBpassword = "wems";
+$wemsDatabase = "WEATTEST";
 
-$wmdsDBusername = "e_wmds_dev";
-$wmdsDBpassword = "wayside";
-$wmdsDatabase = "WMDS";
-  
-$camsDBusername = "TSDC";
-$camsDBpassword = "abc123";
-$camsDatabase = "MXDBCAMS";
 
 ?>

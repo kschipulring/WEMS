@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<package xmlns="http://www.zend.com/server/deployment-descriptor/1.0" version="1.0">
+    <name>WEMS</name>
+    <description>got rid of config &#13; &#13; config update</description>
+    <version>
+        <release>0.1.2</release>
+    </version>
+    <appdir>data</appdir>
+    <scriptsdir>scripts</scriptsdir>
+    <dependencies>
+    <required>
+      <php>
+        <min>5.6</min>
+      </php>
+    </required>
+  </dependencies>
+    <parameters>
+    <parameter display="Environment" id="APP_ENVIRONMENT" readonly="true" required="true" type="choice">
+      <validation>
+        <enums>
+          <enum>TEST</enum>
+          <enum>QA</enum>
+          <enum>PRODUCTION</enum>
+        </enums>
+      </validation>
+    </parameter>
+    </parameters>
+</package>

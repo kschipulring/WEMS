@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="500"
+   height="500"
+   version="1.1"
+   id="svg12"
+   sodipodi:docname="MTA_NYC_logo.svg"
+   inkscape:version="0.92.0 r15299">
+  <metadata
+     id="metadata18">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs16" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="741"
+     inkscape:window-height="480"
+     id="namedview14"
+     showgrid="false"
+     inkscape:zoom="0.472"
+     inkscape:cx="250"
+     inkscape:cy="250"
+     inkscape:window-x="1073"
+     inkscape:window-y="296"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg12" />
+  <title
+     id="title2">MTA NYC logo</title>
+  <ellipse
+     cx="237.5"
+     cy="250"
+     rx="262.5"
+     ry="245"
+     stroke="none"
+     fill="#2360a5"
+     id="ellipse4"
+     style="fill:#060097;fill-opacity:1" />
+  <!-- #0060a9 has also been used -->
+  <g
+     stroke="none"
+     fill="white"
+     id="g10">
+    <path
+       d="M 19,113 L 92,125 112,267 H 113 L 135,132 208,144 V 363 L 162,370 V 276 L 163,229 H 161 L 134,375 88,382 54,225 H 52 L 55,280 V 388 L 24,393 A 262.5 245 0 0 1 19,113"
+       id="path6" />
+    <path
+       id="T"
+       d="M 330,210 L 301,208 V 348 L 259,354 V 204 L 223,201 V 146 L 330,164 V 210 Z" />
+    <path
+       id="A"
+       d="M 411,330 386,334 383,313 358,316 355,339 322,344 355,168 385,173 411,330 Z M 378,279 371,225 H 370 L 363,280 378,279 Z" />
+  </g>
+</svg>

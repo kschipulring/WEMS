@@ -116,9 +116,9 @@ define([
                 basemap: new Basemap({
                     id: 'nysortho',
                     layers: [new BasemapLayer({
-                        url: 'http://www.orthos.dhses.ny.gov/ArcGIS/rest/services/2013/MapServer'
+                        url: 'http://www.mokoon.dhses.ny.gov/ArcGIS/rest/services/2013/MapServer'
                     }), new BasemapLayer({
-                        url: 'http://www.orthos.dhses.ny.gov/ArcGIS/rest/services/2012/MapServer',
+                        url: 'http://www.cacaroon.dhses.ny.gov/ArcGIS/rest/services/2012/MapServer',
                         isReference: true
                     })]
                 })

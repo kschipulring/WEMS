@@ -9,6 +9,9 @@ define([
     'dijit/_Container',
     'dijit/layout/ContentPane',
     'dijit/form/Button',
+    'dijit/Menu',
+    'dijit/MenuItem',
+    'dojo/i18n',
     'esri/tasks/ProjectParameters',
     'esri/config',
     'require',
@@ -24,6 +27,9 @@ define([
     Container,
     ContentPane,
     Button,
+    Menu,
+    MenuItem,
+    i18n,
     ProjectParameters,
     esriConfig,
     require
@@ -238,16 +244,40 @@ define([
                 }
                 if (this.overlayReorder) {
                     array.forEach(this._overlayContainer.getChildren(), function (child) {
-                        if (!child.getPreviousSibling()) {
+                    	
+                    	
+                    	if (!child.getPreviousSibling()) {
                             child._reorderUp.set('disabled', true);
                         } else {
-                            child._reorderUp.set('disabled', false);
+                            
+                        	
+                            if( child.id && typeof(child.id) === "string" && child.id.length > 0 ){
+                            	
+                            	
+                            	if( !i18n.moveUp || typeof(i18n.moveUp) === undefined || typeof(i18n.moveUp) === null || i18n.moveUp.length < 1 ){
+                            		i18n.moveUp = child.id + "_moveUp";
+                            	}
+                            	
+	                        	child._reorderUp = new MenuItem({
+	                                label: i18n.moveUp,
+	                                onClick: function () {
+	                                    controller._moveUp(control);
+	                                }
+	                            });
+	                        	
+	                        	child._reorderUp.set('disabled', false);
+                            }
+
                         }
-                        if (!child.getNextSibling()) {
-                            child._reorderDown.set('disabled', true);
-                        } else {
-                            child._reorderDown.set('disabled', false);
+
+                        if( child._reorderDown !== undefined && child._reorderDown !== null ){
+	                        if (!child.getNextSibling()) {
+	                            child._reorderDown.set('disabled', true);
+	                        } else {
+	                            child._reorderDown.set('disabled', false);
+	                        }
                         }
+
                     }, this);
                 }
             }

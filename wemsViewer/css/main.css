@@ -13,21 +13,44 @@ body, html {
     margin: 0;
     padding: 0;
     width: 100%;
+    display:table;
 }
 .appHeader .headerLogo {
-    float: left;
+    /*float: left;
     left: 30px;
     position: relative;
     top: 8px;
+    */
+    display:table-cell;
+    padding-left: 30px;
+    padding-top: 8px;
+}
+.appHeader .headerLogo img{
+	height: 36px;
+	width:auto;
 }
 .appHeader .headerTitle {
     color: #FFFFFF;
-    float: left;
+    /*float: left;*/
     font-size: 16pt;
     font-weight: bold;
-    left: 60px;
+    /*left: 60px;
     top: 15px;
-    position: relative;
+    position: relative;*/
+    /*padding-left: 60px;*/
+    padding-top: 15px;
+    display:table-cell;
+    vertical-align:top;
+}
+#headerTitleSpan, #headerStatusIconsSpan{
+	display:table-cell;
+	vertical-align:top;
+	white-space: nowrap;
+}
+#headerTitleSpan{
+	/*min-width:100px;*/
+	padding-left: 60px;
+    padding-right: 60px;
 }
 .appHeader .subHeaderTitle {
     color: #CFCFCF;
@@ -40,6 +63,9 @@ body, html {
     position: relative;
     top: 18px;
 }
+.appHeader .search.wems_gis{
+	display:none;
+}
 .appHeader .headerLinks {
     float: right;
     color: #FFFFFF;
@@ -47,6 +73,9 @@ body, html {
     top: 27px;
     right: 10px;
     text-align: right;
+}
+.appHeader .headerLinks.wems_gis{
+	display:none;
 }
 .appHeader .headerLinks a {
     color: #FFFFFF;
@@ -310,7 +339,106 @@ body, html {
     background:url("../images/pointertop.png");
 }
 
+/* for the top icons in the header / legend */
+svg.template{
+	display:none;
+}
+svg.icon{
+	height:32px;
+	width:32px;
+	display:inline-block;
+	padding-right: 3px;
+	position: relative;
+    top: 3px;
+}
+svg.icon.dirty{
+	fill:red;
+}
+svg.icon.inprogress{
+	fill:yellow;
+}
+svg.icon.clean{
+	fill:lawnGreen;
+}
+svg.icon.skyblue{
+	fill:#87CEEB;
+}
+
+svg.icon use{	
+	stroke: black;
+	stroke-width: 1;
+	stroke-opacity: 0.5;
+}
+svg.icon.circle use{
+	transform: scale(0.65) translate(-40px, 4px);
+	-webkit-transform: scale(0.65) translate(-40px, 4px);
+	-ms-transform: scale(0.65) translate(-40px, 4px);
+}
+
+svg.icon.rect use{
+	transform: scale(0.6) translate(5px, 7px);
+	-webkit-transform: scale(0.6) translate(5px, 7px);
+	-ms-transform: scale(0.6) translate(5px, 7px);
+}
+
+svg.icon.triangle use{
+	transform: scale(0.65) translate(5px, 4px);
+	-webkit-transform: scale(0.65) translate(5px, 4px);
+	-ms-transform: scale(0.65) translate(5px, 4px);
+}
+
+/* sibling span to the svg icons */
+span.label{
+	text-shadow: 0px 0px 1px black;
+}
+span.label.dirty{
+	color:red;
+}
+span.label.inprogress{
+	color:yellow;
+}
+span.label.clean{
+	color:lawnGreen;
+}
+.HLspacer{
+	color: #4272AF;
+	display:inline-block;
+	overflow:hidden;
+}
+
 /* end esri mobile popup overrides */
+
+/*
+media queries for Internet Explorer 10 and 11
+*/
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+    /* IE10+ CSS here */
+    
+	.appHeader .headerLogo img{
+		width: 500px;
+		height: 500px;
+		transform: scale(0.072);
+		margin-top: -229px;
+		margin-left: -230px;
+		margin-right: -240px;
+	}
+	
+	#headerStatusIconsSpan svg.circle{
+		transform: scale(0.65) translate(-48px, -2px);
+		-ms-transform: scale(0.65) translate(-48px, -2px);
+	}
+	
+	#headerStatusIconsSpan svg.triangle{
+		transform: scale(0.65) translate(0px, -2px);
+		-ms-transform: scale(0.65) translate(0px, -2px);
+	}
+	
+	#headerStatusIconsSpan svg.rect{
+		transform: scale(0.65) translate(-5px, -2px);
+		-ms-transform: scale(0.65) translate(-5px, -2px);
+	}
+}
+
 
 /*
     media queries bootstrap style
@@ -344,8 +472,16 @@ body, html {
     }
     /* move the title when no logo */
     .appHeader .headerTitle {
-        left: 10px;
+        /*left: 10px;*/
+        padding-left:10px;
     }
+    #headerTitleSpan {
+	    padding-left: 20px;
+    	padding-right: 20px;
+	}
+	.HLspacer{
+		width: 9px;
+	}
 }
 
 /* end media queries bootstrap style */
