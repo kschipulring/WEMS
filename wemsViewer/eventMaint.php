@@ -264,7 +264,7 @@ $supportDoc = "";
 $isupportDoc = "";
 $plsupportDoc = "";
 $siSupportDoc = "";
-$inactive = 600; //600 = 10 min
+$inactive = 2400; //600 = 10 min
 
 $lConponent="";
 $iConponent="";
