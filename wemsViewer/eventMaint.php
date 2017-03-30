@@ -228,7 +228,7 @@ EOD;
 	
 	$outStr .= "</textarea>";
 	
-	return $outStr;
+	return $outStr;  
 }
 
 ob_start();
@@ -1730,11 +1730,7 @@ ________________________________________________________________________________
 		<div id="view5">
 			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
 				<button onclick="StationsMap('sta')">Stations Map</button>
-				<br /><br />
-				<button onclick="StationsMap('il')">Interlockings Map</button>
-				<br /><br />
-				<button onclick="StationsMap('pl')">Parking Lot Map</button>
-				<br /><br />
+				
 				<button onclick="StationsMap('sen')">Sentinel Map</button>
 				<br /><br />
 				<input class="GIS" type="submit" value="GIS" name="SUBMIT" id="SUBMIT" />
