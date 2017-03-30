@@ -71,7 +71,7 @@ oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
 oci_execute($qry);
        
 
-while($row = oci_fetch_array($qry)){
+while($row = oci_fetch_array($qry)){ 
 	$nNoteTime = $row['CTSTARTTIME'];
 	$nUser = $row['CTNOTEUSER'];
 	$nNote = $row['CTNOTES'];
