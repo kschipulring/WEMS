@@ -227,7 +227,7 @@ class eventPDF extends PDF {
     }
     
     protected function _generatePDF($tableString, $pageTitle, $your_width, $your_height, $outputFileName){
-        $reportLogo = "itLogo.png";
+        $reportLogo = "lirrhead.jpg";
         $logoWidth = 30;
         $reportTitle = $pageTitle;
         
