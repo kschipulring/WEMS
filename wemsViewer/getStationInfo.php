@@ -56,11 +56,11 @@ while($row = oci_fetch_array($qry)){
 }
 
 $qry = oci_parse($c, "SELECT TO_CHAR(W.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
-                   W.CTNOTES, E.NAME, W.CTSTATUS, 
+                   W.CTNOTES, E.LST_NME, W.CTSTATUS, 
                    W.CTPASSNUM, W.CTBAGS, 
                    W.CTNOTEUSER
                    FROM WEMS_CLEANABLE_TARGET_NOTES W
-                   LEFT JOIN EMPLOYEE E ON E.EMPLOYEENUMBER = W.FORMANID 
+                   LEFT JOIN WEMS_EMPLOYEE E ON E.EMPLOYEENUMBER = W.FORMANID 
                    where W.CTID = :CTID and 
                    W.EVENTID = :EVENTID and  
                    ((W.FORMANID = E.EMPLOYEENUMBER) or (W.FORMANID is NULL)) ORDER BY ENTER_DATETIME")
@@ -75,7 +75,7 @@ while($row = oci_fetch_array($qry)){
 	$nNoteTime = $row['CTSTARTTIME'];
 	$nUser = $row['CTNOTEUSER'];
 	$nNote = $row['CTNOTES'];
-	$nForman = $row['NAME'];
+	$nForman = $row['LST_NME'];
 	$nBags = $row['CTBAGS'];
 	$nPass = $row['CTPASSNUM'];
 	$nStatus = $row['CTSTATUS'];
