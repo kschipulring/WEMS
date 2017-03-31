@@ -28,7 +28,7 @@
 
 </head>
 
-<body id="body1" bgcolor = "#328ed1">
+<body id="body1" bgcolor = "#328ed1" rel="test">
 
 <form id="HomePage" name="HomePage" action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
 
