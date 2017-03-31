@@ -294,7 +294,7 @@ if($_SESSION['group'] != "WEMS_Admin"){
 	header("Location: login.php?returnPage=$returnPage");
 }else{
 	require '../wemsDatabase.php';
-	//require_once('tcpdf/tcpdf.php');
+	require_once('tcpdf.php');
 	require_once '../classes/databaseClass.php';
 	require_once '../classes/eventClass.php';
 	require_once '../classes/gangClass.php';
@@ -1598,9 +1598,9 @@ ________________________________________________________________________________
                                                         Reports
      ************************************************************************************************************************************************
      -->     
-		<div style="background-color:#FFF2F2;" id="view4">
-			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" target="WEMS_REPORT" onsubmit="validateEventLocation();">
-      			<fieldset id="reports">
+		     <div style="background-color:#FFF2F2;" id="view4"  >
+     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="eventPDFForm" id="eventPDFForm" target="WEMS_REPORT" onsubmit="return validateEventLocation();">
+                <fieldset id="reports">
         				<legend>Platform Assignment Report </legend>
         				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width="100%">
 <tr>
@@ -1629,41 +1629,42 @@ ________________________________________________________________________________
                                 </select></td>
 							</tr>
                             <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Platform Assignment PDF" /></td></tr> 
-						<?php 
-						if(isset($task) && $task == 'create PDF') {
-							include_once '../classes/eventPDFClass.php';
-							$pdf = new eventPDF();
-							$pdf->createEventPDF($_POST);
-						}
-						?>
-        				</table>
-      			</fieldset>
-			</form>
-			<br></br>
-			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gangPDFForm" id="gangPDFForm" target="WEMS_REPORT2" onsubmit="validateEvent();">
-				<fieldset id="departmentWiseReport">
-					<legend>Department Wise Report</legend>    
-					<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-						<tr>
-							<td>Event:</td>
-							<td>
-								<select name="eventId" id = "eventId"> <option value='0' selected> Select Event  </option>
-								<?php 
-								$eventObj = new event();
-								$result = $eventObj->getEventList();
-								if($result){
-									while($row = oci_fetch_array($result[0])){                                    
-										$id = $row['EVENTID'];
-										$desc = $row['EXTERNALID'];
-										echo "<option value=\"$id\" > $desc : $id </option>";
-									}
-								}
-								oci_free_statement($result[0]);
-								?> 
-								</select>
-							</td>
-						</tr>
+                            
+                            <?php 
+                            if(isset($task) && $task == 'Create Platform Assignment PDF') {
+                                include_once '../classes/eventPDFClass.php';
+                                $pdf = new eventPDF();                                
+                                $pdf->createEventPDF($_POST);
+                            }
+                            ?>
 
+        				</table>        
+      				</fieldset>
+      			</form>
+      			<br></br>
+                <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gangPDFForm" id="gangPDFForm" target="WEMS_REPORT2" onsubmit="return validateEvent();">
+                <fieldset id="departmentWiseReport">
+        				<legend>Department Wise Report</legend>    
+        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
+                            <tr>
+							     <td>Event:</td>
+								 <td><select name="eventId" id = "eventId"> <option value='0' selected> Select Event  </option>
+								<?php 
+
+                                $eventObj = new event();
+                                $result = $eventObj->getEventList();
+                                if($result){
+                                    while($row = oci_fetch_array($result[0])){                                    
+                                        $id = $row['EVENTID'];
+                                        $desc = $row['EXTERNALID'];
+    									echo "<option value=\"$id\" > $desc : $id </option>";
+                                    }
+                                }
+                                oci_free_statement($result[0]);
+				               ?> 
+                                </select></td>
+							</tr>
+                           
                             <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Department Wise Employee PDF" /></td></tr> 
                             
                             <?php 
@@ -1677,7 +1678,7 @@ ________________________________________________________________________________
         				</table>
       				</fieldset>
       			</form><br></br>
-                <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="datewiseEventPDFForm" id="datewiseEventPDFForm" target="WEMS_REPORT2" onsubmit="validateDatewiseEvent();">
+                <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="datewiseEventPDFForm" id="datewiseEventPDFForm" target="WEMS_REPORT2" onsubmit="return validateDatewiseEvent();">
                 <fieldset id="DateRangeReports">
         				<legend>Platform Assignment Report For Data Range</legend>
         				<table align = "center" class="table" border="0" width="100%">
@@ -1719,7 +1720,6 @@ ________________________________________________________________________________
       				</fieldset>
       			</form>
         </div>
-     
      
    <!--
      ************************************************************************************************************************************************
