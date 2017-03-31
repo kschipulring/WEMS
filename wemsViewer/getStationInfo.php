@@ -1,7 +1,7 @@
  <?php
 require '../wemsDatabase.php';   
     
-$c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase) 
+$c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)  
 OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
 
 $CTID = isset($_GET['param']) ? $_GET['param'] : -1;
