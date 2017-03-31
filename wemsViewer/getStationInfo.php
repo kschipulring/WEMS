@@ -1,4 +1,6 @@
  <?php
+ 
+ //tme
 require '../wemsDatabase.php';   
     
 $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)   
