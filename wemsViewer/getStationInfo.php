@@ -9,7 +9,7 @@ $eventID = isset($_GET['eventId']) ? $_GET['eventId'] : -1;
     
 $comments = "";
     
-//$eventID = 0;
+//$eventID = 0; 
 $empAssigned= "";
 $button = "";
 $noteTime = "";
