@@ -1,0 +1,16 @@
+<svg width="1" height="1" version="1.1" xmlns="http://www.w3.org/2000/svg" class="opacityHide">
+  <defs>
+      <linearGradient id="Gradient2" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#D11F19"/>
+        <stop offset="40%" stop-color="#BB191F"/>
+        <stop offset="41%" stop-color="white"/>
+        <stop offset="59%" stop-color="white"/>
+        <stop offset="60%" stop-color="#5D7E30"/>
+        <stop offset="100%" stop-color="#BECE47"/>
+      </linearGradient>
+      <style type="text/css"><![CDATA[
+        #rect2, #gradient_element { fill: url(#Gradient2); }
+      ]]></style>
+  </defs>
+  <circle id="gradient_element" cx="17" cy="19" r="13" fill="url(#Gradient2)" />
+</svg>
