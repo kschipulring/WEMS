@@ -1,4 +1,4 @@
-define({
+define({ 
 	map: true,
 	mapClickMode: true,
 	mapRightClickMenu: true,
