@@ -7,7 +7,7 @@ class HLfuncs {
 			$alt = $class;
 		}
 	
-		if($use === ""){
+		if($use === ""){ 
 			$use = $type . "1";
 		}
 	

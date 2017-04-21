@@ -8,7 +8,7 @@ class employeePDF extends PDF {
         parent::__construct();
     }
     
-    
+     
     
     // Page footer
     public function Footer() {

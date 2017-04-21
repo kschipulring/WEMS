@@ -343,13 +343,19 @@ body, html {
 svg.template{
 	display:none;
 }
+svg.opacityHide{
+	opacity: 0.0;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
 svg.icon{
 	height:32px;
 	width:32px;
 	display:inline-block;
 	padding-right: 3px;
 	position: relative;
-    top: 3px;
+	top: 3px;
 }
 svg.icon.dirty{
 	fill:red;
@@ -359,6 +365,9 @@ svg.icon.inprogress{
 }
 svg.icon.clean{
 	fill:lawnGreen;
+}
+svg.icon.halfClean{
+	fill:url(#Gradient2);
 }
 svg.icon.skyblue{
 	fill:#87CEEB;
@@ -385,6 +394,33 @@ svg.icon.triangle use{
 	transform: scale(0.65) translate(5px, 4px);
 	-webkit-transform: scale(0.65) translate(5px, 4px);
 	-ms-transform: scale(0.65) translate(5px, 4px);
+}
+
+svg.icon.halfClean use{
+	transform: scale(1) translate(0px, 0px);
+	-webkit-transform: scale(1) translate(0px, 0px);
+	-ms-transform: scale(1) translate(0px, 0px);
+}
+
+/* temporary fake svg icons */
+span.striped{
+	width:32px;
+	height:32px;
+	display:inline-block;
+	background-repeat: no-repeat;
+	position: relative;
+	top: 5px;
+	left: 8px;
+	background-size: 26px;
+	background-position: 0px 3px;
+}
+
+span.striped.circle{
+	background-image: url(../images/circle_striped.png);
+}
+
+span.striped.rect{
+	background-image: url("../images/rect_striped.png");
 }
 
 /* sibling span to the svg icons */
@@ -428,6 +464,10 @@ media queries for Internet Explorer 10 and 11
 		-ms-transform: scale(0.65) translate(-48px, -2px);
 	}
 	
+	.Internet_Explorer #headerStatusIconsSpan svg.circle.halfClean{
+		-ms-transform: scale(1) translate(0px, 2px);
+	}
+
 	#headerStatusIconsSpan svg.triangle{
 		transform: scale(0.65) translate(0px, -2px);
 		-ms-transform: scale(0.65) translate(0px, -2px);

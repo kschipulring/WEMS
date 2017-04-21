@@ -5,7 +5,7 @@
 
 /* The main calendar widget.  DIV containing a table. */
 
-div.calendar { position: relative; }
+div.calendar { position: relative; width: 15%;}
 
 .calendar, .calendar table {
   border: 1px solid #bdb2bf;
@@ -80,7 +80,7 @@ div.calendar { position: relative; }
 
 .calendar tbody .day { /* Cells <TD> containing month days dates */
   font-family: verdana,tahoma,sans-serif;
-  width: 2em;
+  width: 30%;
   color: #000;
   text-align: right;
   padding: 2px 4px 2px 2px;
@@ -169,7 +169,7 @@ div.calendar { position: relative; }
   display: none;
   top: 0px;
   left: 0px;
-  width: 4em;
+  width: 30%;
   cursor: default;
   border-width: 0 1px 1px 1px;
   border-style: solid;
@@ -186,7 +186,7 @@ div.calendar { position: relative; }
 }
 
 .calendar .combo .label-IEfix {
-  width: 4em;
+  width: 30%;
 }
 
 .calendar .combo .hilite {
@@ -233,4 +233,9 @@ div.calendar { position: relative; }
 
 .calendar td.time span.active {
   background: url("active-bg.gif"); color: #fff;
+}
+
+button.logging.logout{
+	float:right;
+	margin-top: 7px;
 }

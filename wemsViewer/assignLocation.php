@@ -231,10 +231,7 @@ function updateLocationGang($all, $lConponent, $eventID, $lForman, $lNoteTime, $
                                                     
                                                     
                                                     
-            }
-                                                    
-                                                    
-                                                    
+            }                                                  
                                                     
               $qry = oci_parse($c, "insert into WEMS_CLEANABLE_TARGET_NOTES (EVENTID, CTID, CTNOTES, FORMANID, CTSTATUS, CTPASSNUM, CTBAGS, CTSTARTTIME, CTNOTEUSER, ENTER_DATETIME, MARKERID, CREWSIZE)
                                           VALUES(:EVENTID, :CTID, :CTNOTES, :FORMANID, :CTSTATUS, :CTPASSNUM, :CTBAGS, to_date(:CTSTARTTIME, 'mm/dd/yyyy hh:mi AM'), :CTNOTEUSER, SYSDATE, :LOC, :CREWSIZE) ")

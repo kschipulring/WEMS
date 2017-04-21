@@ -4,7 +4,7 @@
 		public $wemsDBpassword;
 		public $wemsDatabase;
 		public $connection = null;
-        public $connectionFactory = "oracle";
+		public $connectionFactory = "oracle";
         
         
           

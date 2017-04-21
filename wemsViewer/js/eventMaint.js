@@ -1,7 +1,7 @@
 /*
  * FUNCTIONS
  * 
- * */ 
+ * */
 
 function StationsMap(map){
 	var openUrl = '';
@@ -52,10 +52,16 @@ function getEmployees(pre){
 			var client = new ActiveXObject("Microsoft.XMLHTTP");
 		}
 	}
-  
+  /*
+  alert(loc);
+  alert(eventId);
+  alert(conponent);
+  alert(locCD);
+  */
+ // alert(loc);
 	client.onreadystatechange = function() {GangListDetailhandler(client, pre)};
-	client.open("GET", "getGangList.php?loc=" + loc + "&eventId=" + eventId + "&conponent="+conponent+"&locCD="+locCD);
-	
+	client.open("GET", "getGangList.php?eventId=" + eventId + "&loc=" + loc);
+	//client.open("GET", "getGangList.php);
 	//client.open("GET", "getGangListNoConponent.php?loc=" + loc + "&eventId=" + eventId);
 	client.send("");
 } //getData() 
@@ -69,25 +75,41 @@ function GangListDetailhandler(obj, pre){
 	var forman = document.getElementById(pre+'Forman');
 	var location = document.getElementById(pre+'Loc').value;
 	var conponent = document.getElementById(pre+'Conponent').value;
+	
    
 	forman.options.length = 0;
   
 	if(obj.readyState == 4 && obj.status == 200){
-		var val = JSON.parse( obj.responseText );
+		//alert("test");
+		//var val = JSON.parse( obj.responseText );
+		
+		
+		var val = eval('(' + obj.responseText + ')');
+		
+		
+		//alert(obj.responseText);
+		
+		
+		console.log( "the GangListDetailhandler JSON val = ", val );
 
+		
+		
 		for(var i = 0; i < val.length; i++){
 			var opt = document.createElement('option');
 			  
 			opt.innerHTML = val[i].NAME;
 			opt.value = val[i].FORMANID;
 
-			var assignLoc = document.createElement('text');
+			//var assignLoc = document.createElement('text');
 			var assignLoc = val[i].LOCATION;
-  		  
-			if(assignLoc == conponent){
+  		    
+			if((assignLoc != "") || (assignLoc == location))
+			{
 				opt.setAttribute("selected","selected");
 				forman.appendChild(opt);
-			}else{
+			}
+			else
+			{
 				forman.appendChild(opt);  	
 			}
 		} //end for(var i = 0; i < val.length; i++)
@@ -120,15 +142,22 @@ function gangHandler(obj){
 	var status = document.getElementById('gStatus');
 	var dteTm = document.getElementById('gStartTm');
 	var gangButton = document.getElementById('gangEnterUpdate');
-  
+ 
 	empNum.value = "";
 	comments.value = "";
 	//gangButton.value = "Enter Gang";
-	  
-	if(obj.readyState == 4 && obj.status == 200){
-		var val = JSON.parse( obj.responseText );
 
-		for(var i = 0; i < val.length; i++){
+	if(obj.readyState == 4 && obj.status == 200){
+		
+		
+		
+		var val = JSON.parse( obj.responseText );
+		//alert(val.length);
+		
+		
+		console.log("gangHandler JSON val = ", val);
+
+		for(var i = 0; i < val.length; i++){ 
 			var txtNew = document.createElement('text');
 			
 			//alert(val[i].EMP_ASSIGNED);
@@ -145,6 +174,20 @@ function gangHandler(obj){
 			
 			txtNew.text = val[i].STATUS;
 			status.value = txtNew.text;
+			
+			
+			
+			//adjust the height of the gang history box based on how many assignments are currently occuring
+			//var gLineCount =  Math.max(1, $(comments.value).val().split("\n").length - 1);
+			//alert("test");
+			//console.log( "gLineCount = " , gLineCount );
+			var gLineCount =  comments.value.split("\n").length;
+			
+			//alert(gLineCount);
+			
+			$("#gHistory").attr("rows", gLineCount);
+			
+			
 
 			// txtNew.text = val[i].DATETIME;
 			// dteTm.value = txtNew.text;
@@ -158,7 +201,7 @@ function gangHandler(obj){
  * */
 
 function getConponentDetails(pre){	
-	switch(pre){
+	/*switch(pre){
 		case "pl":
 		case "i":
 			//url = "getInterlockingInfo.php";
@@ -169,7 +212,7 @@ function getConponentDetails(pre){
 			url = "getStationInfo.php";
 		break;
 	}
-	
+	*/
 	var param = document.getElementById( pre+'Conponent' ).value;
 	
 	var eventId = window.eventId;
@@ -184,16 +227,29 @@ function getConponentDetails(pre){
 		}
 	}
      
+
+	//getEmployees(pre);
+	
 	client.onreadystatechange = function() {conponentDetailhandler(pre, client)};
-	client.open("GET", url + "?param=" + param + "&eventId=" + eventId);
+	client.open("GET", "getStationInfo.php" + "?param=" + param + "&eventId=" + eventId);
 	client.send("");
 } //getData() 
 
 function conponentDetailhandler(pre, obj) {
+	console.log( "Pre = ", pre );
+	
+	
+	
+	
+	
 	var status = document.getElementById(pre+'Status');
+	
+	
+	
 	var comments = document.getElementById(pre+'History');
+	
 	var forman = document.getElementById(pre+'Forman');
-	//forman.options.length = 0;
+	
 	var pass = document.getElementById(pre+'PassNum');
 	//var bags = document.getElementById(pre+'NumBags');
 
@@ -203,9 +259,23 @@ function conponentDetailhandler(pre, obj) {
 	downloadFile.options.length = 0;
 
 	if(obj.readyState == 4 && obj.status == 200) {
-		var val = JSON.parse( obj.responseText );
-
+		
+		
+		
+		var val = eval('(' + obj.responseText + ')');
+		//var val = JSON.parse(obj.responseText);
+		
+		alert(obj.responseText);
+		
+		//console.log( "conponentDetailHandler val = ", val );
+		
+		
+		
 		for(var i = 0; i < val.length; i++) {
+			
+			 
+			
+			
 			var txtNew = document.createElement('text');
 
 			txtNew.text = val[i].STATUS;
@@ -274,6 +344,9 @@ function getConponentData(pre){
 } // getConponentData() 
 
 function conponentHandler(obj, pre){
+	
+	
+	
 	var status = document.getElementById(pre + 'Status');
 	var forman = document.getElementById(pre + 'Forman');
 	var pass = document.getElementById(pre + 'PassNum');
@@ -314,6 +387,8 @@ function conponentHandler(obj, pre){
 
 	if(obj.readyState == 4 && obj.status == 200){
 		var val = JSON.parse( obj.responseText );
+		
+		console.log( "conponentHandler JSON val = ", val );
   	
 		for (var i = 0; i < val.length; i++){
 			var opt = document.createElement('option');
@@ -708,6 +783,39 @@ function clickedTab(){
 	});
 }
 
+
+function validateDatewiseEvent()
+{      
+	if((document.datewiseEventPDFForm.reportFromDate.value == '' || document.datewiseEventPDFForm.reportFromDate.value == 0) || (document.datewiseEventPDFForm.reportToDate.value == '' || document.datewiseEventPDFForm.reportToDate.value == 0)){
+		alert("Please select Date Range for Report");
+		return false; 
+	} else {
+		if(document.datewiseEventPDFForm.locationId.value === '0'){
+			alert("Please select Location for Report");
+			return false;
+	    }
+	}	
+	return true;
+}
+
+function locationSelectChange(pre){
+	console.log( '$("#"+pre+"Forman").val() = ', $("#"+pre+"Forman").val() );
+	console.log( '$("#'+pre+'SUBMIT").val() = ', $("#"+pre+"SUBMIT").val() );
+	
+	if( $("#"+pre+"Forman").val() > 0 ){
+		
+		console.log("dolphin shit");
+		
+		$("#"+pre+"SUBMIT").val("Update Location");
+	}else{
+		console.log("hippo diarhea");
+		
+		$("#"+pre+"SUBMIT").val("Assign Location");
+	}
+	
+	console.log( '$("#'+pre+'SUBMIT").val() = ', $("#"+pre+"SUBMIT").val() );
+}
+
 /*
  * using this instead of jQuery's 'document ready' method.
  * This is because jQuery does not play as nice for initialization in .js files, compared to inline js
@@ -751,6 +859,24 @@ window.onload = function() {
 		weekNumbers: false
 	}); 
 	
+	Calendar.setup({
+		inputField : "plNoteTime",
+		ifFormat   : "%m/%d/%Y",
+		displayArea: "start_display",
+		daFormat   : "%m/%d/%Y",
+		button     : "parkingLotStartTime",
+		weekNumbers: false
+	}); 
+	
+	Calendar.setup({
+		inputField : "siNoteTime",
+		ifFormat   : "%m/%d/%Y",
+		displayArea: "start_display",
+		daFormat   : "%m/%d/%Y",
+		button     : "signalStartTime",
+		weekNumbers: false 
+	}); 
+
 	Calendar.setup({			       
 			inputField : "reportFromDate",			       
 			ifFormat   : "%m/%d/%Y",			       
@@ -768,7 +894,32 @@ window.onload = function() {
 			button     : "reportToTime",			       
 			weekNumbers: false
 	});
+	
+	$(document).ready(function(){
+		var locSuffix = "Loc";
+		var conpSuffix = "Conponent";
+		
+		//location select boxes
+		$("select[id$='"+locSuffix+"'], select[id$='"+conpSuffix+"']").each(function(){
 
+			$(this).on('change', function(e) { //use on if jQuery 1.7+
+				var pre = $(this).attr("id").replace(locSuffix, "").replace(conpSuffix, "");
+				
+				
+				console.log("pre = ", pre, " value = ", $(this).val() );
+				locationSelectChange(pre);
+			});
+		});
+		
+		
+		//adjust the height of the gang history box based on how many assignments are currently occuring
+		var gLineCount =  Math.max(1, $("#gHistory").val().split("\n").length - 1);
+		
+		//console.log( "gLineCount = " , gLineCount );
+		
+		
+		$("#gHistory").attr("rows", gLineCount);
+	})
 	
 	//Prevent the backspace button from being used to go back in web page navigation
 	$(document).on("keydown", function (e){
@@ -804,18 +955,3 @@ occurs each time there is a hash change.
 But only meaningful if one goes to a link from the left tabs
 */
 window.onhashchange = clickedTab;
-
-
-function validateDatewiseEvent()
-{      
-	if((document.datewiseEventPDFForm.reportFromDate.value == '' || document.datewiseEventPDFForm.reportFromDate.value == 0) || (document.datewiseEventPDFForm.reportToDate.value == '' || document.datewiseEventPDFForm.reportToDate.value == 0)){
-		alert("Please select Date Range for Report");
-		return false; 
-	} else {
-		if(document.datewiseEventPDFForm.locationId.value === '0'){
-			alert("Please select Location for Report");
-			return false;
-	    }
-	}	
-	return true;
-}

@@ -11,7 +11,7 @@ class database{
     
     public function connect($databaseName, $databaseUserName, $databasePassword) {
         try {
-            $db = oci_pconnect($databaseUserName, $databasePassword, $databaseName);
+             $db = oci_pconnect($databaseUserName, $databasePassword, $databaseName);
             if ($db) {
                 return $db;
             } else {

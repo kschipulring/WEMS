@@ -10,7 +10,7 @@ class event extends database {
     protected $closeUser;
     private $tableName = "WEMS_EVENT";
     
-    public function __construct() {
+    public function __construct() { 
         parent::__construct();
     }
     

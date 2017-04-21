@@ -13,7 +13,7 @@ try {
         background-color: #D0DFEA;
         font-size:10;
         font-weight: normal;
-    }
+    } 
 
     .grid_column {
         padding: 2px 0;

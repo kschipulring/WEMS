@@ -5,7 +5,7 @@ class database{
     protected $databasePassword = "wems";
     protected $conn; 
     
-    public function __construct() {
+    public function __construct() {    	
         $this->conn = $this->connect($this->databaseName, $this->databaseUserName, $this->databasePassword);
     }
     
@@ -38,12 +38,27 @@ class database{
         }
     }
     
-    public function getRecord($selectQry){
+    public function getRecord($selectQry, $binderArray=null){
         try {
             $rs = array();
             $stmt = oci_parse($this->conn, $selectQry);
+            
+            //if there are values to bind
+            if( $binderArray != null && (gettype($binderArray) == "array") ){
+            	for($i=0; $i<count($binderArray); $i++){
+            		$maxlength = -1;
+            		
+            		if (array_key_exists("maxlength", $binderArray[$i])){
+            			$maxlength = $binderArray[$i]["maxlength"];
+            		}
+            		
+            		oci_bind_by_name($stmt, $binderArray[$i]["key"], $binderArray[$i]["val"], $maxlength);
+            	}
+            }
+            
             $refcur = oci_new_cursor($this->conn);
             $exec = oci_execute($stmt, OCI_DEFAULT);
+            //$exec = oci_execute($stmt);
             oci_execute($refcur);
             if($exec){              
                return array($stmt, $refcur);
@@ -54,6 +69,5 @@ class database{
             return $e;
         }
     }
-    
 }
 ?>

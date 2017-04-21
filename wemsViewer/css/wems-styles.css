@@ -1,0 +1,333 @@
+/* Define the body style */
+
+
+body {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    width: 1300px;
+    margin: 12px auto;  /* margins at the top and bottom of the page */
+    padding: 2em 2em;  /* margins around the sides of the entire menu */
+    background-color: white;
+    border: 2px solid black;
+}
+
+html {
+    background-color: rgb(192, 192, 192);
+}
+aside {
+    float: left;
+    width: 150px;
+}
+nav ul {
+    list-style-type: none;
+    margin-left: 0;
+    padding-left: 0;
+}
+nav ul li {
+    padding-bottom: 0.5em;
+}
+section {
+    float: left;
+    width: 500px;
+}
+header {
+    margin: 410;
+    padding-top: 1.5em;
+    clear: both;
+}
+footer {
+    margin: 0;
+    padding-top: 1.5em;
+    clear: both;
+}
+/* the styles for the other HTML elements */
+h1 {
+    font-size: 120%;
+    margin: 0;
+    padding: .5em 0 .25em;
+}
+h2 {
+    font-size: 120%;
+    margin: 0;
+    padding: .25em 0 .5em;
+}
+h1, h2 {
+    color:#306;
+}
+
+
+h10 {
+    color:#960;
+    font-size: 140%;
+    font-family: Arial, Helvetica, sans-serif;	
+    font-weight: bold;	
+}
+
+h5 {
+    font-size: 150%;
+    margin: 0;
+    padding: .5em 0 .25em;
+    color: #C00;	
+}
+
+h3 {
+    font-size: 150%;
+    margin: 0;
+    padding: .5em 0 .25em;
+    color: #093;	
+}
+
+ul {
+    margin: 0 0 1em 0;
+    padding: 0 0 0 2.5em;
+}
+li {
+    margin: 0;
+    padding: 0;
+}
+
+a.one {color:#ff0000;}
+a.one:link {color:#ff0000;}
+a.one:visited {color:#0000ff;}
+a.one:hover {color:#C0F;}
+
+
+/* This is what makes the a hrefs indented a little bit */
+a {
+    color: rgb(41, 64, 124);
+    font-weight: bold;
+}
+
+a:link, a:visited {
+    padding: 2px 2px;
+    text-decoration: underline;
+}
+
+a:hover {
+	color:#990;
+/*	background-color: #dedede;   */
+	}
+
+
+
+table {
+	align: center;
+	width:100%; 
+    font-family: Arial;
+	font-size:12px;
+	border-radius: 0px;
+	color:#000000;
+	border-width: 3px;
+	border-color: #666666;
+	border-collapse: collapse;
+}
+table th {
+	text-align: left;
+	width:25%;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+	font-family: Arial;
+	font-size:14px;
+}
+table td {
+	text-align: left;
+	width:25%;
+	border-width: 1px;
+	padding: 2px;
+	border-style: solid;
+	border-color: #666666;
+	font-family: Arial;
+	font-size:14px;
+}
+
+table.grid123 {
+	align: center;
+	width: auto;
+	font-family: Arial;
+	font-size:14px;
+	color:#000000;
+	border-width: 3px;
+	border-color: #666666;
+}
+
+table.grid123 th {
+	text-align: left;
+	width: auto;
+	padding: 5px;
+	margin: 1px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #dedede;
+	font-family: Arial;
+	font-size:15px;
+	
+}
+table.grid123 td {
+	text-align: left;
+	width: auto;
+	padding: 5px;
+	margin: 1px;
+	border-style: solid;
+	border-color: #666666;
+	background-color: #ffffff;
+	font-family: Arial;
+	font-size:15px;
+}
+
+table.grid123 td.canedit {
+	background-color: #CC9;
+}
+
+a {
+    color: rgb(41, 64, 124);
+    font-weight: bold;
+}
+
+table.grid123 a:link, a:visited {
+	color:#63F;
+   	font-size:16px;
+    padding: 0px 0px;
+    text-decoration: underline;
+}
+
+table.grid123 a:hover {
+	color:#000000 ;
+/*	background-color: #dedede;   */
+	}
+
+td.greencell {
+            border-style:dotted;
+            border-width:3px;
+			background-color:#0C0;
+            border-color:#000000; 
+            padding: 10px;
+         }
+
+
+br {
+    clear: both;
+}
+/* classes */
+.right {
+    text-align: right;
+}
+.last_paragraph {
+	margin-bottom: 2em;	
+}
+
+.RedButton {
+	width            : 140px;
+	height           : 55px;
+
+	padding          : 4px 4px 4px 4px;
+	color            : black;
+	font-family      : Arial;
+	font-weight      : bold;
+	font-size        : 13px;
+}
+
+.wideBtn {
+	width            : 260px;
+	height           : 55px;
+	padding          : 4px 4px 4px 4px;
+	color            : black;
+	font-family      : Arial;
+	font-weight      : bold;
+	font-size        : 14px;
+	
+}
+
+.wideredBtn {
+	width            : 310px;
+	height           : 85px;
+	padding          : 4px 4px 4px 4px;
+	color            : #C33; 
+	font-family      : Arial;
+	font-weight      : bold;
+	font-size        : 25px;
+	background-color:orange;	
+}
+
+
+.redBGBtn {
+	width            : 310px;
+	height           : 85px;
+	padding          : 2px 2px 2px 2px;
+	color            : red;
+
+}
+
+.smallGreenBtn, .wideGreenBtn {
+	//align			:center;			
+	padding          : 2px 2px 2px 2px;
+	color            : green;
+	font-family      : Arial;
+	font-weight      : bold;
+}
+
+.wideGreenBtn {		
+	width            : 310px;
+	height           : 85px;
+	font-size        : 25px;
+}
+
+.smallGreenBtn {
+	width            : 75px;
+	height           : 28px;
+	font-size        : 15px;
+}
+
+.wideRedCloseBtn {
+	width            : 310px;
+	height           : 85px;
+	padding          : 2px 2px 2px 2px;
+	color            : red;
+	font-family      : Arial;
+	font-weight      : bold;
+	font-size        : 25px;
+}
+
+
+
+
+.alert_message { color:#F0C; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 18px;background-color:yellow;}
+.bright{ color:#df00b8; font-weight:bold; font-style: italic; font-family: verdana, arial,sans-serif; font-size: 40px;background-color: #CCFFCC;}
+.erroroutput{ color:#df00b8; font-weight:bold; font-style: italic; font-family: verdana, arial,sans-serif; font-size: 15px}
+.input-box{ background-color: #F5F5DCC; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 15px}
+.smallpink{ color:#df00b8; font-weight:bold; font-style: italic; font-family: verdana, arial,sans-serif; font-size: 12px}
+.pink{ color:#df00b8; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 15px}
+.navybld{ color:navy; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 18px}
+.bold_green_message { color:#093; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 18px}
+.bold_black_message { color:#000; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 18px}
+.no_more_contestants { color:#093; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 18px}
+.orangebld{ color:#F93; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 16px}
+.heading_bold{ color:#F93; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 20px}
+.heading_bold2{ color:#009; font-weight:bold; font-family: verdana, arial,sans-serif; font-size: 20px}
+.red{ color:red; font-family: verdana,arial,sans-serif; font-size: 12px}
+.blue{ color:blue; font-family: verdana,arial,sans-serif; font-size: 14px}
+.blue_large{ color:blue; font-family: verdana,arial,sans-serif; font-size: 22px}
+.red_large{ color:red; font-family: verdana,arial,sans-serif; font-size: 22px}
+.red_small{ color:red; font-family:  Verdana, Arial, Helvetica, sans-serif; font-size: 14px}
+.contest-rules{ color:blue; font-family:  Verdana, Arial, Helvetica, sans-serif; font-size: 12px}
+.red_fineprint{ color:red; font-family:  Verdana, Arial, Helvetica, sans-serif; font-weight: bold; font-size: 16px}
+.greyitalic{ color:#333; font-family: verdana,arial,sans-serif; font-style: italic; font-size: 15px}
+.smallgreyitalic{ color:#333; font-family: verdana,arial,sans-serif; font-style: italic; font-size: 14px}
+.greysmall { color:grey; font-family: verdana,arial,sans-serif;  font-size: 12px}
+.bluetitle { color:#066; font-family: verdana,arial,sans-serif;  font-weight:bold; font-size: 14px}
+.orange{ color:#FF9C33; font-family: verdana,arial,sans-serif; font-size: 18px; font-weight: bold; display:block; margin: 0px auto; text-align: center}
+.orangeupdate{ color:#FF9C33; font-family: verdana,arial,sans-serif; font-size: 20px; font-weight: bold; display:block; margin: 0px auto; text-align: center}
+.orangedarkerupdate{ color:#C60; font-family: verdana,arial,sans-serif; font-size: 19px; font-weight: bold; display:block; margin: 0px auto; text-align: center; text-decoration:underline}
+.blueitalic{ color:#390; font-family: verdana,arial,sans-serif; font-size: 22px; font-weight: bold;}; 
+.backgroundgreen{ color:#009900; font-family: verdana,arial,sans-serif; font-size: 14px; font-weight: bold; text-align:center; background-color:#CFF}
+.backgroundyellow{ color:#903; font-family: verdana,arial,sans-serif; font-size: 18px; font-weight: bold; text-align:center; background-color:#FF0}
+.forexample { color:#00F; font-family: arial,sans-serif; font-style: italic; font-size: 10x; text-align:center; background-color:#FF0}
+.backgroundedit{ color:#0333; font-family: arial,sans-serif; font-size: 14px; font-weight: bold; text-align:left; background-color:#FFC}
+.red{ color:#F00; font-family: verdana,arial,sans-serif; font-size: 16px; font-weight: bold; text-align:center;}
+.bright{ color:#F00; font-family: arial; font-size: 14px; font-weight: bold; text-align:center;}
+.bld {font-weight:bold; font-size: 17px}	
+.center_subtitle { color:#5A6351; font-family: arial,sans-serif; font-size: 18px}
+.rightside  { margin: 12px auto; padding: 2em 2em;color:#5A6351; font-family: arial,sans-serif; margin-left: 350px;font-size: 18px; align:right;}
+.label {color: #777;text-transform: uppercase;margin-left: 10px;font-size: 0.8em;margin-bottom: 5px;display: block;}
+

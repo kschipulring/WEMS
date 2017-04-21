@@ -1,10 +1,7 @@
 <?php 
 
 
-function uploadFile($eventID, $lConponent)
-{
-     
-
+function uploadFile($eventID, $lConponent){
     require '../wemsDatabase.php';
 
     $c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
@@ -12,21 +9,17 @@ function uploadFile($eventID, $lConponent)
 
 
 
-    for($i=0; $i<count($_FILES['fileToUpload']['name']); $i++)
-                {
+    for($i=0; $i<count($_FILES['fileToUpload']['name']); $i++) {
         
                     $target_file = "/www/cmc/documents/".basename($_FILES["fileToUpload"]["name"][$i]);
         
                     $uploadOk = 1;
                     $imageFileType = pathinfo($target_file,PATHINFO_EXTENSION);
         
-                    if ($uploadOk == 0)
-                    {
+                    if ($uploadOk == 0){
                         $locationErrMsg = "Sorry, your file was not uploaded.";
                         //if everything is ok, try to upload file
-                    }
-                    else
-                    {
+                    }else {
         
                         // echo "<pre>";
                         //print_r($_FILES);

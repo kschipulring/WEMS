@@ -1,19 +1,19 @@
 #content
 {
    background-color: #f2f2f2;
-   padding: 20px 10px;
+   padding: 2px 2px;
    overflow: auto;
 }
 #tab-container
 {
    float: left;
-   margin: 50px 0 0 0;
-   width: 126px;
+   margin: 2px 0 0 0;
+   width: 5px;
 }
 #tab-container ul
 {
    list-style: none;
-   text-align: center;
+   text-align: left;
    
 }
 #tab-container ul li
@@ -21,9 +21,9 @@
    border-top: 1px solid #666;
    border-right: 1px solid #666;
    border-bottom: 1px solid #666;
-   border-left: 8px solid #666;
+   border-left: 2px solid #666;
    background-color: #ddd;
-   margin: 8px 0;
+   margin: 2px 0;
    
 }
 #tab-container ul li a,
@@ -32,7 +32,7 @@
    text-decoration: none;
    color: #666;
    display: block;
-   padding: 15px 5px;
+   padding: 2px 5px;
 }
 #tab-container ul li:hover
 {
@@ -40,20 +40,20 @@
 }
 #tab-container ul li a:hover
 {
-   color: #000;
+   color: #FF9900;
 }
 #tab-container ul li.selected
 {
    border-right: none;
    background-color: #fff;
-   border-left: 8px solid #006699;
+   border-left: 2px solid #006699;
    
 }
 #main-container
 {
    min-height: 600px;
-   margin: 0 0 0 125px;
-   padding: 10px;
+   margin: 0 0 0 5px;
+   padding: 3px;
    background-color: #fff;
    border: 1px solid #888;
 }
@@ -64,7 +64,7 @@
 
 #tabs-titles{
     float:left;
-    margin-right:10px;
+    margin-right:2px;
 	
 }
 #tabs-titles li{
@@ -72,19 +72,22 @@
 	list-style-type: none;
 }
 #tabs-titles li.current{
-    font-weight:bolder;
+	font-weight:bold;
+}
+div#content #tabs-titles li.current, div#content #tabs-titles li.current a, div#content #tabs-titles li.current a:link{
+	color: #333;
 }
 #tabs-contents{
     
-    margin-left:25px;
-    padding:5px;
+    margin-left:5px;
+    padding:1px;
 }
 #tabs-contents li{
     display:none;
 	list-style-type: none;
 }
 #tabs-contents li:first-child{
-    display:block;
+    display:none;
 }
 #ul
 {

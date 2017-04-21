@@ -43,13 +43,13 @@
     
 
     
-	    $qry = oci_parse($c, "select g.FORMANID, e.NAME, g.ASSIGN_LOC from WEMS_GANG g, EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER ")
-                                       OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+	    $qry = oci_parse($c, "select g.FORMANID, e.FST_NME || ' ' || e.LST_NME as NAME, g.ASSIGN_LOC from WEMS_GANG g, WEMS_EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER")
+         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 
                                   
-                                   oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
+		oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
 
-                                   oci_execute($qry);
+		oci_execute($qry);
 
 
      
@@ -79,14 +79,6 @@
          								 
          $json .= "]";
 
-     
-       
-
-      
-
-
-
-   
 
 
  echo $json;

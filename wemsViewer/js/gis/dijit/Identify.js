@@ -18,7 +18,6 @@ define([
     'esri/dijit/PopupTemplate',
     'dojo/text!./Identify/templates/Identify.html',
     'dojo/i18n!./Identify/nls/resource',
-
     'dijit/form/Form',
     'dijit/form/FilteringSelect',
     'xstyle/css!./Identify/css/Identify.css'
@@ -319,7 +318,7 @@ define([
                             
                             	if(prop == "WEMS.WEMS_VIEW.MARKERID")
                            	 	{
-                            		
+                            		var client = new XMLHttpRequest();
                             		
                             		 if (window.XMLHttpRequest)
                                      {
@@ -336,18 +335,14 @@ define([
                                      }
                             		 
                             		 
+                        
+                                    
                             		 
-                            		 
-                            		 
-                            		 
-                            		 client.onreadystatechange = function() {GISData(client)};
-
-                            		 client.open("GET", "getGISData.php?markerid="+result.feature.attributes[prop], false);
-                                     client.send("");
+   
                             		
                             		
                                      
-                                           
+                                     // alert("test")  ;   
                                      
                                      function GISData(obj)
                                      {
@@ -369,25 +364,30 @@ define([
                                     		 var beginning = str.split("~")[0];
                                     	 
                                     		 //alert(beginning);	
+                                    		 alert(result.feature.attributes[prop]);
                                     	 
                                     	 
                                     	
                                     		 var val = eval('(' + beginning + ')');
                                     
                                       
-                                    		 //alert(val[i].FULLNAME);	
+                                    		//alert(val[i].FULLNAME);	
                                       
-                                     
+                                    // alert("TEST");
                                     		 for(var i = 0; i < val.length; i++)
                                     		 {
                                    		  
-                                    		                                      	  
+                                    		                                       	  
                                     			 templateStr += '<b>CONPONENT</b>: ';
                                     			 templateStr += val[i].FULLNAME;
                                     			 templateStr += '<br/>';  
                                   			
                                     			 templateStr += '<b>FOREMAN ASSIGNED</b>: ';
                                     			 templateStr += val[i].FOREMAN;
+                                    			 templateStr += '<br/>';
+
+                                    			 templateStr += '<b>DEPARTMENT</b>: ';
+                                    			 templateStr += val[i].DEPT;
                                     			 templateStr += '<br/>';  
                                     			
                                     			 templateStr += '<b>STATUS</b>: ';
@@ -416,12 +416,23 @@ define([
                                  		 		title: result.layerName,//"dirty"
                                  		 		 //title: 'TEST',//"dirty"
                                  		 		description: templateStr
-                                 		 		}));
+                                 		 		})); 
                                     		  */   
                                     		    
                                       } // end if(obj.readyState == 4 && obj.status == 200)
                                     	 
-                                     }// function GISData(obj)		
+                                     }// function GISData(obj)	
+                                     
+                                   
+                             		 client.onreadystatechange = function() {
+                             			 if( typeof(GISData) === "function" ){
+                             				GISData(client);
+                             			 }
+                                 	 };
+
+                             		 client.open("GET", "getGISData.php?markerid="+result.feature.attributes[prop], false);
+                                     client.send("");
+                                     
                                      
                            	 	} //if(prop == "WEMS.WEMS_VIEW.MARKERID")
                             

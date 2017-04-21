@@ -1,6 +1,6 @@
  <?php 
  ob_end_clean();
- ob_end_flush();
+ //ob_end_flush();
 
  
  
@@ -42,12 +42,12 @@
     }
     
     
-    ob_start();
+    //ob_start();
     $json = "[";
      
     
     
-    while($row = oci_fetch_array($qry))
+ while($row = oci_fetch_array($qry))
     {
     
         $foreman = $row['EMP'];
@@ -55,11 +55,12 @@
         $bags = $row['CT_BAGS'];
         $conponentName = $row['FULLNAME'];
         $passNum = $row['CT_PASSNUM'];
+        $dept = "";
         
         
         if($foreman != "")
         {
-            $qry2 = oci_parse($c, "select NAME from EMPLOYEE where EMPLOYEENUMBER = :FOREMAN")
+            $qry2 = oci_parse($c, "select e.FST_NME, e.LST_NME, d.DEPT_NAME from WEMS_EMPLOYEE e, WEMS_DEPT d where d.dept_NUM = e.DEPTCODE and e.EMPLOYEENUMBER = :FOREMAN")
                                         OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
                                          
                                         oci_bind_by_name($qry2, ":FOREMAN", $foreman, -1);
@@ -68,7 +69,9 @@
                                         
                                         while($row = oci_fetch_array($qry2))
                                         {
-                                            $foreman = $row['NAME'];
+                                            $foreman = $row['FST_NME'] . " " . $row['LST_NME'];
+                                            
+                                            $dept = $row['DEPT_NAME'];
                                         }
                                         
                                         
@@ -80,17 +83,15 @@
         
         
         
-        $json .= "{\"FOREMAN\": \"$foreman\",\"STATUS\": \"$status\",\"BAGS\": \"$bags\",\"FULLNAME\": \"$conponentName \",\"PASSNUM\": \"$passNum\",\"NOTE\": \"$locNote\"},";
+         $json .= "{\"FOREMAN\": \"$foreman\",\"DEPT\": \"$dept\",\"STATUS\": \"$status\",\"BAGS\": \"$bags\",\"FULLNAME\": \"$conponentName \",\"PASSNUM\": \"$passNum\",\"NOTE\": \"$locNote\"},";
          
     }
     //$json .= "{\"CTID\": \"99999999\",\"FULLNAME\": \"All Conponents\"},";
     
     $json .= "]";
     $json .= "~";
-    ob_end_clean();
    // ob_end_clean();
-   // 
-    
+  
     
     
     echo $json;

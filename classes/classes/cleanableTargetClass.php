@@ -14,7 +14,7 @@ inner join DEPT d on d.DEPTCODE = e.DEPTCODE where ct.MARKERID = ". $markerId ."
             return $e;       
         }
     }
-    
+     
     public function getLocationById($markerId){
         try{
             $result = array();

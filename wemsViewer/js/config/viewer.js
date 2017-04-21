@@ -120,7 +120,7 @@ define([
       layerControlLayerInfos: {
           swipe: true,
           metadataUrl: true,
-          expanded: false
+          expanded: false 
       }
 },{
       type: 'dynamic',

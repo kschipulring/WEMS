@@ -2,7 +2,7 @@
 
 $wemsDBusername = "WEMS";
 $wemsDBpassword = "wems";
-$wemsDatabase = "WEATTEST";
+$wemsDatabase = "WEATTEST"; 
 
 
 ?>

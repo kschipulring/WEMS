@@ -8,7 +8,7 @@ class location extends database {
     protected $dateStamp;
     protected $lat;
     protected $lon;
-    protected $gis_join_id;
+    protected $gis_join_id; 
     protected $loc_id;
     protected $county;
     protected $status;

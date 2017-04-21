@@ -22,7 +22,7 @@ OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</p
 oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
 oci_execute($qry);
 
-while($row = oci_fetch_array($qry))
+while( ($row = oci_fetch_array($qry)) != false )
 {
     $empTotal = $row['EMPTOTAL'];
     $deptCd = $row['DEPTCD'];
@@ -42,8 +42,7 @@ while($row = oci_fetch_array($qry))
     
     
     
-    while($row = oci_fetch_array($qry2))
-    {
+    while( ($row = oci_fetch_array($qry2)) != false ) {
         $formanTotal = $row['FORMAN_CNT'];
     }
     
@@ -57,7 +56,7 @@ while($row = oci_fetch_array($qry))
     
             oci_execute($qry3);
             
-            while($row = oci_fetch_array($qry3))
+            while( ($row = oci_fetch_array($qry3)) != false )
             {
                 $dept = $row['DEPT_NAME'];
             }

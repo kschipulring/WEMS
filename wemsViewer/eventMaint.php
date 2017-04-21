@@ -1,5 +1,6 @@
 <?php 
-session_start(); 
+session_start();
+
 // error and success msg rows
 function getErScRows($erMsg, $scMsg, $colSpan = 6){
 	$outStr = "";
@@ -12,50 +13,26 @@ function getErScRows($erMsg, $scMsg, $colSpan = 6){
 	return $outStr;
 }
 
-//converting prefix type to DB type
-function getDBtype($pre){
-	$type = "S"; 
-
-	switch($pre){
-		case "l": 
-			$type = "S"; 
-			break; 
-		case "i":
-			$type = "I";
-			break;
-		case "pl":
-			$type = "P";
-			break;
-		case "si":
-			$type = "T";
-			break;
-	}
-
-	return $type;
-}
-
 function rrLocationMenu($pre, $loc){
-	global $c;
+	global $locationObj;
 	
-	$dbType = getDBtype($pre);
+	$dbType = utilities::getDBtype($pre);
 	
-	$outStr = "<select name='{$pre}Loc' id='{$pre}Loc' onchange='getConponentData(\"$pre\"); getConponentDetails(\"$pre\"); getEmployees(\"$pre\");'>";
-	//$outStr .= "<option value='0' selected='selected'>  </option>";
+	$outStr = "<select class='input-box' name='{$pre}Loc' id='{$pre}Loc' onchange='getConponentData(\"$pre\"); getEmployees(\"$pre\");'>";
 	$outStr .= "<option value='0'>  </option>";
 	
-	$qry = oci_parse($c, "SELECT MARKERID, MARKERNAME from WEMS_LOCATION where LOC_CD = '$dbType' order by MARKERNAME")
-	OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+	$glt = $locationObj->getLocationsByType($pre, $loc);
 	
-	oci_execute($qry);
+	for( $i=0; $i<count($glt); $i++ ){
+		$row = $glt[$i];
 	
-	while( ($row = oci_fetch_array($qry)) != false ){
-		$id = $row['MARKERID'];
-		$desc = $row['MARKERNAME'];
-		if($id == $loc){
-			$outStr .= "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
-		}else{
-			$outStr .= "<option value=\"$id\" > $desc </option>";
+		$isSelected = "";
+	
+		if( $row["SELECTED"] == true ){
+			$isSelected = "selected=\"selected\"";
 		}
+	
+		$outStr .= "<option value=\"$row[MARKERID]\" $isSelected> $row[DESC] </option>";
 	}
 	
 	$outStr .= "</select>";
@@ -63,27 +40,26 @@ function rrLocationMenu($pre, $loc){
 	return $outStr;
 }
 
-function rrComponentFields($pre, $component){
-	global $c;
+function rrComponentFields($pre, $component, $loc){
+	global $locationObj;
 	
-	$dbType = getDBtype($pre);
+	$dbType = utilities::getDBtype($pre);
 	
-	$outStr = "<select name='{$pre}Conponent' id='{$pre}Conponent' onchange='getConponentDetails(\"$pre\");getEmployees(\"$pre\");'>";
-	 											
-	$qry = oci_parse($c, "SELECT CTID, FULLNAME FROM WEMS_CLEANABLE_TARGET where MARKERID = :MARKERID and TYPE = '{$dbType}'")
-	OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-	 
-	oci_bind_by_name($qry, ":MARKERID", $lLoc, -1);
-	 
-	oci_execute($qry);
-	while( ($row = oci_fetch_array($qry)) != false ){
-		$isSelected = '';
-		
-		if($component == $row[CTID]){
-			$isSelected = 'selected=\"selected\"';
+	$outStr = "<select class='input-box' name='{$pre}Conponent' id='{$pre}Conponent' onchange='getConponentDetails(\"$pre\"); getEmployees(\"$pre\");'>";
+	
+	//NOTE: $gct does NOT represent 'Grand Central Terminal'
+	$gct = $locationObj->getCleanableTargetsByType($pre, $component, $loc);
+	
+	for( $i=0; $i<count($gct); $i++ ){
+		$row = $gct[$i];
+	
+		$isSelected = "";
+	
+		if( $row["SELECTED"] == true ){
+			$isSelected = "selected=\"selected\"";
 		}
-		
-		$outStr .= "<option value= \"$row[CTID]\" $isSelected> $row[FULLNAME] </option>";
+	
+		$outStr .= "<option value=\"$row[CTID]\" $isSelected> $row[FULLNAME] </option>";
 	}
 	
 	$outStr .= "</select><input type='checkbox' name='allConponents' value='allConponents' id='{$pre}AllConponents' /> Apply to all conponents <br/>";
@@ -91,25 +67,51 @@ function rrComponentFields($pre, $component){
 	return $outStr;
 }
 
-function statusMenu($pre, $status){
-	global $c, $eventID;
+function gangAssignMenu($pre, $conponent, $loc){
+	global $gangObj, $eventID;
 	
-	$outStr = "<select name='{$pre}Status' id='{$pre}Status'>";
+	$out = "<select class='input-box' name='{$pre}Forman' id='{$pre}Forman'>";
+	$out .= "<option value= \"\" >  </option>";
+	
+	//Now it is in seperate functions :)
+	if(!empty($conponent) && $conponent != ""){
+		$ggl = $gangObj->getGangList($loc, $eventID, $conponent);
 
-	$qry = oci_parse($c, "SELECT STATUSID, STATUS from WEMS_LOCATION_STATUS")
-	OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-		
-	oci_execute($qry);
-		
-	while (($row = oci_fetch_array($qry)) != false) {
-		$id   = $row['STATUSID'];
-		$desc = $row['STATUS'];
+		for( $i=0; $i<count($ggl); $i++ ){
+			$row = $ggl[$i];
 			
-		if ($id == $status) {
-			$outStr .= "<option value=\"$id\" selected=\"selected\"> $desc </option>";
-		} else {
-			$outStr .= "<option value=\"$id\"> $desc </option>";
+			$isSelected = "";
+			
+			if( $row["LOCATION"] > 0 ){
+				$isSelected .= "selected=\"selected\"";
+			}
+			
+			$out .= "<option value= \"$row[FORMANID]\" $isSelected> $row[NAME] </option>";
 		}
+	}
+
+	$out .= "</select>";
+	
+	return $out;
+}
+
+function statusMenu($pre, $status){
+	global $locationObj;
+	
+	$gls = $locationObj->getLocationStatuses($status);
+	
+	$outStr = "<select name='{$pre}Status' id='{$pre}Status' class='input-box'>";
+	
+	for( $i=0; $i<count($gls); $i++ ){
+		$row = $gls[$i];
+	
+		$isSelected = "";
+		
+		if( $row["SELECTED"] == true ){
+			$isSelected = "selected=\"selected\"";
+		}
+		
+		$outStr .= "<option value=\"$row[ID]\" $isSelected> $row[DESC] </option>";
 	}
 
 	$outStr .= "</select>";
@@ -131,12 +133,12 @@ function dateTimeFields($pre, array $timeData){
 	
 	//datepicker
 	$outStr = <<<EOD
-	<input readonly="readonly" type="text" name="{$startTmNm}" size="20" tabindex="24" id="{$startTmNm}" value="{$startTm}"/>
+	<input readonly="readonly" type="text" name="{$startTmNm}" size="20" tabindex="24" id="{$startTmNm}" value="{$startTm}" class='input-box' />
 	<img src="cal.gif" width="16" border="0" id="{$calNm}" alt="Click here to pick date" />  
 EOD;
 	
 	//hour box
-	$outStr .= "<select name=\"{$pre}StartHr\" id=\"{$pre}StartHr\">";
+	$outStr .= "<select name=\"{$pre}StartHr\" id=\"{$pre}StartHr\" class='input-box'>";
 	for ($x = 1; $x <= 12; $x++) {
 		$tempSel = (!empty($hour) && trim($hour) == $x) ? "selected" : "";
 	
@@ -145,17 +147,17 @@ EOD;
 	$outStr .= "</select>";
 	
 	//minute box
-	$outStr .= " : <select name=\"{$pre}StartMin\" id=\"{$pre}StartMin\">";
+	$outStr .= " : <select name=\"{$pre}StartMin\" id=\"{$pre}StartMin\" class='input-box'>";
 	for ($x = 0; $x <= 59; $x++) {
 		if($x < 10) $x = "0".  $x;
 	
 		$tempSel = (!empty($min) && trim($min) == $x) ? "selected" : "";
-		$outStr .= "<option value= \"$x\" $tempSel> $x </option>";
+		$outStr .= "<option value= \"$x\" {$tempSel}> $x </option>";
 	}
 	$outStr .= "</select>";
 	
 	//am and pm box
-	$outStr .= "<select name='{$pre}AmPm' id='{$pre}AmPm'>";
+	$outStr .= "<select name='{$pre}AmPm' id='{$pre}AmPm' class='input-box'>";
 	$outStr .= "<option value='0' " . ((!empty($amPm) && trim($amPm) == "0") ? "selected" : "") . ">AM</option>";
 	$outStr .= "<option value='1'" . ((!empty($amPm) && trim($amPm) == "1") ? "selected" : "") . ">PM</option>";
 	$outStr .= "</select>";
@@ -163,73 +165,64 @@ EOD;
 	return $outStr;
 }
 
-function downloadFields($pre, $bType="CTID"){
-	global $c, $eventID;
+function downloadFields($pre, $component, $bType="CTID"){
+	global $eventID, $locationObj;
 
 	$outStr = "<select name='{$pre}DownloadFile' id='{$pre}DownloadFile'><option value='0' selected='selected'>  </option>";
 
-	$qryDoc = oci_parse($c, "SELECT ID from WEMS_LOCDOCS where EVENTID = :EVENTID and MARKERID = :$bType")
-	OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-
-	oci_bind_by_name($qryDoc, ":EVENTID", $eventID, -1);
-	oci_bind_by_name($qryDoc, ":$bType", $lConponent, -1);
-
-	oci_execute($qryDoc);
-
-	while (($row = oci_fetch_array($qryDoc)) != false) {
+	$gdf = $locationObj->getDownloadFields($eventID, $component, $bType);
+	
+	for( $i=0; $i<count($gdf); $i++ ){
+		$row = $gdf[$i];
+	
 		$outStr .= "<option value= \"$row[ID]\" > $row[ID] </option>";
 	}
 
-	$outStr .= "</select><input class='Download' type='submit' value='Download' name='SUBMIT' id='{$pre}SUBMIT' />";
+	$outStr .= "</select><input class='Download' type='submit' value='Download' name='SUBMIT' id='{$pre}_DL_SUBMIT' />";
 
 	return $outStr;
 }
 
 function historyTextarea($pre, $ctId){
-	global $c, $eventID;
+	global $eventID, $locationObj;
+
+	$outStr = "<textarea rows='10' cols='100' name='{$pre}History' id='{$pre}History' class='input-box'>";
+
+	$glh = $locationObj->getLocationHistory($pre, $eventID, $ctId);
 	
-	$qry = <<<EOD
-SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
-t.CTNOTES, e.FST_NME || ' ' || e.LST_NME AS NAME, t.CTSTATUS, t.CTPASSNUM, t.CTBAGS, t.CTNOTEUSER
-FROM WEMS_CLEANABLE_TARGET_NOTES t
-LEFT JOIN WEMS_EMPLOYEE e ON e.EMPLOYEENUMBER = t.FORMANID 
-where t.CTID = :CTID
-and t.EVENTID = :EVENTID
-and ((t.FORMANID = e.EMPLOYEENUMBER) or (t.FORMANID = 0)) ORDER BY ENTER_DATETIME
-EOD;
-	
-	$qryDoc = oci_parse($c, $qry)
-	OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-	
-	oci_bind_by_name($qryDoc, ":EVENTID", $eventID, -1);
-	oci_bind_by_name($qryDoc, ":CTID", $ctId, -1);
-	
-	oci_execute($qryDoc);
-	
-	$outStr = "<textarea rows='10' cols='100' name='{$pre}History' id='{$pre}History'>";
-	$extra = "";
-	
-	while( ($row = oci_fetch_array($qryDoc)) != false ){
-		$nNoteTime = $row['CTSTARTTIME'];
-		$nUser = $row['CTNOTEUSER'];
-		$nNote = $row['CTNOTES'];
-		$nForman = $row['NAME'];
-		$nStatus = $row['CTSTATUS'];
-		
-		$nBags = $row['CTBAGS'];
-		$nPass = $row['CTPASSNUM'];
-		
-		if($pre === "l"){
-			$extra = ", Bags: " . $nBags . ", Pass #: " . $nPass;
-		}
-			
-		$outStr .= $nNoteTime . ",  user: " . $nUser . ",  " . $nNote . ", Forman: " . $nForman . $extra . ", Status: " .  $nStatus . "\r\n";
-	}
+	$outStr .= join('', $glh);
 	
 	$outStr .= "</textarea>";
 	
 	return $outStr;
 }
+
+function locationSubmitRow($pre, $loc, $labelSuffix){
+	global $eventID, $locationObj;
+	
+	$outStr = "";
+	
+	if ($eventID > 0 && ( $_SESSION['group'] == "WEMS_Admin" || $_SESSION['group'] == "WEMS_Write" ) ){
+		$buttonStr = "Assign";
+		
+		//if this location currently has a gang assigned to it.
+		if( is_numeric($loc) && $locationObj->getLocationIfAssigned($loc, $eventID) == 1 ){
+			$buttonStr = "Update";
+		}
+			
+		$outStr = "<tr><td colspan = \"2\" style=\"text-align:center\">
+		<input type=\"hidden\" name=\"task\" value=\"{$labelSuffix}\" />
+		<input class=\"wideGreenBtn\" type=\"submit\" value=\"{$buttonStr} {$labelSuffix}\" name=\"SUBMIT\" id=\"{$pre}SUBMIT\" />
+		</td></tr>";
+	}
+	
+	return $outStr;
+}
+
+//now load classes easily without worrying about including their files
+spl_autoload_register(function ($class) {
+	include_once "../classes/{$class}Class.php";
+});
 
 ob_start();
 set_include_path(get_include_path() . PATH_SEPARATOR . "/usr/local/zend/var/libraries/tcpdf/6.2.12");
@@ -244,7 +237,7 @@ $locationSuccessMsg = "";
 $eventSuccessMsg = "";
 $gangSuccessMsg = "";
 $interlockingErrMsg = "";
-// $locationSuccessMsg = "";
+$locationSuccessMsg = "";
 $parkingLotErrMsg = "";
 $parkingLotSuccessMsg = "";
 $signalErrMsg = "";
@@ -264,12 +257,19 @@ $supportDoc = "";
 $isupportDoc = "";
 $plsupportDoc = "";
 $siSupportDoc = "";
+
+$lLoc = "";
+$iLoc = "";
+$plLoc = "";
+$siLoc = "";
+
 $inactive = 2400; //600 = 10 min
 
 $lConponent="";
 $iConponent="";
 $plConponent="";
-$siConponent=""; 
+$siConponent="";
+
 
 if (isset($_SESSION['timeout'])) {
 	$session_life = time() - $_SESSION['timeout'];
@@ -289,19 +289,28 @@ if(isset($_POST['Logout'])) { // logout
 	header("Location: login.php?returnPage=$returnPage");
 }
 
-if($_SESSION['group'] != "WEMS_Admin"){
+$groups = config::$approvedGroups;
+
+if (!in_array($_SESSION['group'], $groups)){
 	session_destroy();
 	header("Location: login.php?returnPage=$returnPage");
 }else{
 	require '../wemsDatabase.php';
 	require_once('tcpdf.php');
-	require_once '../classes/databaseClass.php';
+	/*require_once '../classes/databaseClass.php';
 	require_once '../classes/eventClass.php';
 	require_once '../classes/gangClass.php';
 	require_once '../classes/locationClass.php';
-	require_once '../classes/cleanableTargetClass.php';
+	require_once '../classes/cleanableTargetClass.php';*/
+	
+	/*
+	global object instances. NOTE, classes, if their definitions are stored within the '../classes/' directory
+	AND follow the naming convention of like '(someClassName)Class.php', then they can be directly referenced throughout this file
+	*/
+	$gangObj = new gang();
+	$locationObj = new location();
 
-	$c = oci_pconnect ($wemsDBusername, $wemsDBpassword, $wemsDatabase)
+	$c = oci_pconnect($wemsDBusername, $wemsDBpassword, $wemsDatabase)
 	OR die('Unable to connect to the database. Error: <pre>' . print_r(oci_error(),1) . '</pre>');
 
 	// Check if there is a storm open already
@@ -325,7 +334,12 @@ if($_SESSION['group'] != "WEMS_Admin"){
 
 	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-	$task =  isset($_POST['SUBMIT']) ? $_POST['SUBMIT'] : false;
+	//a hidden input seems to be more reliable than input buttons for this role
+	if(isset($_POST['task']) && count($_POST['task']) ){
+		$task = $_POST['task'];
+	}else{
+		$task = isset($_POST['SUBMIT']) ? $_POST['SUBMIT'] : false;
+	}
 
 	if($task == "GIS"){
 		//header("Location: http://webz8dev.lirr.org/~tebert/wems/wemsViewer/WEMS_GIS.php");
@@ -365,11 +379,15 @@ if($_SESSION['group'] != "WEMS_Admin"){
 		reOpen($eventID);
 	}
 
-	if ($task == "Assign Parking Lot") {
+	//if ($task == "Assign Parking Lot") {
+	if (trim($task) == "Parking Lot") {
 		$lPassNum = 0;
 		$lNumBags = 0;
 		$plLoc = isset($_POST['plLoc']) ? $_POST['plLoc'] : "";
-		$plConponent = "";
+		$lLoc = $plLoc;
+		
+		//$plConponent = "";
+		$plConponent = isset($_POST['plConponent']) ? $_POST['plConponent'] : "";
 		$lForman = isset($_POST['plForman']) ? $_POST['plForman'] : "";
 		$lStatus = isset($_POST['plStatus']) ? $_POST['plStatus'] : "";
 		$lNoteTime = isset($_POST['plNoteTime']) ? $_POST['plNoteTime'] : "";
@@ -385,7 +403,7 @@ if($_SESSION['group'] != "WEMS_Admin"){
 		$lUser = $_SESSION['user'];
 		$interlockingErrMsg = $plConponent;
 		$lconponentl = "allConponents";
-		$plConponent = "";
+		//$plConponent = "";
 		$Loc_Type = 'P';
 		$filesToUpload = "";
 		require_once ('assignLocation.php');
@@ -396,15 +414,17 @@ if($_SESSION['group'] != "WEMS_Admin"){
 			$lPassNum, $lNumBags, $lcomments, $lUser, $Loc_Type);
 
 		require_once('uploadFile.php');
-		uploadFile($eventID, $lLoc);
+		uploadFile($eventID, $plConponent);
 	} //if($task == "Assign Parking Lot")
 
 	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	if ($task == "Assign Interlocking") {
-		$lLoc = isset($_POST['iLoc']) ? $_POST['iLoc'] : "";
+	//if ($task == "Assign Interlocking") {
+	if (trim($task) == "Interlocking") {
+		$iLoc = isset($_POST['iLoc']) ? $_POST['iLoc'] : "";
+		$lLoc = $iLoc;
 		$lconponentl = "allConponents";
-		$lConponent = "";
+		$iConponent = isset($_POST['iConponent']) ? $_POST['iConponent'] : "";
+		$lConponent = $iConponent;
 		$lPassNum = 0;
 		$lNumBags = 0;
 		$lForman = isset($_POST['iForman']) ? $_POST['iForman'] : "";
@@ -420,8 +440,6 @@ if($_SESSION['group'] != "WEMS_Admin"){
 		$Loc_Type = 'I';
 		$lUser = $_SESSION['user'];
 		$filesToUpload = "";
-		
-		$iConponent = isset($_POST['iConponent']) ? $_POST['iConponent'] : "";
 
 		require_once ('assignLocation.php');
 
@@ -431,7 +449,7 @@ if($_SESSION['group'] != "WEMS_Admin"){
 
 		require_once ('uploadFile.php');
 
-		uploadFile($eventID, $lLoc);
+		uploadFile($eventID, $lConponent);
 	} //if($task == "Assign Interlocking")
 
 	// %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -723,8 +741,8 @@ if($_SESSION['group'] != "WEMS_Admin"){
 		$gangErrMsg = "";
 		if (!strlen($gangErrMsg)) {
 			$qry = oci_parse($c, "Update WEMS_GANG SET EVENTID = :EVENTID, FORMANID = :FORMANID, EMP_ASSIGNED = :EMP_ASSIGNED, OPENTIME = to_date(:OPENTIME, 'mm/dd/yyyy HH:MI AM'),
-                                        OPENUSER = :OPENUSER, STATUS = :STATUS where EVENTID = :EVENTID and FORMANID = :FORMANID")
-                                        OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c) , 1) . '</pre>');
+                                    OPENUSER = :OPENUSER, STATUS = :STATUS where EVENTID = :EVENTID and FORMANID = :FORMANID")
+                                    OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c) , 1) . '</pre>');
                                          
                                         oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
                                         oci_bind_by_name($qry, ":FORMANID", $forman, -1);
@@ -737,7 +755,7 @@ if($_SESSION['group'] != "WEMS_Admin"){
                                         oci_bind_by_name($qry, ":FORMANID", $forman, -1);
                                         oci_execute($qry);
                                          
-                                        $updateQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED, ENTER_DATETIME, STATUS)
+			$updateQry = oci_parse($c, "insert into WEMS_GANG_NOTES (EVENTID, FORMANID, NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED, ENTER_DATETIME, STATUS)
 							VALUES (:EVENTID, :FORMANID, to_date(:NOTETIME, 'mm/dd/yyyy HH:MI AM'), :NOTEUSER, :EVENTUPDATE, :EMP_ASSIGNED, SYSDATE, :STATUS)")
 							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c) , 1) . '</pre>');
 
@@ -755,7 +773,8 @@ if($_SESSION['group'] != "WEMS_Admin"){
 	} //if(!strlen($errMsg))
 } //if($task == "Update Gang")
 
-if ($task == "Assign Location") {
+//if ($task == "Assign Location") {
+if ($task == "Location") {
 	$lLoc = isset($_POST['lLoc']) ? $_POST['lLoc'] : "";
 	$lConponent = isset($_POST['lConponent']) ? $_POST['lConponent'] : "";
 	$lForman = isset($_POST['lForman']) ? $_POST['lForman'] : "";
@@ -794,6 +813,12 @@ if ($task == "Assign Location") {
 	    <title>WEMS</title>
 	    
 	    <link rel="stylesheet" type="text/css" media="all" href="../lib/jscalendar/skins/aqua/theme.css" title="win2k-cold-1" />
+	    <link href="css/wems-styles.css" rel="stylesheet" type="text/css" />
+	    
+		<script language="JavaScript" type="text/javascript">
+		window.tabindex = <?=$tabindex?>;
+		window.eventId = <?=$eventID?>;
+		</script>
 	    
 	    <script type="text/javascript" src="js/eventMaint.js"></script>
 	    <script type="text/javascript" src="../lib/jscalendar/calendar.js"></script>
@@ -815,104 +840,114 @@ if ($task == "Assign Location") {
     <!-- <body onload="getEmployees();getILEmployees();getPLEmployees();"> -->
     <body class="eventMaint">
 		<div>
-			<img src="wemsPhoto.jpg" alt="Mountain View" style="float:right;height:42px;" />
+			<img src="../images/wemsPhoto.jpg" alt="Mountain View" style="float:right;" />
 			<br/><br/>
 		</div>
 		<div>
-			<ul class="tabs" data-persist="true"> 
+			<ul class="tabs" data-persist="true">
 				<!--  <li><a href="#view1">Home</a></li> -->
 		    		<li><a href="#view1">Event</a></li> 
 		    		<li><a href="#view2">Gang Assignments</a></li> 
 		    		<li><a href="#view3">Location Assignments</a></li> 
 		    		<li><a href="#view4">Reports</a></li> 
 		    		<li><a href="#view5">Maps</a></li> 
+		    		<li>
+					<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" name="logout" id="logoutform">
+						<input type="hidden" name="Logout" value="true" />
+						<button class="logout logging smallGreenBtn">Log Out</button>
+					</form>
+				</li> 
 			</ul> 
 		</div>
-    		<div class="tabcontents"> 
+
+    		<div class="tabcontents">
      <!--
      ************************************************************************************************************************************************
                                                     EVENT
      ************************************************************************************************************************************************
      -->
-    			<div style="background-color:#FFF2F2;" id="view1"> 
-      			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
+
+    			<div style="background-color:#f0ffff;" id="view1"> 
+      			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="eventform" id="eventform" >
       				<fieldset id="event">
-        				<legend>Event Maintenance </legend>
+        					<legend><span class="bold_green_message">Event Maintenance</span></legend>
 
-        				<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
-						<?php echo getErScRows($eventErrMsg, $eventSuccessMsg); ?>
-
-                      		<tr><th colspan = "2" align="center">Event</th></tr>
-                      		
+	        				<table align="center" class="table grid123" cellpadding="1" cellspacing="1" border="0" >
+							<?php echo getErScRows($eventErrMsg, $eventSuccessMsg); ?>
+	
+	                      		<tr><th colspan="2" align="center">Event</th></tr>
+	                      		
                       			<?php
                       			if($eventID > 0){
-                      			    echo "<tr><td>Storm ID:</td> <td><input type=\"text\" name=\"sID\" value=\"$externalID\" readonly /></td></tr>";
+                      			    echo "<tr><th>Storm ID:</th> <td><input type=\"text\" class=\"input-box\" name=\"sID\" value=\"$externalID\" readonly /></td></tr>";
                       			}
 							?>
-								<tr>
-									<td>Storm Level:</td>
-									<td><select name="eventType" id = "eventType">
-										<option value="0" selected="selected"> </option>
-									
-							<?php 
-                                   $qry = oci_parse($c, "SELECT EVENTTYPE, EVENTDESC from EVENTTYPE order by EVENTDESC desc")
-                                       OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-
-                                   oci_execute($qry);
-
-                                   while( ($row = oci_fetch_array($qry)) != false ){
-                                     $id = $row['EVENTTYPE'];
-                                     $desc = $row['EVENTDESC'];
-									
-										if($id == $eventType)
-										echo "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
-										else
-										echo "<option value=\"$id\" > $desc </option>";
-
-                                   }
-					          ?> 
-									</select></td>
-								</tr>
-								<tr>
-									<?php 
-									if($eventID > 0){
-									   echo"<td>Assigned By:</td><td><input type=\"text\" name=\"sAssigned\" value=\" $activeUser\" readonly></td>";
-									}
-									?>	
-								</tr>
-								<tr>
-									<td>Start Date: </td>
-									<td>
-									<?php 
-									$timeData = array( "startTm" => $openTime, "startTmNm" => "opentime", "calNm" => "startCalbutton" );
-									echo dateTimeFields("open", $timeData);
-									?>					
-									</td>
-								</tr>
-								<tr>
-									<td>Comments</td>
-									<td><textarea rows="4" cols="50" name="sComments"></textarea></td>
-								</tr>
-
+							<tr>
+								<th>Storm Level:</th>
+								<td><select class="input-box" name="eventType" id = "eventType">
+									<option value="0" selected="selected"> </option>
+							
 								<?php
+	                                   $qry = oci_parse($c, "SELECT EVENTTYPE, EVENTDESC from EVENTTYPE order by EVENTDESC desc")
+	                                       OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+	
+	                                   oci_execute($qry);
+	
+	                                   while( ($row = oci_fetch_array($qry)) != false ){
+									$id = $row['EVENTTYPE'];
+									$desc = $row['EVENTDESC'];
+										
+									if($id == $eventType)
+									echo "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
+									else
+									echo "<option value=\"$id\" > $desc </option>";
+	                                   }
+						          ?> 
+								</select></td>
+							</tr>
+							<tr>
+								<?php 
+								if($eventID > 0){
+								   echo"<th>Assigned By:</th><td><input type=\"text\" class='input-box' name=\"sAssigned\" value=\" $activeUser\" readonly></td>";
+								}
+								?>	
+							</tr>
+							<tr>
+								<th>Start Date: </th>
+								<td>
+								<?php 
+								$timeData = array( "startTm" => $openTime, "startTmNm" => "opentime", "calNm" => "startCalbutton" );
+								echo dateTimeFields("open", $timeData);
+								?>					
+								</td>
+							</tr>
+							<tr>
+								<th>Comments</th>
+								<td><textarea rows="4" cols="50" name="sComments"></textarea></td>
+							</tr>
+
+							<?php
+							if( $_SESSION['group'] == "WEMS_Admin" ){
 								echo "<tr>";
 								if($eventID > 0){
-									echo "<td colspan = \"1\" align=\"center\"><input class=\"Update Storm\" type=\"submit\" value=\"Update Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
-									echo "<td colspan = \"1\" align=\"center\"><input class=\"Close Storm\" type=\"submit\" value=\"Close Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td></tr>";
+									echo "<td colspan = \"1\" align=\"center\"><input class=\"wideredBtn\" type=\"submit\" value=\"Close Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
+									echo "<td colspan = \"1\" align=\"center\"><input class=\"wideGreenBtn\" type=\"submit\" value=\"Update Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
 								}else{
-									echo "<td colspan = \"2\" align=\"center\"><input class=\"Create Storm\" type=\"submit\" value=\"Create Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
+									echo "<td colspan = \"2\" align=\"center\"><input class=\"wideGreenBtn\" type=\"submit\" value=\"Create Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
 								}
-								?>
+								
+								echo "</tr>";
+							}
+							?>
         				</table>
         				
         				<br></br>
 
-        				<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
-						<tr ><th colspan = "2" align="center">Storm History</th></tr>
+        				<table align="center" class="table grid123" cellpadding="1" cellspacing="1" border="0" >
+						<tr><th colspan = "2" align="center">Storm History</th></tr>
 												
 						<tr>
-							<td><textarea rows="10" cols="100">
-							<?php 
+							<td><textarea class="input-box" rows="10" cols="100" id="stormHistory"><?php 
 							if($eventID > 0){
 							   $qry = oci_parse($c, "select et.EVENTDESC, TO_CHAR(e.ENTER_DATETIME, 'MM/DD/YYYY hh:miAM') as NOTETIME, 
 							                         e.NOTEUSER, e.EVENTUPDATE  
@@ -932,34 +967,33 @@ if ($task == "Assign Location") {
 							       echo $eTime . ", " . $eType . ", " . $eUser . ", " . $eUpdate . '&#13;&#10;';
 							   }
 							}
-							?>
-							</textarea></td>
+							?></textarea></td>
 						</tr>
 						<?php 
-						if($eventID == 0){						
+						if($eventID == 0){
 							$outStr = "<tr><td colspan = \"2\" align=\"center\">__________________________________________</td></tr>";
 							$outStr .= "<tr><td colspan = \"2\" align=\"center\">Past Storms:";
 							$outStr .= "<select name=\"pastStorms\" id = \"pastStorms\" > <option value= 0 selected>";
-						    
+
 							$qry = oci_parse($c, "SELECT EXTERNALID, EVENTID from WEMS_EVENT order by EVENTID")
 							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
 							oci_execute($qry);
-						    
+
 							while( ($row = oci_fetch_array($qry)) != false ){
 								$id = $row['EVENTID'];
 								$desc = $row['EXTERNALID'] . " - " . $id;
-						        	
+
 								if($id == $eventType){
 									$outStr .= "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
 								}else{
 									$outStr .= "<option value=\"$id\" > $desc </option>";
 								}
 							}
-						    
+
 							$outStr .= "</option></select></td></tr>";
 
-							$outStr .= "<td colspan = \"2\" align=\"center\"><input class=\"Re-Open Storm\" type=\"submit\" value=\"Re-Open Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
-							
+							$outStr .= "<td colspan = \"2\" align=\"center\"><input class=\"wideGreenButton\" type=\"submit\" value=\"Re-Open Storm\" name=\"SUBMIT\" id=\"SUBMIT\" /></td>";
+
 							echo $outStr;
 						}
 						?>
@@ -971,103 +1005,107 @@ if ($task == "Assign Location") {
     <!--
      ************************************************************************************************************************************************
                                                             Create Gangs
-               
      ************************************************************************************************************************************************
      -->    
-    	<div style="background-color:#FFF2F2;" id="view2"> 
-     	<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
-              	<table align="center" class="table" cellpadding="1" cellspacing="1" border="0">
-              		
-				<?php echo getErScRows($gangErrMsg, $gangSuccessMsg); ?>
+    	<div style="background-color:#f0ffff;" id="view2"> 
+     	<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="gangform" id="gangform" >		
+			<fieldset id="creategangs">
+        			<legend><span class="bold_green_message">Gang Assignments</span></legend>
 
-			<tr><th colspan = "2" align="center">Create Gang</th></tr>
-			<tr>
-				<td>Foreman:</td>
-				<td><select name="forman" id = "forman" onchange="getGangData()">
-					<option value= "" >  </option>
-					<?php 
-					$qry = oci_parse($c, "SELECT EMPLOYEENUMBER, FST_NME || ' ' || LST_NME AS NAME from WEMS_EMPLOYEE where DEPTCODE is not NULL order by LST_NME")
-					OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-
-					oci_execute($qry);
-
-					while( ($row = oci_fetch_array($qry)) != false ){
-						$id = $row['EMPLOYEENUMBER'];
-						$desc = $row['NAME'];
-							
-						if($id == $forman){
-							echo "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
-						}else{
-							echo "<option value= \"$id\" > $desc </option>";
-						}
-					}
-					?> 
-				</select></td>
-			</tr>
-			<tr>
-				<td>Number Of Employees</td>
-				<td>
-					<select name="gEmpNum" id="gEmpNum">
+        			<table align="center" class="table grid123">
+        				<?php echo getErScRows($gangErrMsg, $gangSuccessMsg); ?>
+					<tr>
+						<th colspan="2" align="center">
+							<span class="heading_bold"><center>Create Gang</center></span>
+						</th>
+					</tr>
+					<tr>
+						<th>Foreman:</th>
+						<td><select class="input-box" name="forman" id="forman" onchange="getGangData()">
+							<option value= "" >  </option>
+							<?php 
+							$qry = oci_parse($c, "SELECT EMPLOYEENUMBER, LST_NME || ', ' || FST_NME AS NAME from WEMS_EMPLOYEE where DEPTCODE is not NULL and DIV_CD = '1' order by LST_NME")
+							OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
+		
+							oci_execute($qry);
+		
+							while( ($row = oci_fetch_array($qry)) != false ){
+								$id = $row['EMPLOYEENUMBER'];
+								$desc = $row['NAME'];
+									
+								if($id == $forman){
+									echo "<option value= \"$id\" selected=\"selected\"> $desc </option> ";
+								}else{
+									echo "<option value= \"$id\" > $desc </option>";
+								}
+							}
+							?> 
+						</select></td>
+					</tr>
+					<tr>
+						<th>Number Of Employees</th>
+						<td>
+							<select class="input-box" name="gEmpNum" id="gEmpNum">
+							<?php
+							for ($x = 0; $x <= 15; $x++) {
+								if($gEmpNum == $x){
+									echo "<option value= \"$x\" selected=\"selected\"> $x </option>";
+								}else{
+									echo "<option value= \"$x\"> $x </option>";
+								}
+							}
+							?>
+							</select>
+						</td>
+					</tr>								
+					<tr>
+						<th>Status</th>
+						<td>
+							<select name="gStatus" id="gStatus" class="input-box">
+								<option value="0" <?= (isset($_POST['gStatus']) && trim($_POST['gStatus']) == "0") ? "selected" : "" ?>>  </option>
+								<option value="1" <?= (isset($_POST['gStatus']) && trim($_POST['gStatus']) == "1") ? "selected" : "" ?>> Assigned </option>
+								<option value="2" <?= (isset($_POST['gStatus']) && trim($_POST['gStatus']) == "2") ? "selected" : "" ?>> Closed </option>
+							</select>
+						</td>
+					</tr>	
 					<?php
-					for ($x = 0; $x <= 15; $x++) {
-						if($gEmpNum == $x){
-							echo "<option value= \"$x\" selected=\"selected\"> $x </option>";
-						}else{
-							echo "<option value= \"$x\"> $x </option>";
-						}
+					$gStartTm = isset($_POST['gStartTm'])  ? $_POST['gStartTm'] : "";
+					$gHour = isset($_POST['gStartHr'])  ? $_POST['gStartHr'] : "";
+					$gMin = isset($_POST['gStartMin'])  ? $_POST['gStartMin'] : "";
+					$gAmPm = isset($_POST['gAmPm'])  ? $_POST['gAmPm'] : "";
+					?>
+					<tr>
+						<th>Start Date Time</th>
+						<td>
+							<?php 
+							$timeData = array( "startTm" => $gStartTm, "startTmNm" => "gStartTm", "calNm" => "gangStartTm", "hour" => $gHour, "min" => $gMin, "amPm" => $gAmPm );
+							echo dateTimeFields("g", $timeData);
+							?>
+						 </td>
+					</tr>						
+					<tr>
+						<th>Comments</th> 
+						<td><textarea rows="4" cols="50" name="gComments"></textarea></td>
+					</tr>
+				<?php
+				if( $_SESSION['group'] == "WEMS_Admin" || $_SESSION['group'] == "WEMS_Write" ){
+					if($task == "Enter Gang"){
+						echo "<tr><td colspan = \"2\" style=\"text-align: center\"><input class=\"wideGreenBtn\" type=\"submit\" value=\"Update Gang\" name=\"SUBMIT\" id=\"gangEnterUpdate\" /></td></tr>";
+					}elseif($eventID > 0){
+						echo "<tr><td colspan = \"2\" style=\"text-align: center\"><input class=\"wideGreenBtn\" type=\"submit\" value=\"Enter Gang\" name=\"SUBMIT\" id=\"gangEnterUpdate\" /></td></tr>";
 					}
-					?>
-					</select>
-				</td>
-			</tr>								
-			<tr>
-				<td>Status</td>
-				<td>
-					<select name="gStatus" id="gStatus">
-						<option value= "0" <?= (isset($_POST['gStatus']) && trim($_POST['gStatus']) == "0") ? "selected" : "" ?>>  </option>
-						<option value= "1" <?= (isset($_POST['gStatus']) && trim($_POST['gStatus']) == "1") ? "selected" : "" ?>> Assigned </option>
-						<option value= "2" <?= (isset($_POST['gStatus']) && trim($_POST['gStatus']) == "2") ? "selected" : "" ?>> Closed </option>
-					</select>
-				</td>
-			</tr>	
-			<?php
-			$gStartTm = isset($_POST['gStartTm'])  ? $_POST['gStartTm'] : "";
-			$gHour = isset($_POST['gStartHr'])  ? $_POST['gStartHr'] : "";
-			$gMin = isset($_POST['gStartMin'])  ? $_POST['gStartMin'] : "";
-			$gAmPm = isset($_POST['gAmPm'])  ? $_POST['gAmPm'] : "";
-			?>
-			<tr>
-				<td>Start Date Time</td>
-				<td>
-					<?php 
-					$timeData = array( "startTm" => $gStartTm, "startTmNm" => "gStartTm", "calNm" => "gangStartTm", "hour" => $gHour, "min" => $gMin, "amPm" => $gAmPm );
-					echo dateTimeFields("g", $timeData);
-					?>
-				 </td>
-			</tr>						
-			<tr>
-				<td>Comments</td> 
-				<td><textarea rows="4" cols="50" name="gComments"></textarea></td>
-			</tr>
-			<?php
-			
-			//if($eventID > 0) echo"<tr><td colspan = \"2\" align=\"center\"><input class=\"Enter Gang\" type=\"submit\" value=\"Enter Gang\" name=\"SUBMIT\" id=\"gangEnterUpdate\" /></td></tr>";
-			if($task == "Enter Gang") echo "<tr><td colspan = \"2\" align=\"center\"><input class=\"Update Gang\" type=\"submit\" value=\"Update Gang\" name=\"SUBMIT\" id=\"gangEnterUpdate\" /></td></tr>";
-			else 
-			    if($eventID > 0) echo "<tr><td colspan = \"2\" align=\"center\"><input class=\"Enter Gang\" type=\"submit\" value=\"Enter Gang\" name=\"SUBMIT\" id=\"gangEnterUpdate\" /></td></tr>";
-			    
-			?>
+				}
+				?>
 				</table>
-
+					
         			<br></br>
         									
-        			<table align="center" class="table" cellpadding="1" cellspacing="1" border="0">
-					<tr><th colspan = "2" align="center">Gang History</th></tr>
+        			<table align="center" class="table grid123">
+					<tr><th colspan="2" align="center">Gang History</th></tr>
 					<tr>
 						<td></td>
 						<td>
-							<textarea rows="10" cols="100" name="gHistory" id="gHistory">
-							<?php 
+							<textarea class="input-box" rows="5" cols="100" name="gHistory" id="gHistory"><?php 
 	                              $qry = oci_parse($c, "SELECT TO_CHAR(ENTER_DATETIME, 'MM/DD/YYYY HH:MI PM') as NOTETIME, NOTEUSER, EVENTUPDATE, EMP_ASSIGNED
 											 from WEMS_GANG_NOTES where FORMANID = :FORMANID and EVENTID = :EVENTID order by NOTETIME")
 											OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
@@ -1085,38 +1123,41 @@ if ($task == "Assign Location") {
 								       								    
 								$comments .= $noteTime . ",  user: " . $user . ",  " . $note . ", Employees assigned: " . $noteEmpAssigned . "\r\n";
 	       					}
-	       					//echo $comments;
+	       					echo $comments;
 							?>
 							</textarea>
 						</td>
 					</tr>
+					<tr>
+						<th colspan="2" align="center">
+			        			<table align="center">
+			        				<?php 
+								if($eventID > 0){
+								    include 'getTotalByDepartment.php';
+								    echo "<tr><td colspan=\"4\"> " . $output . "</td></tr>";
+								}
+			       	               ?>
+			        			</table>
+						</th>
+					</tr>
         			</table>
 
-        			<br></br>
-        			
-        			<table align="center">
-        				<?php 
-					if($eventID > 0){
-					    include 'getTotalByDepartment.php';
-					    echo "<tr><td colspan=\"2\"> " . $output . "</td></tr>";
-					}
-       	               ?>
-        			</table>
-      		</form>
-     	</div>
+      		</fieldset>
+      	</form>
+     </div>
      	
-     	<!--
+     <!--
      ************************************************************************************************************************************************
                                                         LOCATION
 
      ************************************************************************************************************************************************
      -->  
-      <div style="background-color:#FFF2F2;" id="view3">
+      <div style="background-color:#f0ffff;" id="view3">
 		<fieldset id="Assignment">
-        		<legend>Assignments </legend>
+        		<legend><span class="bold_green_message">Assignments</span> </legend>
     			<div id="content">
        			<div id="tab-container">
-          			<ul id="tabs-titles"  class="content" data-persist="true">
+          			<ul id="tabs-titles" class="content" data-persist="true">
 	             			<li><a href="#lview0">Assign Gang To Station</a></li>
 	    		 			<li><a href="#lview1">Assign Gangs To Interlocking</a></li>
 	    		 			<li><a href="#lview2">Assign Gangs To Parking Lot</a></li>
@@ -1127,12 +1168,12 @@ if ($task == "Assign Location") {
     					<ul id="tabs-contents" style="list-style: none;">
     						<li>
     							<div id="lview0">
-    								<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
-    									<table align="center" class="table" cellpadding="1" cellspacing="1" border="0">
+    								<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="locationform_station" id="locationform_station" >
+    									<table align="center" class="table grid123">
 										<?php //echo getErScRows($locationErrMsg, $locationSuccessMsg); ?>
-										<tr><th colspan = "2" align="center">location Maintenance</th></tr>
 										<tr>
-											<td>Location:</td>
+											<tr><th colspan = "2"><span class="heading_bold"><center>Location Maintenance</center></span></th></tr>
+											<th>Location:</th>
 											<td>
 												<?php
 												echo rrLocationMenu("l", $lLoc);
@@ -1140,227 +1181,153 @@ if ($task == "Assign Location") {
 											</td>
 										</tr>
 										<tr>
-											<td>Component:</td>
+											<th>Component:</th>
 											<td>
-												<?php echo rrComponentFields("l", $lConponent); ?>
+												<?php echo rrComponentFields("l", $lConponent, $lLoc); ?>
 											</td>
 										</tr>
 										<tr>
-											<td>Gang:</td>
+											<th>Gang:</th>
 											<td>
-												<select name="lForman" id="lForman">
-												<?php 
-													 //Needs to be moved out into seperate function
-													 
-													if(!empty($lConponent) && $lConponent != ""){
-													    echo "<option value= \"\" >  </option>";
-													    $ASSIGNED_SITEFORMEN = "";
-	
-	                                                            $qry2 = oci_parse($c, "select ASSIGNED_SITEFOREMEN from WEMS_CLEANABLE_TARGET WHERE MARKERID = :MARKERID and CTID = :CTID")
-	                                                            OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-	
-	                                                            oci_bind_by_name($qry2, "MARKERID",  $lLoc, -1);
-	                                                            oci_bind_by_name($qry2, "CTID", $lConponent, -1);
-	    
-	                                                            oci_execute($qry2);
-	    
-	                                                            while( ($row = oci_fetch_array($qry2)) != false ) {
-	                                                                $ASSIGNED_SITEFORMEN = $row['ASSIGNED_SITEFOREMEN'];
-	                                                            }
-	
-		                                                       $qry = oci_parse($c, "select g.FORMANID, e.FST_NME || ' ' || e.LST_NME AS NAME, g.ASSIGN_LOC from WEMS_GANG g, WEMS_EMPLOYEE e where g.EVENTID = :EVENTID and g.FORMANID = e.EMPLOYEENUMBER ")
-	                                                            OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-	
-	                                                            oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-	
-	                                                            oci_execute($qry);
-	
-	                                                            while( ($row = oci_fetch_array($qry)) != false ){
-	                                                                $assign_loc = $row['ASSIGN_LOC'];
-	                                                                $forman = $row['FORMANID'];
-	                                   
-	                                                                if(($lLoc == $assign_loc) or ($assign_loc =="")){
-	                                                                    if($ASSIGNED_SITEFORMEN == $forman){
-	                                                                        echo "<option value= \"$forman\" selected=\"selected\"> $row[NAME] </option>";
-	                                                                    }else{
-	                                                                        echo "<option value= \"$forman\" > $row[NAME] </option>";
-	                                                                    }
-	                                                                }
-	                                                            }		   
-	                                                        }	
+                                   				<?php echo gangAssignMenu("l", $lConponent, $lLoc); ?>
+											</td>
+										</tr>
+										<tr>
+											<th>Status:</th>
+											<td>
+											<?php echo statusMenu("l", $lStatus); ?>
+											</td>
+										</tr>
+										<tr> 
+											<th>Pass Number:</th>
+											<td>
+												<select class="input-box" name="lPassNum" id = "lPassNum">
+												<?php
+												for ($x = 0; $x <= 10; $x++) {
+												    if($x == $lPassNum)
+												    echo "<option value= \"$x\" selected=\"selected\"> $x </option>";
+												      else
+												    echo "<option value= \"$x\"> $x </option>";
+												}
 												?>
-                                   							</select>
-													</td>
-												</tr>
-												<tr>
-													<td>Status:</td>
-													<td>
-													<?php echo statusMenu("l", $lStatus); ?>
-													</td>
-												</tr>
-												<tr> 
-													<td>Pass Number:</td>
-													<td>
-														<select name="lPassNum" id = "lPassNum">
-														<?php
-														for ($x = 0; $x <= 10; $x++) {
-														    if($x == $lPassNum)
-														    echo "<option value= \"$x\" selected=\"selected\"> $x </option>";
-														      else
-														    echo "<option value= \"$x\"> $x </option>";
-														}
-														?>
-														</select>
-													</td>
-												</tr>
-												<tr>
-													<td># of Bags:</td>
-													<td>
-														<select name="lNumBags" id="lNumBags">
-														<?php
-														for ($x = 0; $x <= 40; $x++) {
-														    echo "<option value= \"$x\"> $x </option>";
-														}
-														?>
-														</select>
-													</td>
-												</tr>
-												<tr>
-													<td> Support Document:</td>
-													<td>
-														<input name="fileToUpload[]" id= "rDoc" size="75" type="file" multiple="multiple" value="<?= $supportDoc ?>" />
-													</td>
-												</tr>
-												 <tr>
-													<td>  Support Documents attached:</td>
-													<td>
-														<?php
-														echo downloadFields("l", "CTID");
-														?>
-													</td>
-												</tr>	
-												<tr>
-													<td>Date/Time</td>
-													<td>
-													<?php 
-													$timeData = array( "startTmNm" => "lNoteTime", "calNm" => "locationStartTime" );
-													echo dateTimeFields("sta", $timeData);
-													?>
-													</td>
-												</tr>
-												
-												<tr>
-													<td>Comments</td>
-													<td><textarea rows="4" cols="50" name="lcomments"></textarea></td>
-												</tr>
-												
-             									<?php
-											if($eventID > 0) echo "<tr><td colspan = \"2\" align=\"center\"><input class=\"Assign Location\" type=\"submit\" value=\"Assign Location\" name=\"SUBMIT\" id=\"SUBMIT\" /></td></tr>";
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<th># of Bags:</th>
+											<td>
+												<select class="input-box" name="lNumBags" id="lNumBags">
+												<?php
+												for ($x = 0; $x <= 40; $x++) {
+												    echo "<option value= \"$x\"> $x </option>";
+												}
+												?>
+												</select>
+											</td>
+										</tr>
+										<tr>
+											<th> Support Document:</th>
+											<td>
+												<input class="input-box" name="fileToUpload[]" id= "rDoc" size="75" type="file" multiple="multiple" value="<?= $supportDoc ?>" />
+											</td>
+										</tr>
+										 <tr>
+											<th>  Support Documents attached:</th>
+											<td>
+												<?php
+												echo downloadFields("l", $lConponent, "CTID");
+												?>
+											</td>
+										</tr>	
+										<tr>
+											<th>Date/Time</th>
+											<td>
+											<?php 
+											$timeData = array( "startTmNm" => "lNoteTime", "calNm" => "locationStartTime" );
+											echo dateTimeFields("sta", $timeData);
 											?>
-        									</table>
+											</td>
+										</tr>
+										<tr>
+											<th>Comments</th>
+											<td><textarea class="input-box" rows="4" cols="50" name="lcomments"></textarea></td>
+										</tr>
+												
+	             							<?php
+	             							echo locationSubmitRow("l", $lLoc, "Location");
+										?>
+        								</table>
         									
-        									<br></br>
+        								<br></br>
 
-        									<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
-												<tr><th colspan = "2" align="center">Location History</th></tr>
-												<tr>
-													<td></td>
-													<td>
-													<!--
-													<textarea rows="10" cols="100" name="lHistory" id="lHistory">
-													<?php
-													$locComments = "";
-													$qry = oci_parse($c, "SELECT TO_CHAR(w.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME,
-									w.CTNOTES, e.FST_NME || ' ' || e.LST_NME AS NAME, w.CTSTATUS, w.CTPASSNUM, w.CTBAGS, w.CTNOTEUSER
-									FROM WEMS_CLEANABLE_TARGET_NOTES w
-									LEFT JOIN WEMS_EMPLOYEE e ON e.EMPLOYEENUMBER = w.FORMANID 
-									where w.CTID = :CTID
-									and w.EVENTID = :EVENTID
-									and ((w.FORMANID = e.EMPLOYEENUMBER) or (w.FORMANID = 0)) ORDER BY ENTER_DATETIME")
-       												OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-       
-       												oci_bind_by_name($qry, ":CTID", $lConponent, -1);
-       												oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-       												oci_execute($qry);
-
-													while( ($row = oci_fetch_array($qry)) != false ){
-       								    					$nNoteTime = $row['CTSTARTTIME'];
-       								    					$nUser = $row['CTNOTEUSER'];
-       								    					$nNote = $row['CTNOTES'];
-       								    					$nForman = $row['NAME'];
-       								    					$nBags = $row['CTBAGS'];
-       								    					$nPass = $row['CTPASSNUM'];
-       								    					$nStatus = $row['CTSTATUS'];
-       								    
-       									$locComments .= $nNoteTime . ",  user: " . $nUser . ",  " . $nNote . ", Forman: " . $nForman . ", Bags: " . $nBags . ", Pass #: " . $nPass . ", Status: " .  $nStatus . "\r\n";
-       								}
-									   echo $locComments;				
-									?>
-													</textarea>
-													-->
-													<?php
-													echo historyTextarea("l", $lConponent);
-													?>
-													</td>
-												</tr>
-        									</table>
-    									</form>
-    									</div>
-    								</li>
-
+        								<table align="center" class="table grid123" cellpadding="1" cellspacing="1" border="0" >
+										<tr><th colspan = "2" align="center">Location History</th></tr>
+										<tr>
+											<td></td>
+											<td>
+												<?php
+												echo historyTextarea("l", $lConponent);
+												?>
+											</td>
+										</tr>
+        								</table>
+    								</form>
+    							</div>
+    						</li>
 <!--
      ************************************************************************************************************************************************
                                                        Interlockings 
   
      ************************************************************************************************************************************************
-     -->  
+     --> 
     								<li>
     									<div id="lview1">
-										<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform">
-											<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
-												<tr><th colspan = "2" align="center">INTERLOCKING Maintenance</th></tr>
+										<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="locationform_interlocking" id="locationform_interlocking">
+											<table align="center" class="table grid123">
+												<tr><th colspan = "2" align="center"><span class="heading_bold"><center>Interlocking Maintenance</center></span></th></tr>
 												<tr>
-													<td>Interlocking:</td>
+													<th>Interlocking:</th>
 													<td>
-														<?php echo rrLocationMenu("i", $lLoc); ?>
+														<?php echo rrLocationMenu("i", $iLoc); ?>
 													</td>
 												</tr>
-
 												<tr>
-													<td>Component:</td>
-													<td> <?php echo rrComponentFields("i", $iConponent); ?> </td>
+													<th>Component:</th>
+													<td> <?php echo rrComponentFields("i", $iConponent, $iLoc); ?> </td>
 												</tr>
-
 												<tr>
-													<td>Gang:</td>
+													<th>Gang:</th>
 													<td>
-														<select name="iForman" id = "iForman" > 
+														<!-- <select name="iForman" id="iForman" > 
 															<option value="0" selected="selected">  </option>
 	                                   						</select>
+	                                   						-->
+	                                   						<?php
+                                   							echo gangAssignMenu("i", $iConponent, $iLoc);
+                                   							?>
 													</td>
 												</tr>
 												<tr>
-													<td>Status:</td>
+													<th>Status:</th>
 													<td>
 													<?php echo statusMenu("i", $iStatus); ?>
 													</td>
 												</tr>
 												<tr>
-													<td> Support Document:</td>
+													<th> Support Document:</th>
 													<td>
-														<input name="fileToUpload[]" id= "rDoc" size="75" type="file" multiple="multiple" value="<?php echo $isupportDoc; ?>" />
+														<input name="fileToUpload[]" id="rDoc" size="75" type="file" multiple="multiple" value="<?php echo $isupportDoc; ?>" />
 													</td>
 												</tr>
-												
 												<tr>
-													<td>  Support Documents attached:</td>
+													<th>  Support Documents attached:</th>
 													<td>
-														<?php echo downloadFields("i", "MARKERID"); ?>
+														<?php echo downloadFields("i", $iConponent, "MARKERID"); ?>
 													</td>
 												</tr>	
 												
 												<tr>
-													<td>Date/Time</td>
+													<th>Date/Time</td>
 													<td>
 													<?php 
 													$timeData = array( "startTmNm" => "iNoteTime", "calNm" => "interlockingStartTime" );
@@ -1368,25 +1335,24 @@ if ($task == "Assign Location") {
 													?>
 													</td>
 												</tr>
-												
 												<tr>
-													<td>Comments</td>
-													<td><textarea rows="4" cols="50" name="icomments"></textarea></td>
+													<th>Comments</th>
+													<td><textarea class="input-box" rows="4" cols="50" name="icomments"></textarea></td>
 												</tr>
 												
              									<?php
-											if($eventID > 0) echo"<tr><td colspan = \"2\" align=\"center\"><input class=\"Assign Interlocking\" type=\"submit\" value=\"Assign Interlocking\" name=\"SUBMIT\" id=\"SUBMIT\" /></td></tr>";
+             									echo locationSubmitRow("i", $iLoc, "Interlocking");
 											?>
         									</table>
         									
         									<br></br>
 
-        									<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
+        									<table align="center" class="table grid123">
 											<tr><th colspan="2" align="center">Interlocking History</th></tr>
 											<tr>
 												<td></td>
-												<td><textarea rows="10" cols="100" name="iHistory" id="iHistory"></textarea></td>
-											</tr>             
+												<td><textarea class="input-box" rows="10" cols="100" name="iHistory" id="iHistory"></textarea></td>
+											</tr>
         									</table>
 										</form>
     									</div>
@@ -1398,107 +1364,79 @@ ________________________________________________________________________________
  -->
  								<li>
 									<div id="lview2">
-        									<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
-											<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
+        									<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="locationform_parking" id="locationform_parking" >
+											<table align="center" class="table grid123">
 												<?php echo getErScRows($parkingLotErrMsg, $parkingLotSuccessMsg); ?>
 				
-												<tr><th colspan="2" align="center">Parking Lot Maintenance</th></tr>						
 												<tr>
-													<td>Parking Lots:</td>
-													<td>
-														<?php echo rrLocationMenu("pl", $lLoc); ?>
-													</td>
-												</tr>	
-
-												<tr>
-													<td>Component:</td>
-													<td> <?php echo rrComponentFields("pl", $plConponent); ?> </td>
+													<th colspan="2" align="center"><span class="heading_bold"><center>Parking Lot Maintenance</center></span></th>
 												</tr>
 												<tr>
-													<td>Gang:</td>
+													<th>Parking Lots:</th>
 													<td>
-														<select name="plForman" id="plForman"> 
-															<option value="0" selected="selected">  </option>
-														</select>
+														<?php echo rrLocationMenu("pl", $plLoc); ?>
 													</td>
 												</tr>
 												<tr>
-													<td>Status:</td>
+													<th>Component:</th>
+													<td> <?php echo rrComponentFields("pl", $plConponent, $plLoc); ?> </td>
+												</tr>
+												<tr>
+													<th>Gang:</th>
+													<td>
+														<?php
+                                   							echo gangAssignMenu("pl", $plConponent, $plLoc);
+                                   							?>
+													</td>
+												</tr>
+												<tr>
+													<th>Status:</th>
 													<td>
 														<?php echo statusMenu("pl", $iStatus); ?>
 													</td>
 												</tr>
 												<tr>
-													<td> Support Document:</td>
-													<td> <input name="fileToUpload[]" id="rDoc" size="75" type="file" multiple="multiple" value="<?=$plsupportDoc ?>" /></td>
+													<th> Support Document:</th>
+													<td> <input class="input-box" name="fileToUpload[]" id="rDoc" size="75" type="file" multiple="multiple" value="<?=$plsupportDoc ?>" /></td>
 												</tr>
 												<tr>
-													<td>  Support Documents attached:</td>
+													<th>  Support Documents attached:</th>
 													<td>
-														<?php echo downloadFields("pl", "MARKERID"); ?>
+														<?php echo downloadFields("pl", $plConponent, "MARKERID"); ?>
 													</td>
-												</tr>	
-												
+												</tr>
 												<tr>
-													<td>Date/Time</td>
+													<th>Date/Time</th>
 													<td>
 													<?php 
 													$timeData = array( "startTmNm" => "plNoteTime", "calNm" => "parkingLotStartTime" );
 													echo dateTimeFields("pl", $timeData);
-													?>									
+													?>
 													</td>
 												</tr>
 												<tr>
-													<td>Comments</td>
-													<td><textarea rows="4" cols="50" name="plcomments"></textarea></td>
+													<th>Comments</th>
+													<td><textarea class="input-box" rows="4" cols="50" name="plcomments"></textarea></td>
 												</tr>
 
-             										<?php
-												if($eventID > 0) echo "<tr><td colspan = \"2\" align=\"center\"><input class=\"Assign parking Lot\" type=\"submit\" value=\"Assign Parking Lot\" name=\"SUBMIT\" id=\"SUBMIT\" /></td></tr>";
+												<?php
+												echo locationSubmitRow("pl", $plLoc, "Parking Lot");
 												?>
-        									</table>
+											</table>
         									
-        									<br></br>
-        									
-        									<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
-											<tr><th colspan="2" align="center">Parking Lot History</th></tr>
-											<tr>	
-												<td></td>
-												<td>
-													<!--
-													<textarea rows="10" cols="100" name="plHistory" id="plHistory">
-													<?php
-													$plComments = "";
-													$qry = oci_parse($c, "SELECT TO_CHAR(t.CTSTARTTIME, 'MM/DD/YYYY HH:MI PM') as CTSTARTTIME, t.CTNOTES, e.FST_NME || ' ' || e.LST_NME AS NAME, t.CTSTATUS, t.CTNOTEUSER
-																	from WEMS_CLEANABLE_TARGET_NOTES t, WEMS_EMPLOYEE e
-																	where CTID = :CTID and EVENTID = :EVENTID and t.FORMANID = e.EMPLOYEENUMBER")
-       																OR die('Oracle error, in parse. Error: <pre>' . print_r(oci_error($c), 1) . '</pre>');
-       
-       												oci_bind_by_name($qry, ":CTID", $plConponent, -1);
-       												oci_bind_by_name($qry, ":EVENTID", $eventID, -1);
-       												oci_execute($qry);
+        										<br></br>
 
-       												while( ($row = oci_fetch_array($qry)) != false ){
-       								    					$nNoteTime = $row['CTSTARTTIME'];
-       								    					$nUser = $row['CTNOTEUSER'];
-       								    					$nNote = $row['CTNOTES'];
-       								    					$nForman = $row['NAME'];
-       								    										
-       								    					$nStatus = $row['CTSTATUS'];
-       								    
-														$plComments .= $nNoteTime . ",  user: " . $nUser . ",  " . $nNote . ", Forman: " . $nForman . ", Status: " .  $nStatus . "\r\n";
-       												}
-       												echo $plComments;
-       												?>
-													</textarea>
-													-->
-													
-													<?php
-													echo historyTextarea("pl", $plConponent);
-													?>
-												</td>
-											</tr>
-        									</table>
+	        									<table align="center" class="table grid123" cellpadding="1" cellspacing="1" border="0" >
+												<tr><th colspan="2" align="center">Parking Lot History</th></tr>
+												<tr>	
+													<td></td>
+													<td>		
+														<?php
+														echo historyTextarea("pl", $plConponent);
+														?>
+													</td>
+												</tr>
+	        									</table>
         									</form>
     									</div>
     								</li>
@@ -1511,24 +1449,23 @@ ________________________________________________________________________________
 
  								<li>
 									<div id="lview3">
-        									<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="siMainform" >
-											<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
+        									<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="locationform_signal" id="locationform_signal" >
+											<table align="center" class="table grid123" cellpadding="1" cellspacing="1" border="0" >
 												<?php echo getErScRows($signalErrMsg, $signalSuccessMsg); ?>
 				
 												<tr><th colspan="2" align="center">Signals Maintenance</th></tr>						
 												<tr>
-													<td>Signals:</td>
+													<th>Signals:</th>
 													<td>
 														<?php echo rrLocationMenu("si", $lLoc); ?>
 													</td>
-												</tr>	
-
-												<tr>
-													<td>Component:</td>
-													<td> <?php echo rrComponentFields("si", $plConponent); ?> </td>
 												</tr>
 												<tr>
-													<td>Gang:</td>
+													<th>Component:</th>
+													<td> <?php echo rrComponentFields("si", $plConponent, $lLoc); ?> </td>
+												</tr>
+												<tr>
+													<th>Gang:</th>
 													<td>
 														<select name="siForman" id="siForman"> 
 															<option value="0" selected="selected">  </option>
@@ -1536,24 +1473,24 @@ ________________________________________________________________________________
 													</td>
 												</tr>
 												<tr>
-													<td>Status:</td>
+													<th>Status:</th>
 													<td>
 														<?php echo statusMenu("si", $iStatus); ?>
 													</td>
 												</tr>
 												<tr>
-													<td> Support Document:</td>
+													<th> Support Document:</th>
 													<td> <input name="fileToUpload[]" id="siDoc" size="75" type="file" multiple="multiple" value="<?=$siSupportDoc ?>" /></td>
 												</tr>
 												<tr>
-													<td>  Support Documents attached:</td>
+													<th>  Support Documents attached:</th>
 													<td>
-														<?php echo downloadFields("si", "MARKERID"); ?>
+														<?php echo downloadFields("si", $plConponent, "MARKERID"); ?>
 													</td>
 												</tr>	
 												
 												<tr>
-													<td>Date/Time</td>
+													<th>Date/Time</th>
 													<td>
 													<?php 
 													$timeData = array( "startTmNm" => "siNoteTime", "calNm" => "signalStartTime" );
@@ -1562,18 +1499,18 @@ ________________________________________________________________________________
 													</td>
 												</tr>
 												<tr>
-													<td>Comments</td>
+													<th>Comments</th>
 													<td><textarea rows="4" cols="50" name="sicomments"></textarea></td>
 												</tr>
 
              										<?php
-												if($eventID > 0) echo "<tr><td colspan = \"2\" align=\"center\"><input class=\"Assign signal\" type=\"submit\" value=\"Assign Signal\" name=\"SUBMIT\" id=\"siSUBMIT\" /></td></tr>";
+             										echo locationSubmitRow("si", $lLoc, "Signal");
 												?>
         									</table>
         									
         									<br></br>
-        									
-        									<table align="center" class="table" cellpadding="1" cellspacing="1" border="0" >
+
+        									<table align="center" class="table grid123" cellpadding="1" cellspacing="1" border="0" >
 											<tr><th colspan="2" align="center">Signal History</th></tr>
 											<tr>	
 												<td></td>
@@ -1598,115 +1535,120 @@ ________________________________________________________________________________
                                                         Reports
      ************************************************************************************************************************************************
      -->     
-		     <div style="background-color:#FFF2F2;" id="view4"  >
-     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="eventPDFForm" id="eventPDFForm" target="WEMS_REPORT" onsubmit="return validateEventLocation();">
+		<div style="background-color:#f0ffff;" id="view4">
+     			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="eventPDFForm" id="eventPDFForm" target="WEMS_REPORT" onsubmit="return validateEventLocation();">
                 <fieldset id="reports">
-        				<legend>Platform Assignment Report </legend>
-        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width="100%">
-<tr>
-							     <td>Event:</td>
-								 <td><select name="eventId" id = "eventId" onChange="getLocationByEvent();"> <option value='0' selected> Select Event  </option>
-								<?php 
-
-                                $eventObj = new event();
-                                $result = $eventObj->getEventList();
-                                if($result){
-                                    while($row = oci_fetch_array($result[0])){                                    
-                                        $id = $row['EVENTID'];
-                                        $desc = $row['EXTERNALID'];
-    									echo "<option value=\"$id\" > $desc : $id </option>";
-                                    }
-                                }
-                                oci_free_statement($result[0]);
-				               ?> 
-                                </select></td>
-							</tr>
-							<tr><td></td><td></td></tr>
-                            <tr>
-							     <td>Location:</td>
-								 <td><select name="locationId[]" id = "locationId" multiple size ="1" width = "100%">
-								 <option selected="selected">Select Location</option>
-                                </select></td>
-							</tr>
-                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Platform Assignment PDF" /></td></tr> 
+        			<legend><span class="bold_green_message">Platform Assignment Reports</span></legend>
+					<table align="center" class="table grid123">
+						<tr>
+							<th>Event:</th>
+							<td>
+								<select name="eventId" id="eventId" onchange="getLocationByEvent()" class="input-box">
+									<option value='0' selected="selected"> Select Event  </option>
+									<?php 
+									$eventObj = new event();
+									$result = $eventObj->getEventList();
+									if($result){
+										while( ($row = oci_fetch_array($result[0])) != false ){                                    
+											$id = $row['EVENTID'];
+											$desc = $row['EXTERNALID'];
+		    									echo "<option value=\"$id\" > $desc : $id </option>";
+										}
+									}
+									oci_free_statement($result[0]);
+									?> 
+								</select>
+							</td>
+						<tr>
+						     <th>Location:</td>
+							<td>
+								<select name="locationId[]" id="locationId" size="1" multiple="multiple" width="100%" class="input-box">
+									<option selected="selected">Select Location</option>
+								</select>
+							</td>
+						</tr>
+						<tr><td colspan="2"><input class="wideGreenBtn" style="width: auto;" type="submit" name="SUBMIT" id="SUBMIT" value="Create Platform Assignment PDF" /></td></tr> 
                             
-                            <?php 
-                            if(isset($task) && $task == 'Create Platform Assignment PDF') {
-                                include_once '../classes/eventPDFClass.php';
-                                $pdf = new eventPDF();                                
-                                $pdf->createEventPDF($_POST);
-                            }
-                            ?>
-
-        				</table>        
-      				</fieldset>
-      			</form>
-      			<br></br>
-                <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gangPDFForm" id="gangPDFForm" target="WEMS_REPORT2" onsubmit="return validateEvent();">
-                <fieldset id="departmentWiseReport">
-        				<legend>Department Wise Report</legend>    
-        				<table align = "center" class="table" cellpadding="1" cellspacing="1" border="0" width=100%>
-                            <tr>
-							     <td>Event:</td>
-								 <td><select name="eventId" id = "eventId"> <option value='0' selected> Select Event  </option>
-								<?php 
-
-                                $eventObj = new event();
-                                $result = $eventObj->getEventList();
-                                if($result){
-                                    while($row = oci_fetch_array($result[0])){                                    
-                                        $id = $row['EVENTID'];
-                                        $desc = $row['EXTERNALID'];
-    									echo "<option value=\"$id\" > $desc : $id </option>";
-                                    }
-                                }
-                                oci_free_statement($result[0]);
-				               ?> 
-                                </select></td>
-							</tr>
-                           
-                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Department Wise Employee PDF" /></td></tr> 
-                            
-                            <?php 
-                            if(isset($task) && $task == 'Create Department Wise Employee PDF') {
-                                include_once '../classes/employeePDFClass.php';
-                                $pdf = new employeePDF();                               
-                                $pdf->createEmployeePDF($_POST);
-                            }
-                            ?>
-
+						<?php 
+						if(isset($task) && $task == 'Create Platform Assignment PDF') {
+							include_once '../classes/eventPDFClass.php';
+							$pdf = new eventPDF();
+							$pdf->createEventPDF($_POST);
+						}
+						?>
         				</table>
-      				</fieldset>
-      			</form><br></br>
+      			</fieldset>
+			</form>
+			<br></br>
+			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gangPDFForm" id="gangPDFForm" target="WEMS_REPORT2" onsubmit="return validateEvent();">
+				<fieldset id="departmentWiseReport">
+					<legend><span class="bold_green_message">Department Wise Report</span></legend>    
+					<table align="center" class="table grid123">
+						<tr>
+							<th>Event:</th>
+							<td>
+								<select name="eventId" id="eventId" class="input-box"> <option value='0' selected="selected"> Select Event  </option>
+								<?php 
+								$eventObj = new event();
+									$result = $eventObj->getEventList();
+									if($result){
+										while( ($row = oci_fetch_array($result[0])) != false ){                                    
+											$id = $row['EVENTID'];
+											$desc = $row['EXTERNALID'];
+		    									echo "<option value=\"$id\" > $desc : $id </option>";
+										}
+									}
+									oci_free_statement($result[0]);
+									?>
+								</select>
+							</td>
+						</tr>
+
+						<tr>
+							<td colspan="2">
+								<center>
+									<input type="submit" name="SUBMIT" id="SUBMIT" class="wideGreenBtn" style="width:auto" value="Create Department Wise Employee PDF" />
+								</center>
+							</td>
+						</tr> 
+						<?php 
+						if (isset($task) && $task == 'Create Department Wise Employee PDF') {
+							include_once '../classes/employeePDFClass.php';
+							$pdf = new employeePDF();                               
+							$pdf->createEmployeePDF($_POST);
+						}
+						?>
+					</table>
+				</fieldset>
+			</form>
+			<br></br>
                 <form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="datewiseEventPDFForm" id="datewiseEventPDFForm" target="WEMS_REPORT2" onsubmit="return validateDatewiseEvent();">
-                <fieldset id="DateRangeReports">
-        				<legend>Platform Assignment Report For Data Range</legend>
-        				<table align = "center" class="table" border="0" width="100%">
+                	<fieldset id="platformAssignmentReport">
+					<legend><span class="bold_green_message">Platform Assignment Report For Data Range</span></legend>
+					<table align="center" class="table grid123">
                             <tr>
-							     <td width="10%">Date From:</td>
+						<th width="10%">Date From:</th>
 								 <td width="40%"><input readonly type="text" name="reportFromDate" size="20" tabindex="24" id="reportFromDate" value=""/><img src="cal.gif" width="16" border="0" id="reportFromTime" alt="Click here to pick date" /></td>
 								 <td width="10%"> To:</td>
 								 <td width="40%"><input readonly type="text" name="reportToDate" size="20" tabindex="24" id="reportToDate" value=""/><img src="cal.gif" width="16" border="0" id="reportToTime" alt="Click here to pick date" /></td>
-							</tr>							
-							<tr><td></td><td></td></tr>
-                            <tr>
-							     <td>Location:</td>
-								 <td><select name="locationId" id = "locationId"> <option value='0' selected> Select Location  </option>
-								<?php                                
-                                $locationObj = new location();
-                                $result = $locationObj->getLocationList();
-                                if($result){
-                                    while($row = oci_fetch_array($result[0])){                                    
-                                        $id = $row['MARKERID'];
-                                        $desc = $row['MARKERNAME'];                                        
-    									echo "<option value=\"$id\" > $desc </option>";
-                                    }
-                                }
-                                oci_free_statement($result[0]);
-				               ?> 
-                                </select></td>
-							</tr>
-                            <tr><td colspan =1><input type="submit" name="SUBMIT" id="SUBMIT" value="Create Datewise Platform Assignment PDF" /></td></tr> 
+							</tr> 
+							<tr>
+							     <th>Location:</th>
+								<td colspan="3"><select class="input-box" name="locationId" id="locationId"> <option value='0' selected="selected"> Select Location  </option>
+								<?php
+								$result = $locationObj->getLocationList();
+								if($result){
+									while($row = oci_fetch_array($result[0])){                                    
+										$id = $row['MARKERID'];
+										$desc = $row['MARKERNAME'];                                        
+										echo "<option value=\"$id\" > $desc </option>";
+									}
+								}
+								oci_free_statement($result[0]);
+								?> 
+							</select></td>
+						</tr>
+						<tr><td colspan="4" style="text-align: center;"><input type="submit" name="SUBMIT" id="SUBMIT" class="wideGreenBtn" value="Create Datewise Platform Assignment PDF" /></td></tr> 
                             
                             <?php 
                             if(isset($task) && $task == 'Create Datewise Platform Assignment PDF') {
@@ -1717,8 +1659,8 @@ ________________________________________________________________________________
                             ?>
 
         				</table>        
-      				</fieldset>
-      			</form>
+      			</fieldset>
+      		</form>
         </div>
      
    <!--
@@ -1728,16 +1670,15 @@ ________________________________________________________________________________
      -->
 
 		<div id="view5">
-			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
-				<button onclick="StationsMap('sta')">Stations Map</button>
-				<br /><br />
-				<button onclick="StationsMap('il')">Interlockings Map</button>
-				<br /><br />
-				<button onclick="StationsMap('pl')">Parking Lot Map</button>
-				<br /><br />
-				<button onclick="StationsMap('sen')">Sentinel Map</button>
-				<br /><br />
-				<input class="GIS" type="submit" value="GIS" name="SUBMIT" id="SUBMIT" />
+			<form action="<?php echo $_SERVER['PHP_SELF']; ?>"  method="post" enctype="multipart/form-data" name="gisform" id="gisform" >
+				<center>
+					<button class="wideGreenBtn" onclick="StationsMap('sta')">View Stations Map</button>
+					<br /><br />
+	               
+					<br /><br />
+					<button class="wideGreenBtn" onclick="StationsMap('sen')">View Sentinel Map</button>
+					<br /><br />
+				</center>
 			</form>
 		</div>
      
@@ -1747,15 +1688,11 @@ ________________________________________________________________________________
      ************************************************************************************************************************************************
      -->
 		<div style="background-color:#FFF2F2;" id="view6"> 
-			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="new_inquiry" id="mainform" >
+			<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post" enctype="multipart/form-data" name="logoutform2" id="logoutform2" >
 			</form>
 		</div> 
      
     <!-- ____________________________________________________________________________________________________ --> 
     </div> <!-- end <div class="tabcontents"> -->
     </body>
-    <script language="JavaScript" type="text/javascript">
-	window.tabindex = <?=$tabindex?>;
-	window.eventId = <?=$eventID?>;
-	</script>
 </html>
