@@ -265,7 +265,7 @@ function conponentDetailhandler(pre, obj) {
 		var val = eval('(' + obj.responseText + ')');
 		//var val = JSON.parse(obj.responseText);
 		
-		alert(obj.responseText);
+		//alert(obj.responseText);
 		
 		//console.log( "conponentDetailHandler val = ", val );
 		
