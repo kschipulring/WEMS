@@ -364,7 +364,7 @@ define([
                                     		 var beginning = str.split("~")[0];
                                     	 
                                     		 //alert(beginning);	
-                                    		 alert(result.feature.attributes[prop]);
+                                    		// alert(result.feature.attributes[prop]);
                                     	 
                                     	 
                                     	
