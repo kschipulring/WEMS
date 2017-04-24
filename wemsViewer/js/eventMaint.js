@@ -410,7 +410,7 @@ function getILEmployees(){
 	var loc = document.getElementById('iLoc').value;
 	//alert(loc);  
 	var eventId = window.eventId;
-
+ 
 	if(window.XMLHttpRequest) {
 		// If IE7, Mozilla, Safari, etc: Use native object
 		var client = new XMLHttpRequest();
