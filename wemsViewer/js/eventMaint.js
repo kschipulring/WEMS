@@ -103,15 +103,37 @@ function GangListDetailhandler(obj, pre){
 			//var assignLoc = document.createElement('text');
 			var assignLoc = val[i].LOCATION;
   		    
-			if((assignLoc != "") || (assignLoc == location))
+			
+			
+			
+			var test1 = Number(assignLoc);
+			var test2 = Number(location);
+			//alert(test1);
+			if(test1 == test2)
 			{
+
+				//var str1 = "Location: ";
+				//var str2 = location;
+				//var str3 = " assignLoc: ";
+				//var str4 = assignLoc;
+				//var res = str1.concat(str2, str3, str4);
+
+				//alert(res);
+				
 				opt.setAttribute("selected","selected");
 				forman.appendChild(opt);
 			}
-			else
+			
+			if(assignLoc == 0)
 			{
 				forman.appendChild(opt);  	
 			}
+			
+			
+			
+			
+			
+			
 		} //end for(var i = 0; i < val.length; i++)
 	} // end if(obj.readyState == 4 && obj.status == 200)
 } //GangListDetailhandler(obj)
