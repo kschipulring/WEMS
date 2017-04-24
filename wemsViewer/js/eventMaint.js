@@ -408,7 +408,7 @@ function conponentHandler(obj, pre){
 function getILEmployees(){
 	//var loc = document.getElementById('iConponent').value;
 	var loc = document.getElementById('iLoc').value;
-	//alert(loc);
+	//alert(loc);  
 	var eventId = window.eventId;
 
 	if(window.XMLHttpRequest) {
