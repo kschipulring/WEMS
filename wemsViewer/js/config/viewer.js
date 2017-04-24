@@ -140,18 +140,6 @@ define([
           metadataUrl: true,
           expanded: false
       }
-},{
-      type: 'dynamic',
-      url: 'http://www.orthos.dhses.ny.gov/arcgis/rest/services/elevation_contours/MapServer',
-      /*url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/elevation_contours/MapServer',*/
-      title: 'USGS 10 Meter Contours',
-      options: {
-          id: 'nfhl',
-          opacity: 1.0,
-          visible: true,
-          outFields: ['*'], 
-          mode: 1
-      }
 }
   ],
         // set include:true to load. For titlePane type set position the the desired order in the sidebar
