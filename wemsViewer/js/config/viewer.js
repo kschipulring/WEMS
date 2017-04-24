@@ -76,7 +76,7 @@ define([
         operationalLayers: [
 	{
             type: 'dynamic',
-            url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/WEMS/MapServer', 
+            url: 'https://arcgisprod10.lirr.org/arcgis/rest/services/WEMS/MapServer', 
             title: 'WEMS',
             options: {
                 id: 'WEMS',
