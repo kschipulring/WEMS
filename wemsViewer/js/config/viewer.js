@@ -5,7 +5,7 @@ define([
    'esri/tasks/GeometryService',
    'esri/layers/ImageParameters',
    'esri/dijit/Basemap', 
-   'esri/dijit/BasemapLayer',
+   'esri/dijit/BasemapLayer', 
    'esri/geometry/Point'
 ], function (units, Extent, esriConfig, GeometryService, ImageParameters) {
 
