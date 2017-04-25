@@ -14,7 +14,7 @@ define([
 	//esriConfig.defaults.io.proxyUrl = 'http://arcgisupg.lirr.org/DotNet/proxy.ashx'
     esriConfig.defaults.io.alwaysUseProxy = false;
 	// url to your geometry server.
-    esriConfig.defaults.geometryService = new GeometryService('https://arcgisprod10.lirr.org/arcgis/rest/services/Utilities/Geometry/GeometryServer');
+    esriConfig.defaults.geometryService = new GeometryService('http://arcgisprod10.lirr.org/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
     //image parameters for dynamic services, set to png32 for higher quality exports.
     var imageParameters = new ImageParameters();
@@ -76,7 +76,7 @@ define([
         operationalLayers: [
 	{
             type: 'dynamic',
-            url: 'https://arcgisprod10.lirr.org/arcgis/rest/services/WEMS/MapServer', 
+            url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/WEMS/MapServer', 
             title: 'WEMS',
             options: {
                 id: 'WEMS',
@@ -88,7 +88,7 @@ define([
   }, 
 	{
       type: 'dynamic',
-      url: 'https://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_DRAINAGE/MapServer',
+      url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_DRAINAGE/MapServer',
       title: 'Drainage',
       options: {
           id: 'lirremergency',
@@ -106,7 +106,7 @@ define([
       }
 },{
       type: 'dynamic',
-      url: 'https://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_CADASTRAL/MapServer',
+      url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_CADASTRAL/MapServer',
       title: 'LIRR SA Property',
       options: {
           id: 'lirrtrack',
@@ -124,7 +124,7 @@ define([
       }
 },{
       type: 'dynamic',
-      url: 'https://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_INFRASTRUCTURE/MapServer',
+      url: 'http://arcgisprod10.lirr.org/arcgis/rest/services/LIRR_INFRASTRUCTURE/MapServer',
       title: 'LIRR Infrastructure',
       options: {
           id: 'lirrinfrastructure',
