@@ -29,7 +29,7 @@ function getTally(){
 }
 
 require(["dojo/ready"], function(ready){
-	
+	/*BUG!!!!!
 	// get the config file from the url if present
 	var file = 'config/viewer', s = window.location.search, q = s.match(/config=([^&]*)/i);
 	if (q && q.length > 0) {
@@ -53,4 +53,5 @@ require(["dojo/ready"], function(ready){
     // This function won't run until the DOM has loaded and other modules that register have run.
 
 	});
+	*/
 });

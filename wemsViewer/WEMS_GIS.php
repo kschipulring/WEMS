@@ -110,5 +110,6 @@ spl_autoload_register(function ($class) {
 		<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.3/es5-shim.min.js"></script>
 	<![endif]-->
 	<script type="text/javascript" src="//js.arcgis.com/3.14compact/"></script>
-	<script type="text/javascript" src="js/viewer/gis.js"></script>
+	<script type="text/javascript" src="js/viewer/gis.js"></script> 
+	
 </html>
