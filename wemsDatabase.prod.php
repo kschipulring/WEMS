@@ -2,7 +2,7 @@
 
 $wemsDBusername = "WEMSADMIN";
 $cmcDBpassword = "dbadba";
-$cmcDatabase = "WEMSPRD_DG";
+$cmcDatabase = "WEATPRD_DG";
 
 
 
