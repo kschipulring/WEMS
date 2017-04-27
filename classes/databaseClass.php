@@ -3,9 +3,29 @@ class database{
     protected $databaseName = "WEATTEST";
     protected $databaseUserName = "wems";
     protected $databasePassword = "wems";
-    protected $conn; 
+    protected $conn;
     
-    public function __construct() {    	
+    /*
+     * This helps ensure that settings here are to be the same as those stored in WEMS/wemsDatabase.php.
+     * ESSENTIAL, because different environments have different DB settings.  But 'WEMS/wemsDatabase.php' always has what is correct for the respective environment.
+     * This is achieved with 'pre_activate.php'. It switches the contents of aforementioned include file based on where it detects itself to be using file renames, etc.
+     */
+    protected $dbConfigFile = "";
+    
+    public function __construct() {
+        $this->dbConfigFile = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "wemsDatabase.php";
+    	
+        if( file_exists($this->dbConfigFile) ){
+            require_once( $this->dbConfigFile );
+            
+            //override settings from the official source
+            if( !empty($GLOBALS["wemsDatabase"]) && strlen($GLOBALS["wemsDatabase"]) > 0 ){
+            	$this->databaseName = $GLOBALS["wemsDatabase"];
+            	$this->databaseUserName = $GLOBALS["wemsDBusername"];
+            	$this->databasePassword = $GLOBALS["wemsDBpassword"];
+            }
+        }
+    	
         $this->conn = $this->connect($this->databaseName, $this->databaseUserName, $this->databasePassword);
     }
     
