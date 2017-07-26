@@ -226,3 +226,4 @@ pip-log.txt
 #############
 
 gitignore_testfiles/
+/org.eclipse.wst.common.project.facet.core.xml
