@@ -13,6 +13,6 @@ privilege tier with the ability to change status or assign cleanup crews.
 ## TECHNOLOGY USED
 
 - PHP with minor usage of the Zend framework.
-- ARCGIS map system
+- ARCGIS map system - API accessed via CURL on the PHP side and AJAX with client side Javascript.
 - Oracle Database
 - Javascript with REST API and also SVG for custom drawing and symbols for stations and other elements.
